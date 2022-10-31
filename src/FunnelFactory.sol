@@ -32,13 +32,16 @@ contract FunnelFactory is IFunnelFactory {
         emit DeployedFunnel(_tokenAddress, _funnelAddress);
     }
 
+    /**
+     * @dev Deploys a funnel contract to an address dependent on tokenAddress and factory address
+     */
     function _deployFunnel(address _tokenAddress) internal returns (address) {
         return
             CREATE3.deploy(
-                bytes32(uint256(uint160(_tokenAddress))),
+                bytes32(uint256(uint160(_tokenAddress))), // tokenAddress as salt
                 abi.encodePacked(
                     type(Funnel).creationCode,
-                    abi.encode(_tokenAddress)
+                    abi.encode(_tokenAddress) // constructor arg
                 ),
                 0
             );

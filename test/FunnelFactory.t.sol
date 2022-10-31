@@ -36,6 +36,19 @@ contract FunnelFactoryTest is Test {
         assertFalse(funnelAddress1 == funnelAddress2);
     }
 
+    function testDeployFunnelFromDifferentFactory() public {
+        address funnelAddress1 = funnelFactory.deployFunnelForToken(
+            tokenAddress1
+        );
+
+        FunnelFactory funnelFactory2 = new FunnelFactory();
+        address funnelAddress2 = funnelFactory2.deployFunnelForToken(
+            tokenAddress1
+        );
+
+        assertFalse(funnelAddress1 == funnelAddress2);
+    }
+
     function testDeployFunnelForTokenRevertsIfAlreadyDeployed() public {
         funnelFactory.deployFunnelForToken(tokenAddress3);
 
