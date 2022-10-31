@@ -6,5 +6,4 @@ import "./IERC5827Proxy.sol";
 
 interface IFunnel is IERC5827, IERC5827Proxy {
     error RecoveryRateExceeded();
-    error Uninitialized();
 }

@@ -34,6 +34,12 @@ contract FunnelTest is ERC5827TestSuite {
         assertEq(funnel.baseToken(), address(token));
     }
 
+    function testRecoveryRateExceeded2() public {
+        vm.prank(user1);
+        vm.expectRevert(IFunnel.RecoveryRateExceeded.selector);
+        funnel.approveRenewable(user2, 100, 101);
+    }
+
     function testSupportsInterface2() public view {
         assert(renewableToken.supportsInterface(0xc55dae63));
     }
