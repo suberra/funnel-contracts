@@ -18,7 +18,7 @@ contract Funnel is IFunnel {
     // owner => spender => renewableAllowance
     mapping(address => mapping(address => RenewableAllowance)) rAllowance;
 
-    function initialize(IERC20 _token) public {
+    constructor(IERC20 _token) {
         _baseToken = _token;
     }
 
@@ -47,7 +47,7 @@ contract Funnel is IFunnel {
         uint256 _recoveryRate
     ) internal {
         if (_recoveryRate > _value) {
-            revert IFunnel.RecoveryRateExceeded();
+            revert RecoveryRateExceeded();
         }
 
         rAllowance[_owner][_spender] = RenewableAllowance({
