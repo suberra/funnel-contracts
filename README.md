@@ -4,15 +4,21 @@ Funnels are contracts that enforces renewable token allowances [EIP-5827](https:
 
 Each funnel contract is a proxy/wrapper for an underlying ERC20 token, funneling a large unlimited allowance to a limited allowance that regains over time.
 
-### Contracts
+## Factory
 
-1. FunnelFactory.sol - Factory contract for creating funnels
+The funnel factory is a contract that deploys new funnel contracts, it is the only contract that can create new funnels.
+
+Goal is to deploy a factory onto all supported chains at the same address, and **every chain will produce the same funnel address for the same token address**. 
+
+## Contracts
+
+### FunnelFactory.sol - Factory contract for creating funnels
 
 `deployFunnelForToken(address _tokenAddress)` - Deploys the funnel contract for a given token address
 
 `getFunnelForToken(address _tokenAddress)` - Returns the funnel contract address for a given token address
 
 
-2. ERC20Funnel.sol - Funnel contract for ERC20 tokens
+### ERC20Funnel.sol - Funnel contract for ERC20 tokens
 
 `baseToken()` - Returns the address of the underlying token
