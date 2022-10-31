@@ -1,11 +1,10 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.13;
+
+import "./IERC5827.sol";
 import "./IERC5827Proxy.sol";
 
-interface IFunnel is IERC5827Proxy {
-    /**
-     * @dev Returns amount of tokens that is available to be transferred, which is the minimum amount between account's balance and renewable allowance.
-     */
-    function availableBalanceOf(address account)
-        external
-        view
-        returns (uint256);
+interface IFunnel is IERC5827, IERC5827Proxy {
+    error RecoveryRateExceeded();
+    error Uninitialized();
 }

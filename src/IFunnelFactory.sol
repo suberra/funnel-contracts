@@ -1,4 +1,9 @@
+pragma solidity ^0.8.13;
+
 interface IFunnelFactory {
+    error FunnelNotDeployed();
+    error FunnelAlreadyDeployed();
+
     /**
      * @dev Deploys a new Funnel contract
      * Throws if `_tokenAddress` has already been deployed
