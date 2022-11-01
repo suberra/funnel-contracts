@@ -8,13 +8,8 @@ import "./Funnel.sol";
 import {CREATE3} from "solmate/utils/CREATE3.sol";
 
 contract FunnelFactory is IFunnelFactory {
-    // address public erc20FunnelImplementation;
     // tokenAddress => funnelAddress
     mapping(address => address) deployments;
-
-    // constructor(address _erc20FunnelImplementation) {
-    //     erc20FunnelImplementation = _erc20FunnelImplementation;
-    // }
 
     /**
      * @dev Deploys a new Funnel contract
@@ -33,7 +28,7 @@ contract FunnelFactory is IFunnelFactory {
     }
 
     /**
-     * @dev Deploys a funnel contract to an address dependent on tokenAddress and factory address
+     * @dev Deploys a funnel contract to an address dependent on token and factory addresses
      */
     function _deployFunnel(address _tokenAddress) internal returns (address) {
         return
