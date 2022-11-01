@@ -118,6 +118,10 @@ contract Funnel is IFunnel {
         return true;
     }
 
+    function baseToken() external view returns (address) {
+        return address(_baseToken);
+    }
+
     function supportsInterface(bytes4 interfaceId)
         public
         view
@@ -129,9 +133,7 @@ contract Funnel is IFunnel {
             interfaceId == type(IERC5827Proxy).interfaceId;
     }
 
-    /**
-     * @notice Returns balance of token for an account
-     */
+    /// ERC20 functions
     function balanceOf(address account) external view returns (uint256) {
         return _baseToken.balanceOf(account);
     }
@@ -142,9 +144,5 @@ contract Funnel is IFunnel {
 
     function transfer(address to, uint256 amount) external returns (bool) {
         return _baseToken.transferFrom(msg.sender, to, amount);
-    }
-
-    function baseToken() external view returns (address) {
-        return address(_baseToken);
     }
 }
