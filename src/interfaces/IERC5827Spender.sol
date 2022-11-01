@@ -1,0 +1,37 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.0;
+
+import "openzeppelin-contracts/interfaces/IERC165.sol";
+
+/**
+ * @title IERC5827Spender defines a callback function that is called when renewable allowance is approved
+ * @author Zlace
+ * @dev Allow transfer/approval call chaining inspired by https://eips.ethereum.org/EIPS/eip-1363
+ */
+interface IERC5827Spender is IERC165 {
+    /*
+     * Note: the ERC-165 identifier for this interface is 0xb868618d.
+     * 0xb868618d === bytes4(keccak256("onRenewableApprovalReceived(address,uint256,uint256,bytes)"))
+     */
+
+    /**
+     * @notice Handle the approval of IPeriodicPayable tokens
+     * @dev IPeriodicPayable calls this function on the recipient
+     * after an `approve`. This function MAY throw to revert and reject the
+     * approval. Return of other than the magic value MUST result in the
+     * transaction being reverted.
+     * Note: the token contract address is always the message sender.
+     * @param owner address owner of the funds
+     * @param amount uint192 The amount of tokens to be spent
+     * @param data bytes Additional data with no specified format
+     * @return `bytes4(keccak256("onRenewableApprovalReceived(address,uint256,uint256,bytes)"))`
+     *  unless throwing
+     */
+    function onRenewableApprovalReceived(
+        address owner,
+        uint256 amount,
+        uint256 recoveryRate,
+        bytes memory data
+    ) external returns (bytes4);
+}

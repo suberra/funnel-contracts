@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: CC0-1.0
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.15;
 import "openzeppelin-contracts/interfaces/IERC20.sol";
 import "openzeppelin-contracts/interfaces/IERC165.sol";
 
@@ -13,6 +13,12 @@ interface IERC5827 is IERC20, IERC165 {
      *   bytes4(keccak256('transferFrom(address,address,uint256)') ^
      *   bytes4(keccak256('allowance(address,address)') ^
      */
+
+    /**
+     *   @dev Thrown when there available allowance is lesser than transfer amount
+     *   @param available Allowance available, 0 if unset
+     */
+    error InsufficientRenewableAllowance(uint256 available);
 
     /*
      * @notice Emitted when a new renewable allowance is set.

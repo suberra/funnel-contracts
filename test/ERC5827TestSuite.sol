@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.15;
 
 import "forge-std/Test.sol";
-import "../src/IERC5827.sol";
+import "../src/interfaces/IERC5827.sol";
 
 abstract contract ERC5827TestSuite is Test {
     event Approval(
@@ -129,6 +129,18 @@ abstract contract ERC5827TestSuite is Test {
         renewableToken.transferFrom(user1, user3, 10);
     }
 
+    function testTransfer() public {
+        vm.expectEmit(true, false, false, true);
+        emit Transfer(user1, user2, 1337);
+        vm.prank(user1);
+        renewableToken.transfer(user2, 1337);
+
+        // revert on insufficent balance
+        vm.prank(user3);
+        vm.expectRevert();
+        renewableToken.transfer(user1, 1337);
+    }
+
     function testRenewableMaxAllowance() public {
         vm.prank(user1);
 
@@ -145,7 +157,12 @@ abstract contract ERC5827TestSuite is Test {
 
     function testInsufficientAllowance() public {
         vm.prank(user1);
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodePacked(
+                IERC5827.InsufficientRenewableAllowance.selector,
+                abi.encode(0)
+            )
+        );
         renewableToken.transferFrom(user1, user3, 10);
     }
 

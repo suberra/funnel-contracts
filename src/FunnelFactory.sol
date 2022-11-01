@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.15;
 
-import "./IFunnelFactory.sol";
-import "./IERC5827.sol";
-import "./IERC5827Proxy.sol";
+import "./interfaces/IFunnelFactory.sol";
+import "./interfaces/IERC5827.sol";
+import "./interfaces/IERC5827Proxy.sol";
 import "./Funnel.sol";
 import {CREATE3} from "solmate/utils/CREATE3.sol";
 

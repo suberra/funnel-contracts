@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.15;
 
 import "forge-std/Test.sol";
 import "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
@@ -40,7 +40,11 @@ contract FunnelTest is ERC5827TestSuite {
         funnel.approveRenewable(user2, 100, 101);
     }
 
-    function testSupportsInterface2() public view {
-        assert(renewableToken.supportsInterface(0xc55dae63));
+    function testSupportsInterfaceProxy() public view {
+        assert(funnel.supportsInterface(0xc55dae63));
+    }
+
+    function testSupportsInterfacePayable() public view {
+        assert(funnel.supportsInterface(0x3717806a));
     }
 }
