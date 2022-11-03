@@ -7,6 +7,7 @@ import "./interfaces/IERC5827Proxy.sol";
 import {IERC5827Spender} from "./interfaces/IERC5827Spender.sol";
 import {MetaTxContext} from "./lib/MetaTxContext.sol";
 import {Address} from "openzeppelin-contracts/utils/Address.sol";
+import {IERC1363Receiver} from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
 
 contract Funnel is IFunnel, MetaTxContext {
     IERC20 private _baseToken;
@@ -106,7 +107,7 @@ contract Funnel is IFunnel, MetaTxContext {
         address from,
         address to,
         uint256 amount
-    ) external returns (bool) {
+    ) public returns (bool) {
         uint256 remainingAllowance = _remainingAllowance(from, _msgSender());
         if (remainingAllowance < amount) {
             revert InsufficientRenewableAllowance({
@@ -134,7 +135,57 @@ contract Funnel is IFunnel, MetaTxContext {
         address to,
         uint256 value,
         bytes memory data
-    ) external returns (bool) {}
+    ) external returns (bool) {
+        transferFrom(from, to, value);
+
+        require(
+            _checkOnTransferReceived(from, to, value, data),
+            "IPeriodicAllowance: receiver returned wrong data"
+        );
+        return true;
+    }
+
+    /**
+     * @dev Internal function to invoke {IERC1363Receiver-onTransferReceived} on a target address
+     *  The call is not executed if the target address is not a contract
+     * @param from address Representing the previous owner of the given token amount
+     * @param recipient address Target address that will receive the tokens
+     * @param value uint256 The amount tokens to be transferred
+     * @param data bytes Optional data to send along with the call
+     * @return whether the call correctly returned the expected magic value
+     */
+    function _checkOnTransferReceived(
+        address from,
+        address recipient,
+        uint256 value,
+        bytes memory data
+    ) internal virtual returns (bool) {
+        if (!Address.isContract(recipient)) {
+            revert("IERC5827Payable: transfer to non contract address");
+        }
+
+        try
+            IERC1363Receiver(recipient).onTransferReceived(
+                _msgSender(), // operator
+                from,
+                value,
+                data
+            )
+        returns (bytes4 retval) {
+            return retval == IERC1363Receiver.onTransferReceived.selector;
+        } catch (bytes memory reason) {
+            if (reason.length == 0) {
+                revert(
+                    "IERC5827Payable: transfer to non IERC1363Receiver implementer"
+                );
+            } else {
+                /// @solidity memory-safe-assembly
+                assembly {
+                    revert(add(32, reason), mload(reason))
+                }
+            }
+        }
+    }
 
     /**
      * @notice Approve renewable allowance for spender and then call `onRenewableApprovalReceived` on IERC5827Spender
@@ -167,7 +218,7 @@ contract Funnel is IFunnel, MetaTxContext {
         bytes memory data
     ) internal virtual returns (bool) {
         if (!Address.isContract(_spender)) {
-            revert("IPeriodicAllowance: approve a non contract address");
+            revert("IERC5827Payable: approve a non contract address");
         }
 
         try

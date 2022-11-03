@@ -5,10 +5,13 @@ import "forge-std/Test.sol";
 import "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 import "../src/Funnel.sol";
 import "./ERC5827TestSuite.sol";
+import "./MockSpenderReceiver.sol";
 
 contract FunnelTest is ERC5827TestSuite {
     ERC20 token;
     Funnel funnel;
+
+    MockSpenderReceiver spender;
 
     function setUp() public override {
         user1 = address(0x1111111111111111111111111111111111111111);
@@ -25,6 +28,8 @@ contract FunnelTest is ERC5827TestSuite {
         funnel = new Funnel(token);
         renewableToken = funnel;
 
+        spender = new MockSpenderReceiver();
+
         vm.prank(user1);
         // approves proxy contract to handle allowance
         token.approve(address(renewableToken), type(uint256).max);
@@ -38,6 +43,18 @@ contract FunnelTest is ERC5827TestSuite {
         vm.prank(user1);
         vm.expectRevert(IFunnel.RecoveryRateExceeded.selector);
         funnel.approveRenewable(user2, 100, 101);
+    }
+
+    function testTransferFromAndCall() public {
+        vm.prank(user1);
+        funnel.approveRenewable(user2, 1337, 1);
+
+        vm.prank(user2);
+        funnel.transferFromAndCall(user1, address(spender), 10, "");
+    }
+
+    function testApproveRenewableAndCall() public {
+        funnel.approveRenewableAndCall(address(spender), 1337, 1, "");
     }
 
     function testSupportsInterfaceProxy() public view {
