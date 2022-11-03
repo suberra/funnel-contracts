@@ -8,6 +8,13 @@ import "./ERC5827TestSuite.sol";
 import "./MockSpenderReceiver.sol";
 
 contract FunnelTest is ERC5827TestSuite {
+    event TransferReceived(address operator, address from, uint256 value);
+    event RenewableApprovalReceived(
+        address owner,
+        uint256 value,
+        uint256 recoveryRate
+    );
+
     ERC20 token;
     Funnel funnel;
 
@@ -50,10 +57,15 @@ contract FunnelTest is ERC5827TestSuite {
         funnel.approveRenewable(user2, 1337, 1);
 
         vm.prank(user2);
+        vm.expectEmit(true, false, false, true);
+        emit TransferReceived(user2, user1, 10);
         funnel.transferFromAndCall(user1, address(spender), 10, "");
     }
 
     function testApproveRenewableAndCall() public {
+        vm.prank(user1);
+        vm.expectEmit(true, false, false, true);
+        emit RenewableApprovalReceived(user1, 1337, 1);
         funnel.approveRenewableAndCall(address(spender), 1337, 1, "");
     }
 

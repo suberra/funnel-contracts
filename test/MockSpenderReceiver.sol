@@ -5,21 +5,30 @@ import {IERC1363Receiver} from "openzeppelin-contracts/interfaces/IERC1363Receiv
 import "../src/interfaces/IERC5827Spender.sol";
 
 contract MockSpenderReceiver is IERC1363Receiver, IERC5827Spender {
+    event TransferReceived(address operator, address from, uint256 value);
+    event RenewableApprovalReceived(
+        address owner,
+        uint256 value,
+        uint256 recoveryRate
+    );
+
     function onTransferReceived(
-        address,
-        address,
-        uint256,
+        address operator,
+        address from,
+        uint256 value,
         bytes memory
-    ) external pure override returns (bytes4) {
+    ) external override returns (bytes4) {
+        emit TransferReceived(operator, from, value);
         return IERC1363Receiver.onTransferReceived.selector;
     }
 
     function onRenewableApprovalReceived(
-        address,
-        uint256,
-        uint256,
+        address owner,
+        uint256 amount,
+        uint256 recoveryRate,
         bytes memory
-    ) external pure override returns (bytes4) {
+    ) external override returns (bytes4) {
+        emit RenewableApprovalReceived(owner, amount, recoveryRate);
         return IERC5827Spender.onRenewableApprovalReceived.selector;
     }
 

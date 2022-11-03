@@ -19,6 +19,6 @@ Goal is to deploy a factory onto all supported chains at the same address, and *
 `getFunnelForToken(address _tokenAddress)` - Returns the funnel contract address for a given token address
 
 
-### ERC20Funnel.sol - Funnel contract for ERC20 tokens
+### Funnel.sol - Funnel contract for ERC20 tokens
 
 `baseToken()` - Returns the address of the underlying token

@@ -10,7 +10,7 @@ import {Address} from "openzeppelin-contracts/utils/Address.sol";
 import {IERC1363Receiver} from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
 
 contract Funnel is IFunnel, MetaTxContext {
-    IERC20 private _baseToken;
+    IERC20 private immutable _baseToken;
 
     struct RenewableAllowance {
         uint256 maxAmount;
