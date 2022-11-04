@@ -26,4 +26,9 @@ interface IFunnelFactory {
         external
         view
         returns (address _funnelAddress);
+
+    /**
+     * @dev Returns true if contract address is a deployed Funnel contract
+     */
+    function isFunnel(address _funnelAddress) external view returns (bool);
 }
