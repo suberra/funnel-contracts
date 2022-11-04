@@ -3,9 +3,10 @@ pragma solidity ^0.8.15;
 
 import "forge-std/Test.sol";
 import "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
+import {IERC20Metadata} from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
 import "../src/Funnel.sol";
 import "./ERC5827TestSuite.sol";
-import "./MockSpenderReceiver.sol";
+import "../src/mocks/MockSpenderReceiver.sol";
 
 contract FunnelTest is ERC5827TestSuite {
     event TransferReceived(address operator, address from, uint256 value);
@@ -75,5 +76,11 @@ contract FunnelTest is ERC5827TestSuite {
 
     function testSupportsInterfacePayable() public view {
         assert(funnel.supportsInterface(0x3717806a));
+    }
+
+    function testFallbackToBaseToken() public {
+        assertEq(IERC20Metadata(address(funnel)).symbol(), "USDC");
+        assertEq(IERC20Metadata(address(funnel)).decimals(), 18);
+        assertEq(IERC20Metadata(address(funnel)).name(), "Existing USDC token");
     }
 }
