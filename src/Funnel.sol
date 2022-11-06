@@ -143,7 +143,7 @@ contract Funnel is IFunnel, MetaTxContext {
 
         require(
             _checkOnTransferReceived(from, to, value, data),
-            "IPeriodicAllowance: receiver returned wrong data"
+            "IERC5827Payable: IERC1363Receiver returned wrong data"
         );
         return true;
     }
@@ -205,12 +205,12 @@ contract Funnel is IFunnel, MetaTxContext {
         bytes calldata data
     ) external returns (bool) {
         _approve(_msgSender(), _spender, _value, _recoveryRate);
-        IERC5827Spender(_spender).onRenewableApprovalReceived(
-            _msgSender(),
-            _value,
-            _recoveryRate,
-            data
+
+        require(
+            _checkOnApprovalReceived(_spender, _value, _recoveryRate, data),
+            "IERC5827Payable: IERC5827Spender returned wrong data"
         );
+
         return true;
     }
 

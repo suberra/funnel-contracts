@@ -26,5 +26,11 @@ contract MockSpenderReceiverTest is Test {
 
     function testSupportInterfaceSpender() public {
         assertEq(receiver.supportsInterface(0xb868618d), true);
+        assertEq(
+            receiver.supportsInterface(
+                IERC5827Spender.onRenewableApprovalReceived.selector
+            ),
+            true
+        );
     }
 }

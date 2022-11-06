@@ -60,14 +60,51 @@ contract FunnelTest is ERC5827TestSuite {
         vm.prank(user2);
         vm.expectEmit(true, false, false, true);
         emit TransferReceived(user2, user1, 10);
-        funnel.transferFromAndCall(user1, address(spender), 10, "");
+        assertEq(
+            funnel.transferFromAndCall(user1, address(spender), 10, ""),
+            true
+        );
+    }
+
+    function testTransferFromAndCallRevertNonContract() public {
+        vm.prank(user1);
+        funnel.approveRenewable(user2, 1337, 1);
+        vm.prank(user2);
+        vm.expectRevert("IERC5827Payable: transfer to non contract address");
+        funnel.transferFromAndCall(user1, address(user3), 1337, "");
+    }
+
+    function testTransferFromAndCallRevertNonReceiver() public {
+        vm.prank(user1);
+        funnel.approveRenewable(user2, 1337, 1);
+
+        vm.prank(user2);
+        vm.expectRevert(
+            "IERC5827Payable: transfer to non IERC1363Receiver implementer"
+        );
+        funnel.transferFromAndCall(user1, address(token), 1337, "");
     }
 
     function testApproveRenewableAndCall() public {
         vm.prank(user1);
         vm.expectEmit(true, false, false, true);
         emit RenewableApprovalReceived(user1, 1337, 1);
-        funnel.approveRenewableAndCall(address(spender), 1337, 1, "");
+        assertEq(
+            funnel.approveRenewableAndCall(address(spender), 1337, 1, ""),
+            true
+        );
+    }
+
+    function testApproveRenewableAndCallRevertNonContract() public {
+        vm.expectRevert("IERC5827Payable: approve a non contract address");
+        funnel.approveRenewableAndCall(address(user3), 1337, 1, "");
+    }
+
+    function testApproveRenewableAndCallRevertNonReceiver() public {
+        vm.expectRevert(
+            "IERC5827Payable: approve a non IERC5827Spender implementer"
+        );
+        funnel.approveRenewableAndCall(address(token), 1337, 1, "");
     }
 
     function testSupportsInterfaceProxy() public view {
