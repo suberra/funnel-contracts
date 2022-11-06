@@ -25,7 +25,7 @@ describe("ERC20Funnel", function () {
     const funnelContract = await Funnel.deploy(baseToken.address);
 
     // delegate all allowance enforcement to funnel
-    await baseToken.approve(
+    await baseToken.connect(minter).approve(
       funnelContract.address,
       ethers.constants.MaxUint256
     );
@@ -119,32 +119,7 @@ describe("ERC20Funnel", function () {
         deployTokenFixture
       );
 
-      const deadline =
-        (await ethers.provider.getBlock("latest")).timestamp + 60;
-      const nonce = await token.nonces(minter.address);
-
-      const data = generateErc20Permit(
-        await getChainId(),
-        token.address,
-        await token.name(),
-        minter.address, // owner
-        user2.address,
-        getTokenAmount(99), // value
-        nonce,
-        deadline
-      );
-
-      const { v, r, s } = await signPermit(data, minter);
-
-      await token.permit(
-        minter.address,
-        user2.address,
-        getTokenAmount(99),
-        deadline,
-        v,
-        r,
-        s
-      );
+      await token.connect(minter).approve(user2.address, getTokenAmount(99));
 
       // update allowance
       {

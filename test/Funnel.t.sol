@@ -79,8 +79,8 @@ contract FunnelTest is ERC5827TestSuite {
     }
 
     function testFallbackToBaseToken() public {
-        assertEq(IERC20Metadata(address(funnel)).symbol(), "USDC");
-        assertEq(IERC20Metadata(address(funnel)).decimals(), 18);
-        assertEq(IERC20Metadata(address(funnel)).name(), "Existing USDC token");
+        assertEq(IERC20Metadata(address(funnel)).symbol(), token.symbol());
+        assertEq(IERC20Metadata(address(funnel)).decimals(), token.decimals());
+        assertEq(IERC20Metadata(address(funnel)).name(), token.name());
     }
 }
