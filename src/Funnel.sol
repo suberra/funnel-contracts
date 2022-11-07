@@ -8,11 +8,16 @@ import {IERC5827Spender} from "./interfaces/IERC5827Spender.sol";
 import {IERC5827Payable} from "./interfaces/IERC5827Payable.sol";
 import {MetaTxContext} from "./lib/MetaTxContext.sol";
 import {IERC20} from "openzeppelin-contracts/interfaces/IERC20.sol";
+import {IERC20Metadata} from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
 
 import {Address} from "openzeppelin-contracts/utils/Address.sol";
 import {IERC1363Receiver} from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
 
 contract Funnel is IFunnel, MetaTxContext {
+    /*//////////////////////////////////////////////////////////////
+                            EIP-5827 STORAGE
+    //////////////////////////////////////////////////////////////*/
+
     IERC20 private immutable _baseToken;
 
     struct RenewableAllowance {
@@ -25,8 +30,107 @@ contract Funnel is IFunnel, MetaTxContext {
     // owner => spender => renewableAllowance
     mapping(address => mapping(address => RenewableAllowance)) rAllowance;
 
+    /*//////////////////////////////////////////////////////////////
+                            EIP-2612 STORAGE
+    //////////////////////////////////////////////////////////////*/
+
+    uint256 internal immutable INITIAL_CHAIN_ID;
+
+    bytes32 internal immutable INITIAL_DOMAIN_SEPARATOR;
+
+    mapping(address => uint256) public nonces;
+
     constructor(IERC20 _token) {
         _baseToken = _token;
+
+        INITIAL_CHAIN_ID = block.chainid;
+
+        INITIAL_DOMAIN_SEPARATOR = computeDomainSeparator();
+    }
+
+    /**
+     * @dev Returns the name of the token or fallsback to token address if not found
+     */
+    function baseTokenNameOrAddress() internal view returns (string memory) {
+        (bool success, bytes memory result) = address(_baseToken).staticcall(
+            abi.encodeWithSignature("name()")
+        );
+
+        if (success && result.length > 0) {
+            return abi.decode(result, (string));
+        }
+
+        return string(abi.encodePacked(address(_baseToken)));
+    }
+
+    function computeDomainSeparator() internal view virtual returns (bytes32) {
+        string memory name = baseTokenNameOrAddress();
+
+        return
+            keccak256(
+                abi.encode(
+                    keccak256(
+                        "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+                    ),
+                    keccak256(bytes(name)),
+                    keccak256("1"),
+                    block.chainid,
+                    address(this)
+                )
+            );
+    }
+
+    function DOMAIN_SEPARATOR() public view virtual returns (bytes32) {
+        return
+            block.chainid == INITIAL_CHAIN_ID
+                ? INITIAL_DOMAIN_SEPARATOR
+                : computeDomainSeparator();
+    }
+
+    function permit(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) public virtual {
+        require(deadline >= block.timestamp, "PERMIT_DEADLINE_EXPIRED");
+
+        // Unchecked because the only math done is incrementing
+        // the owner's nonce which cannot realistically overflow.
+        unchecked {
+            address recoveredAddress = ecrecover(
+                keccak256(
+                    abi.encodePacked(
+                        "\x19\x01",
+                        DOMAIN_SEPARATOR(),
+                        keccak256(
+                            abi.encode(
+                                keccak256(
+                                    "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
+                                ),
+                                owner,
+                                spender,
+                                value,
+                                nonces[owner]++,
+                                deadline
+                            )
+                        )
+                    )
+                ),
+                v,
+                r,
+                s
+            );
+
+            require(
+                recoveredAddress != address(0) && recoveredAddress == owner,
+                "INVALID_SIGNER"
+            );
+        }
+        _approve(owner, spender, value, 0);
     }
 
     function approve(address _spender, uint256 _value)

@@ -22,20 +22,16 @@ describe("ERC20Funnel", function () {
     const baseToken = await Token.deploy("Test USDC", "USDC.t");
 
     const Funnel = await ethers.getContractFactory("Funnel");
-    const funnelContract = await Funnel.deploy(baseToken.address);
+    const funnel = await Funnel.deploy(baseToken.address);
 
     // delegate all allowance enforcement to funnel
-    await baseToken.connect(minter).approve(
-      funnelContract.address,
-      ethers.constants.MaxUint256
-    );
+    await baseToken
+      .connect(minter)
+      .approve(funnel.address, ethers.constants.MaxUint256);
 
-    const token = await ethers.getContractAt(
-      "TestERC20Token",
-      funnelContract.address
-    );
+    const token = await ethers.getContractAt("TestERC20Token", funnel.address);
 
-    return { token, minter, user2, user3, user4 };
+    return { token, minter, user2, user3, user4, funnel };
   }
 
   describe("Deployment", function () {
@@ -75,44 +71,61 @@ describe("ERC20Funnel", function () {
   });
 
   describe("Permits", function () {
-    it("Should allow transferFrom after permits", async function () {
-      const { token, minter, user2, user3 } = await loadFixture(
-        deployTokenFixture
-      );
+    it("should have the expected DOMAIN_SEPARATOR", async function () {
+      const { token, funnel } = await loadFixture(deployTokenFixture);
 
-      const deadline =
-        (await ethers.provider.getBlock("latest")).timestamp + 60;
-      const nonce = await token.nonces(minter.address);
+      const domain = {
+        name: "Test USDC",
+        version: "1",
+        chainId: await getChainId(),
+        verifyingContract: token.address,
+      };
 
-      const data = generateErc20Permit(
-        await getChainId(),
-        token.address,
-        await token.name(),
-        minter.address, // owner
-        user2.address,
-        getTokenAmount(99), // value
-        nonce,
-        deadline
-      );
+      const hashStruct = ethers.utils._TypedDataEncoder.hashDomain(domain);
 
-      const { v, r, s } = await signPermit(data, minter);
+      expect(await token.DOMAIN_SEPARATOR()).to.equal(hashStruct);
+    }),
+      it("Should allow transferFrom after permits", async function () {
+        const { token, minter, user2, user3 } = await loadFixture(
+          deployTokenFixture
+        );
 
-      await token.permit(
-        minter.address,
-        user2.address,
-        getTokenAmount(99),
-        deadline,
-        v,
-        r,
-        s
-      );
+        const deadline =
+          (await ethers.provider.getBlock("latest")).timestamp + 60;
+        const nonce = await token.nonces(minter.address);
+        const name = (await token.name()) || (await token.baseToken());
 
-      await token
-        .connect(user2)
-        .transferFrom(minter.address, user3.address, getTokenAmount(99));
+        const data = generateErc20Permit(
+          await getChainId(),
+          token.address,
+          name,
+          minter.address, // owner
+          user2.address,
+          getTokenAmount(99), // value
+          nonce,
+          deadline
+        );
 
-      expect(await token.balanceOf(user3.address)).to.equal(getTokenAmount(99));
-    });
+        const { v, r, s } = await signPermit(data, minter);
+
+        await token.permit(
+          minter.address,
+          user2.address,
+          getTokenAmount(99),
+          deadline,
+          v,
+          r,
+          s
+        );
+
+        await token
+          .connect(user2)
+          .transferFrom(minter.address, user3.address, getTokenAmount(99));
+
+        expect(await token.balanceOf(user3.address)).to.equal(
+          getTokenAmount(99)
+        );
+      });
 
     it("Should allow updates to existing allowance via permits", async function () {
       const { token, minter, user2, user3 } = await loadFixture(
@@ -192,13 +205,13 @@ describe("ERC20Funnel", function () {
           r,
           s
         )
-      ).to.revertedWith("ERC20Permit: invalid signature");
+      ).to.revertedWith("INVALID_SIGNER");
 
       await expect(
         token
           .connect(user2)
           .transferFrom(minter.address, user3.address, getTokenAmount(99))
-      ).to.revertedWith("ERC20: insufficient allowance");
+      ).to.be.reverted;
 
       expect(await token.balanceOf(user3.address)).to.equal(0);
     });
