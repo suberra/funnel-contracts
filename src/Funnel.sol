@@ -38,6 +38,16 @@ contract Funnel is IFunnel, MetaTxContext {
 
     bytes32 internal immutable INITIAL_DOMAIN_SEPARATOR;
 
+    bytes32 internal immutable PERMIT_RENEWABLE_TYPEHASH =
+        keccak256(
+            "PermitRenewable(address owner,address spender,uint256 value,uint256 nonce,uint256 recoveryRate,uint256 deadline)"
+        );
+
+    bytes32 internal immutable PERMIT_TYPEHASH =
+        keccak256(
+            "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
+        );
+
     mapping(address => uint256) public nonces;
 
     constructor(IERC20 _token) {
@@ -108,9 +118,7 @@ contract Funnel is IFunnel, MetaTxContext {
                         DOMAIN_SEPARATOR(),
                         keccak256(
                             abi.encode(
-                                keccak256(
-                                    "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-                                ),
+                                PERMIT_TYPEHASH,
                                 owner,
                                 spender,
                                 value,
