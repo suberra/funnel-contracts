@@ -22,3 +22,21 @@ Goal is to deploy a factory onto all supported chains at the same address, and *
 ### Funnel.sol - Funnel contract for ERC20 tokens
 
 `baseToken()` - Returns the address of the underlying token
+
+
+# Usage
+
+## Deployment
+
+Make copy of `.env.template` to `.env` and fill in the values.
+
+Running local fork
+`anvil`
+
+Deploy to local fork
+
+`forge script script/FunnelFactoryDeployer.sol:FunnelFactoryDeployer --fork-url http://localhost:8545 --broadcast`
+
+Deploy factory to goerli
+
+`forge script script/FunnelFactoryDeployer.sol:FunnelFactoryDeployer --rpc-url $GOERLI_RPC_URL --broadcast`  
