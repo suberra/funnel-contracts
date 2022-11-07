@@ -16,7 +16,7 @@ contract FunnelFactory is IFunnelFactory {
      * Throws if `_tokenAddress` has already been deployed
      */
     function deployFunnelForToken(address _tokenAddress)
-        external
+        public
         returns (address _funnelAddress)
     {
         if (deployments[_tokenAddress] != address(0)) {
@@ -47,7 +47,7 @@ contract FunnelFactory is IFunnelFactory {
      * Reverts with FunnelNotDeployed if `_tokenAddress` has not been deployed
      */
     function getFunnelForToken(address _tokenAddress)
-        external
+        public
         view
         returns (address _funnelAddress)
     {
@@ -56,5 +56,19 @@ contract FunnelFactory is IFunnelFactory {
         }
 
         return deployments[_tokenAddress];
+    }
+
+    /**
+     * @dev Returns true if contract address is a deployed Funnel contract
+     */
+    function isFunnel(address _funnelAddress) public view returns (bool) {
+        // Not a deployed contract
+        if (_funnelAddress.code.length == 0) return false;
+
+        address baseToken = IERC5827Proxy(_funnelAddress).baseToken();
+
+        if (baseToken == address(0)) return false;
+
+        return _funnelAddress == getFunnelForToken(baseToken);
     }
 }

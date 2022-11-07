@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
-import "./interfaces/IFunnel.sol";
-import "./interfaces/IERC5827.sol";
-import "./interfaces/IERC5827Proxy.sol";
+import {IFunnel} from "./interfaces/IFunnel.sol";
+import {IERC5827} from "./interfaces/IERC5827.sol";
+import {IERC5827Proxy} from "./interfaces/IERC5827Proxy.sol";
 import {IERC5827Spender} from "./interfaces/IERC5827Spender.sol";
+import {IERC5827Payable} from "./interfaces/IERC5827Payable.sol";
 import {MetaTxContext} from "./lib/MetaTxContext.sol";
+import {IERC20} from "openzeppelin-contracts/interfaces/IERC20.sol";
+
 import {Address} from "openzeppelin-contracts/utils/Address.sol";
 import {IERC1363Receiver} from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
 
@@ -140,7 +143,7 @@ contract Funnel is IFunnel, MetaTxContext {
 
         require(
             _checkOnTransferReceived(from, to, value, data),
-            "IPeriodicAllowance: receiver returned wrong data"
+            "IERC5827Payable: IERC1363Receiver returned wrong data"
         );
         return true;
     }
@@ -202,12 +205,12 @@ contract Funnel is IFunnel, MetaTxContext {
         bytes calldata data
     ) external returns (bool) {
         _approve(_msgSender(), _spender, _value, _recoveryRate);
-        IERC5827Spender(_spender).onRenewableApprovalReceived(
-            _msgSender(),
-            _value,
-            _recoveryRate,
-            data
+
+        require(
+            _checkOnApprovalReceived(_spender, _value, _recoveryRate, data),
+            "IERC5827Payable: IERC5827Spender returned wrong data"
         );
+
         return true;
     }
 
@@ -272,5 +275,42 @@ contract Funnel is IFunnel, MetaTxContext {
 
     function transfer(address to, uint256 amount) external returns (bool) {
         return _baseToken.transferFrom(_msgSender(), to, amount);
+    }
+
+    fallback() external {
+        _fallback(address(_baseToken));
+    }
+
+    // View only fallback
+    function _fallback(address implementation) internal virtual {
+        assembly {
+            // Copy msg.data. We take full control of memory in this inline assembly
+            // block because it will not return to Solidity code. We overwrite the
+            // Solidity scratch pad at memory position 0.
+            calldatacopy(0, 0, calldatasize())
+
+            // Call the implementation.
+            // out and outsize are 0 because we don't know the size yet.
+            let result := staticcall(
+                gas(),
+                implementation,
+                0,
+                calldatasize(),
+                0,
+                0
+            )
+
+            // Copy the returned data.
+            returndatacopy(0, 0, returndatasize())
+
+            switch result
+            // delegatecall returns 0 on error.
+            case 0 {
+                revert(0, returndatasize())
+            }
+            default {
+                return(0, returndatasize())
+            }
+        }
     }
 }

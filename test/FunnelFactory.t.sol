@@ -82,6 +82,27 @@ contract FunnelFactoryTest is Test {
         funnelFactory.getFunnelForToken(tokenAddress3);
     }
 
+    function testIsFunnelTrueForDeployedFunnel() public {
+        address funnel = funnelFactory.deployFunnelForToken(address(token));
+        assertEq(funnelFactory.isFunnel(funnel), true);
+    }
+
+    function testIsFunnelFalseForUndeployedFunnel() public {
+        assertFalse(funnelFactory.isFunnel(address(0x1234)));
+    }
+
+    function testIsFunnelFalseForDeployedFunnelFromDifferentFactory() public {
+        address funnel = funnelFactory.deployFunnelForToken(address(token));
+
+        FunnelFactory funnelFactory2 = new FunnelFactory();
+        address funnelAddress2 = funnelFactory2.deployFunnelForToken(
+            address(token)
+        );
+
+        assertEq(funnelFactory.isFunnel(funnel), true);
+        assertFalse(funnelFactory.isFunnel(funnelAddress2));
+    }
+
     function testTransferFromFunnel() public {
         funnelFactory.deployFunnelForToken(address(token));
 
