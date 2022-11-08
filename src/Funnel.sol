@@ -7,13 +7,16 @@ import {IERC5827Proxy} from "./interfaces/IERC5827Proxy.sol";
 import {IERC5827Spender} from "./interfaces/IERC5827Spender.sol";
 import {IERC5827Payable} from "./interfaces/IERC5827Payable.sol";
 import {MetaTxContext} from "./lib/MetaTxContext.sol";
+import {Nonces} from "./lib/Nonces.sol";
 import {IERC20} from "openzeppelin-contracts/interfaces/IERC20.sol";
 import {IERC20Metadata} from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
 
 import {Address} from "openzeppelin-contracts/utils/Address.sol";
 import {IERC1363Receiver} from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
 
-contract Funnel is IFunnel, MetaTxContext {
+import {Strings} from "openzeppelin-contracts/utils/Strings.sol";
+
+contract Funnel is IFunnel, MetaTxContext, Nonces {
     /*//////////////////////////////////////////////////////////////
                             EIP-5827 STORAGE
     //////////////////////////////////////////////////////////////*/
@@ -40,15 +43,13 @@ contract Funnel is IFunnel, MetaTxContext {
 
     bytes32 internal immutable PERMIT_RENEWABLE_TYPEHASH =
         keccak256(
-            "PermitRenewable(address owner,address spender,uint256 value,uint256 nonce,uint256 recoveryRate,uint256 deadline)"
+            "PermitRenewable(address owner,address spender,uint256 value,uint256 recoveryRate,uint256 nonce,uint256 deadline)"
         );
 
     bytes32 internal immutable PERMIT_TYPEHASH =
         keccak256(
             "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
         );
-
-    mapping(address => uint256) public nonces;
 
     constructor(IERC20 _token) {
         _baseToken = _token;
@@ -61,28 +62,29 @@ contract Funnel is IFunnel, MetaTxContext {
     /**
      * @dev Returns the name of the token or fallsback to token address if not found
      */
-    function baseTokenNameOrAddress() internal view returns (string memory) {
+    function name() public view returns (string memory) {
+        string memory _name;
         (bool success, bytes memory result) = address(_baseToken).staticcall(
             abi.encodeWithSignature("name()")
         );
 
         if (success && result.length > 0) {
-            return abi.decode(result, (string));
+            _name = abi.decode(result, (string));
+        } else {
+            _name = Strings.toHexString(uint160(address(_baseToken)), 20);
         }
 
-        return string(abi.encodePacked(address(_baseToken)));
+        return string.concat(_name, "(funnel)");
     }
 
     function computeDomainSeparator() internal view virtual returns (bytes32) {
-        string memory name = baseTokenNameOrAddress();
-
         return
             keccak256(
                 abi.encode(
                     keccak256(
                         "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
                     ),
-                    keccak256(bytes(name)),
+                    keccak256(bytes(name())),
                     keccak256("1"),
                     block.chainid,
                     address(this)
@@ -122,7 +124,7 @@ contract Funnel is IFunnel, MetaTxContext {
                                 owner,
                                 spender,
                                 value,
-                                nonces[owner]++,
+                                _nonces[owner]++,
                                 deadline
                             )
                         )
@@ -139,6 +141,51 @@ contract Funnel is IFunnel, MetaTxContext {
             );
         }
         _approve(owner, spender, value, 0);
+    }
+
+    function permitRenewable(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 recoveryRate,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) public virtual {
+        require(deadline >= block.timestamp, "PERMIT_DEADLINE_EXPIRED");
+
+        unchecked {
+            uint256 nonce = _nonces[owner]++;
+            address recoveredAddress = ecrecover(
+                keccak256(
+                    abi.encodePacked(
+                        "\x19\x01",
+                        DOMAIN_SEPARATOR(),
+                        keccak256(
+                            abi.encode(
+                                PERMIT_RENEWABLE_TYPEHASH,
+                                owner,
+                                spender,
+                                value,
+                                recoveryRate,
+                                nonce,
+                                deadline
+                            )
+                        )
+                    )
+                ),
+                v,
+                r,
+                s
+            );
+
+            require(
+                recoveredAddress != address(0) && recoveredAddress == owner,
+                "INVALID_SIGNER"
+            );
+        }
+        _approve(owner, spender, value, recoveryRate);
     }
 
     function approve(address _spender, uint256 _value)

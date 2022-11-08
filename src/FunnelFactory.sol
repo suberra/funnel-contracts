@@ -22,6 +22,9 @@ contract FunnelFactory is IFunnelFactory {
         if (deployments[_tokenAddress] != address(0)) {
             revert FunnelAlreadyDeployed();
         }
+
+        // TODO: validate ERC20?
+
         _funnelAddress = _deployFunnel(_tokenAddress);
         deployments[_tokenAddress] = _funnelAddress;
         emit DeployedFunnel(_tokenAddress, _funnelAddress);

@@ -2,7 +2,11 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
-import { generateErc20Permit, signPermit } from "./lib/sdk";
+import {
+  generateErc20Permit,
+  generateRenewablePermit,
+  signPermit,
+} from "./lib/sdk";
 
 async function getChainId() {
   return ethers.provider.getNetwork().then((n) => n.chainId);
@@ -38,7 +42,7 @@ describe("ERC20Funnel", function () {
     it("Should set the right name & symbol", async function () {
       const { token } = await loadFixture(deployTokenFixture);
 
-      expect(await token.name()).to.equal("Test USDC");
+      expect(await token.name()).to.equal("Test USDC(funnel)");
       expect(await token.symbol()).to.equal("USDC.t");
     });
 
@@ -75,7 +79,7 @@ describe("ERC20Funnel", function () {
       const { token, funnel } = await loadFixture(deployTokenFixture);
 
       const domain = {
-        name: "Test USDC",
+        name: await token.name(),
         version: "1",
         chainId: await getChainId(),
         verifyingContract: token.address,
@@ -86,14 +90,14 @@ describe("ERC20Funnel", function () {
       expect(await token.DOMAIN_SEPARATOR()).to.equal(hashStruct);
     }),
       it("Should allow transferFrom after permits", async function () {
-        const { token, minter, user2, user3 } = await loadFixture(
+        const { token, minter, user2, user3, funnel } = await loadFixture(
           deployTokenFixture
         );
 
         const deadline =
           (await ethers.provider.getBlock("latest")).timestamp + 60;
         const nonce = await token.nonces(minter.address);
-        const name = (await token.name()) || (await token.baseToken());
+        const name = await token.name();
 
         const data = generateErc20Permit(
           await getChainId(),
@@ -214,6 +218,61 @@ describe("ERC20Funnel", function () {
       ).to.be.reverted;
 
       expect(await token.balanceOf(user3.address)).to.equal(0);
+    });
+
+    it("Should allow transferFrom after permitRenewable", async function () {
+      const { token, minter, user2, user3, funnel } = await loadFixture(
+        deployTokenFixture
+      );
+
+      const deadline =
+        (await ethers.provider.getBlock("latest")).timestamp + 60;
+      const nonce = await token.nonces(minter.address);
+      const name = await token.name();
+
+      const data = generateRenewablePermit(
+        await getChainId(),
+        token.address,
+        name,
+        minter.address, // owner
+        user2.address, //spender
+        getTokenAmount(99), // value
+        getTokenAmount(1), // recovery
+        nonce,
+        deadline
+      );
+
+      const { v, r, s } = await signPermit(data, minter);
+
+      await funnel.permitRenewable(
+        minter.address,
+        user2.address,
+        getTokenAmount(99),
+        getTokenAmount(1),
+        deadline,
+        v,
+        r,
+        s
+      );
+
+      await token
+        .connect(user2)
+        .transferFrom(minter.address, user3.address, getTokenAmount(99));
+
+      expect(await token.balanceOf(user3.address)).to.equal(getTokenAmount(99));
+
+      // recovers allowances in 15s
+      const newTimestamp =
+        (await ethers.provider.getBlock("latest")).timestamp + 15;
+      await ethers.provider.send("evm_setNextBlockTimestamp", [newTimestamp]);
+
+      await token
+        .connect(user2)
+        .transferFrom(minter.address, user3.address, getTokenAmount(15));
+
+      expect(await token.balanceOf(user3.address)).to.equal(
+        getTokenAmount(99 + 15)
+      );
     });
   });
 });
