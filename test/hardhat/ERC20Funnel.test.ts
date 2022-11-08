@@ -298,7 +298,7 @@ describe("ERC20Funnel", function () {
 
       const deadline =
         (await ethers.provider.getBlock("latest")).timestamp + 60;
-      const nonce = await token.nonces(minter.address);
+      const nonce = await token.nonces(contractWallet.address);
       const name = await token.name();
 
       const data = generateErc20Permit(
@@ -344,7 +344,7 @@ describe("ERC20Funnel", function () {
 
       const deadline =
         (await ethers.provider.getBlock("latest")).timestamp + 60;
-      const nonce = await token.nonces(minter.address);
+      const nonce = await token.nonces(contractWallet.address);
       const name = await token.name();
 
       const data = generateErc20Permit(
@@ -440,14 +440,14 @@ describe("ERC20Funnel", function () {
 
       const deadline =
         (await ethers.provider.getBlock("latest")).timestamp + 60;
-      const nonce = await token.nonces(minter.address);
+      const nonce = await token.nonces(contractWallet.address);
       const name = await token.name();
 
       const data = generateRenewablePermit(
         await getChainId(),
         token.address,
         name,
-        minter.address, // owner
+        contractWallet.address, // owner
         user2.address, //spender
         getTokenAmount(99), // value
         getTokenAmount(1), // recovery
@@ -487,7 +487,11 @@ describe("ERC20Funnel", function () {
 
       await token
         .connect(user2)
-        .transferFrom(minter.address, user3.address, getTokenAmount(15));
+        .transferFrom(
+          contractWallet.address,
+          user3.address,
+          getTokenAmount(15)
+        );
 
       expect(await token.balanceOf(user3.address)).to.equal(
         getTokenAmount(99 + 15)
@@ -504,14 +508,14 @@ describe("ERC20Funnel", function () {
 
       const deadline =
         (await ethers.provider.getBlock("latest")).timestamp + 60;
-      const nonce = await token.nonces(minter.address);
+      const nonce = await token.nonces(contractWallet.address);
       const name = await token.name();
 
       const data = generateRenewablePermit(
         await getChainId(),
         token.address,
         name,
-        minter.address, // owner
+        contractWallet.address, // owner
         user2.address, //spender
         getTokenAmount(99), // value
         getTokenAmount(1), // recovery
@@ -522,7 +526,7 @@ describe("ERC20Funnel", function () {
       const { v, r, s } = await signPermit(data, minter);
 
       await expect(
-        await funnel.permitRenewable(
+        funnel.permitRenewable(
           contractWallet.address,
           user2.address,
           getTokenAmount(99),
