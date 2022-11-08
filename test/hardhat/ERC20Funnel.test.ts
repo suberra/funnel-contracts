@@ -23,6 +23,8 @@ describe("ERC20Funnel", function () {
     const [minter, user2, user3, user4] = await ethers.getSigners();
 
     const Token = await ethers.getContractFactory("TestERC20Token");
+    const MockERC1271 = await ethers.getContractFactory("MockERC1271");
+
     const baseToken = await Token.deploy("Test USDC", "USDC.t");
 
     const Funnel = await ethers.getContractFactory("Funnel");
@@ -35,9 +37,17 @@ describe("ERC20Funnel", function () {
       .connect(minter)
       .approve(funnel.address, ethers.constants.MaxUint256);
 
+    // smart contract wallet for erc1271 testing
+    const contractWallet = await MockERC1271.deploy();
+    await contractWallet.approveToken(
+      baseToken.address,
+      funnel.address,
+      ethers.constants.MaxUint256
+    );
+
     const token = await ethers.getContractAt("TestERC20Token", funnel.address);
 
-    return { token, minter, user2, user3, user4, funnel };
+    return { token, minter, user2, user3, user4, funnel, contractWallet };
   }
 
   describe("Deployment", function () {
@@ -275,6 +285,92 @@ describe("ERC20Funnel", function () {
       expect(await token.balanceOf(user3.address)).to.equal(
         getTokenAmount(99 + 15)
       );
+    });
+
+    it("approves to increase allowance with an ERC1271 permit", async () => {
+      const { token, minter, user2, user3, contractWallet } = await loadFixture(
+        deployTokenFixture
+      );
+
+      await token
+        .connect(minter)
+        .transfer(contractWallet.address, getTokenAmount(1000));
+
+      const deadline =
+        (await ethers.provider.getBlock("latest")).timestamp + 60;
+      const nonce = await token.nonces(minter.address);
+      const name = await token.name();
+
+      const data = generateErc20Permit(
+        await getChainId(),
+        token.address,
+        name,
+        contractWallet.address, // owner
+        user2.address,
+        getTokenAmount(99), // value
+        nonce,
+        deadline
+      );
+
+      const { v, r, s } = await signPermit(data, minter);
+
+      await contractWallet.approveAll();
+
+      await token.permit(
+        contractWallet.address,
+        user2.address,
+        getTokenAmount(99),
+        deadline,
+        v,
+        r,
+        s
+      );
+
+      await token
+        .connect(user2)
+        .transferFrom(
+          contractWallet.address,
+          user3.address,
+          getTokenAmount(99)
+        );
+
+      expect(await token.balanceOf(user3.address)).to.equal(getTokenAmount(99));
+    });
+
+    it("does not approve with invalid ERC1271 permit", async () => {
+      const { token, minter, user2, contractWallet } = await loadFixture(
+        deployTokenFixture
+      );
+
+      const deadline =
+        (await ethers.provider.getBlock("latest")).timestamp + 60;
+      const nonce = await token.nonces(minter.address);
+      const name = await token.name();
+
+      const data = generateErc20Permit(
+        await getChainId(),
+        token.address,
+        name,
+        contractWallet.address, // owner
+        user2.address,
+        getTokenAmount(99), // value
+        nonce,
+        deadline
+      );
+
+      const { v, r, s } = await signPermit(data, minter);
+
+      await expect(
+        token.permit(
+          contractWallet.address,
+          user2.address,
+          getTokenAmount(99),
+          deadline,
+          v,
+          r,
+          s
+        )
+      ).to.revertedWith("IERC1271: invalid permit");
     });
   });
 });
