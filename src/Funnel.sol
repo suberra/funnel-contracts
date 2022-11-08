@@ -15,13 +15,14 @@ import {Address} from "openzeppelin-contracts/utils/Address.sol";
 import {IERC1363Receiver} from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
 
 import {Strings} from "openzeppelin-contracts/utils/Strings.sol";
+import {Initializable} from "openzeppelin-contracts/proxy/utils/Initializable.sol";
 
-contract Funnel is IFunnel, MetaTxContext, Nonces {
+contract Funnel is IFunnel, MetaTxContext, Nonces, Initializable {
     /*//////////////////////////////////////////////////////////////
                             EIP-5827 STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    IERC20 private immutable _baseToken;
+    IERC20 private _baseToken;
 
     struct RenewableAllowance {
         uint256 maxAmount;
@@ -37,9 +38,9 @@ contract Funnel is IFunnel, MetaTxContext, Nonces {
                             EIP-2612 STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    uint256 internal immutable INITIAL_CHAIN_ID;
+    uint256 internal INITIAL_CHAIN_ID;
 
-    bytes32 internal immutable INITIAL_DOMAIN_SEPARATOR;
+    bytes32 internal INITIAL_DOMAIN_SEPARATOR;
 
     bytes32 internal immutable PERMIT_RENEWABLE_TYPEHASH =
         keccak256(
@@ -51,7 +52,7 @@ contract Funnel is IFunnel, MetaTxContext, Nonces {
             "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
         );
 
-    constructor(IERC20 _token) {
+    function initialize(IERC20 _token) public initializer {
         _baseToken = _token;
 
         INITIAL_CHAIN_ID = block.chainid;

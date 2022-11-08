@@ -18,8 +18,12 @@ contract FunnelFactoryTest is Test {
     address user2;
     address user3;
 
+    Funnel implementation;
+
     function setUp() public {
-        funnelFactory = new FunnelFactory();
+        implementation = new Funnel();
+        funnelFactory = new FunnelFactory(address(implementation));
+
         tokenAddress1 = address(0x1111);
         tokenAddress2 = address(0x2222);
         tokenAddress3 = address(0x3333);
@@ -62,7 +66,9 @@ contract FunnelFactoryTest is Test {
             tokenAddress1
         );
 
-        FunnelFactory funnelFactory2 = new FunnelFactory();
+        FunnelFactory funnelFactory2 = new FunnelFactory(
+            address(implementation)
+        );
         address funnelAddress2 = funnelFactory2.deployFunnelForToken(
             tokenAddress1
         );
@@ -94,7 +100,9 @@ contract FunnelFactoryTest is Test {
     function testIsFunnelFalseForDeployedFunnelFromDifferentFactory() public {
         address funnel = funnelFactory.deployFunnelForToken(address(token));
 
-        FunnelFactory funnelFactory2 = new FunnelFactory();
+        FunnelFactory funnelFactory2 = new FunnelFactory(
+            address(implementation)
+        );
         address funnelAddress2 = funnelFactory2.deployFunnelForToken(
             address(token)
         );

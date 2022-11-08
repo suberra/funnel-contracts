@@ -26,7 +26,9 @@ describe("ERC20Funnel", function () {
     const baseToken = await Token.deploy("Test USDC", "USDC.t");
 
     const Funnel = await ethers.getContractFactory("Funnel");
-    const funnel = await Funnel.deploy(baseToken.address);
+
+    const funnel = await Funnel.deploy();
+    await funnel.initialize(baseToken.address);
 
     // delegate all allowance enforcement to funnel
     await baseToken
