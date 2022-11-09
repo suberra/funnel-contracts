@@ -8,6 +8,8 @@ import {
   signPermit,
 } from "./lib/sdk";
 
+const MAX_UINT256 = ethers.constants.MaxUint256;
+
 async function getChainId() {
   return ethers.provider.getNetwork().then((n) => n.chainId);
 }
@@ -25,7 +27,12 @@ describe("ERC20Funnel", function () {
     const Token = await ethers.getContractFactory("TestERC20Token");
     const MockERC1271 = await ethers.getContractFactory("MockERC1271");
 
-    const baseToken = await Token.deploy("Test USDC", "USDC.t");
+    const baseToken = await Token.deploy(
+      "Test USDC",
+      "USDC.t",
+      minter.address,
+      MAX_UINT256
+    );
 
     const Funnel = await ethers.getContractFactory("Funnel");
 
@@ -61,9 +68,7 @@ describe("ERC20Funnel", function () {
     it("Should mint the minter initial tokens", async function () {
       const { token, minter } = await loadFixture(deployTokenFixture);
 
-      expect(await token.balanceOf(minter.address)).to.equal(
-        BigNumber.from(10).pow(26)
-      );
+      expect(await token.balanceOf(minter.address)).to.equal(MAX_UINT256);
     });
   });
 

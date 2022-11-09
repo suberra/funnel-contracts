@@ -307,8 +307,14 @@ contract Funnel is IFunnel, MetaTxContext, Nonces, Initializable {
             });
         }
 
-        rAllowance[from][_msgSender()].remaining = remainingAllowance - amount;
-        rAllowance[from][_msgSender()].lastUpdated = uint64(block.timestamp);
+        if (remainingAllowance != type(uint256).max) {
+            rAllowance[from][_msgSender()].remaining =
+                remainingAllowance -
+                amount;
+            rAllowance[from][_msgSender()].lastUpdated = uint64(
+                block.timestamp
+            );
+        }
 
         _baseToken.transferFrom(from, to, amount);
         return true;

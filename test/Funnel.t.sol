@@ -21,6 +21,18 @@ contract FunnelTest is ERC5827TestSuite {
 
     MockSpenderReceiver spender;
 
+    // keccak256(
+    //     "PermitRenewable(address owner,address spender,uint256 value,uint256 recoveryRate,uint256 nonce,uint256 deadline)"
+    // )
+    bytes32 internal PERMIT_RENEWABLE_TYPEHASH =
+        0x4c7980a0d4b6c380a9911208fee8e0a4cec3c9be70b18695b1089dde159ff934;
+
+    // keccak256(
+    //     "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
+    // )
+    bytes32 constant PERMIT_TYPEHASH =
+        0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
+
     function setUp() public override {
         user1 = address(0x1111111111111111111111111111111111111111);
         user2 = address(0x2222222222222222222222222222222222222222);
@@ -41,7 +53,7 @@ contract FunnelTest is ERC5827TestSuite {
 
         vm.prank(user1);
         // approves proxy contract to handle allowance
-        token.approve(address(renewableToken), type(uint256).max);
+        token.approve(address(funnel), type(uint256).max);
     }
 
     function testBaseToken() public {
@@ -52,6 +64,18 @@ contract FunnelTest is ERC5827TestSuite {
         vm.prank(user1);
         vm.expectRevert(IFunnel.RecoveryRateExceeded.selector);
         funnel.approveRenewable(user2, 100, 101);
+    }
+
+    function testInfiniteApproveTransferFrom() public {
+        vm.prank(user1);
+        funnel.approve(address(this), type(uint256).max);
+
+        assertTrue(funnel.transferFrom(user1, user2, 13370));
+
+        assertEq(funnel.allowance(user1, address(this)), type(uint256).max);
+
+        assertEq(funnel.balanceOf(user1), 0);
+        assertEq(funnel.balanceOf(user2), 13370);
     }
 
     function testTransferFromAndCall() public {
@@ -90,9 +114,8 @@ contract FunnelTest is ERC5827TestSuite {
         vm.prank(user1);
         vm.expectEmit(true, false, false, true);
         emit RenewableApprovalReceived(user1, 1337, 1);
-        assertEq(
-            funnel.approveRenewableAndCall(address(spender), 1337, 1, ""),
-            true
+        assertTrue(
+            funnel.approveRenewableAndCall(address(spender), 1337, 1, "")
         );
     }
 
@@ -106,6 +129,359 @@ contract FunnelTest is ERC5827TestSuite {
             "IERC5827Payable: approve a non IERC5827Spender implementer"
         );
         funnel.approveRenewableAndCall(address(token), 1337, 1, "");
+    }
+
+    function testPermit() public {
+        uint256 privateKey = 0xBEEF;
+        address owner = vm.addr(privateKey);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    funnel.DOMAIN_SEPARATOR(),
+                    keccak256(
+                        abi.encode(
+                            PERMIT_TYPEHASH,
+                            owner,
+                            address(0xCAFE),
+                            1e18,
+                            0,
+                            block.timestamp
+                        )
+                    )
+                )
+            )
+        );
+
+        funnel.permit(owner, address(0xCAFE), 1e18, block.timestamp, v, r, s);
+
+        assertEq(funnel.allowance(owner, address(0xCAFE)), 1e18);
+        assertEq(funnel.nonces(owner), 1);
+    }
+
+    function testFailPermitBadNonce() public {
+        uint256 privateKey = 0xBEEF;
+        address owner = vm.addr(privateKey);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    funnel.DOMAIN_SEPARATOR(),
+                    keccak256(
+                        abi.encode(
+                            PERMIT_TYPEHASH,
+                            owner,
+                            address(0xCAFE),
+                            1e18,
+                            1,
+                            block.timestamp
+                        )
+                    )
+                )
+            )
+        );
+
+        funnel.permit(owner, address(0xCAFE), 1e18, block.timestamp, v, r, s);
+    }
+
+    function testFailPermitBadDeadline() public {
+        uint256 privateKey = 0xBEEF;
+        address owner = vm.addr(privateKey);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    funnel.DOMAIN_SEPARATOR(),
+                    keccak256(
+                        abi.encode(
+                            PERMIT_TYPEHASH,
+                            owner,
+                            address(0xCAFE),
+                            1e18,
+                            0,
+                            block.timestamp
+                        )
+                    )
+                )
+            )
+        );
+
+        funnel.permit(
+            owner,
+            address(0xCAFE),
+            1e18,
+            block.timestamp + 1,
+            v,
+            r,
+            s
+        );
+    }
+
+    function testFailPermitPastDeadline() public {
+        uint256 privateKey = 0xBEEF;
+        address owner = vm.addr(privateKey);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    funnel.DOMAIN_SEPARATOR(),
+                    keccak256(
+                        abi.encode(
+                            PERMIT_TYPEHASH,
+                            owner,
+                            address(0xCAFE),
+                            1e18,
+                            0,
+                            block.timestamp - 1
+                        )
+                    )
+                )
+            )
+        );
+
+        funnel.permit(
+            owner,
+            address(0xCAFE),
+            1e18,
+            block.timestamp - 1,
+            v,
+            r,
+            s
+        );
+    }
+
+    function testFailPermitReplay() public {
+        uint256 privateKey = 0xBEEF;
+        address owner = vm.addr(privateKey);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    funnel.DOMAIN_SEPARATOR(),
+                    keccak256(
+                        abi.encode(
+                            PERMIT_TYPEHASH,
+                            owner,
+                            address(0xCAFE),
+                            1e18,
+                            0,
+                            block.timestamp
+                        )
+                    )
+                )
+            )
+        );
+
+        funnel.permit(owner, address(0xCAFE), 1e18, block.timestamp, v, r, s);
+        funnel.permit(owner, address(0xCAFE), 1e18, block.timestamp, v, r, s);
+    }
+
+    function testFailPermitRenewableBadNonce() public {
+        uint256 privateKey = 0xBEEF;
+        address owner = vm.addr(privateKey);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    funnel.DOMAIN_SEPARATOR(),
+                    keccak256(
+                        abi.encode(
+                            PERMIT_RENEWABLE_TYPEHASH,
+                            owner,
+                            address(0xCAFE),
+                            1e18,
+                            1,
+                            1,
+                            block.timestamp
+                        )
+                    )
+                )
+            )
+        );
+
+        funnel.permitRenewable(
+            owner,
+            address(0xCAFE),
+            1e18,
+            1,
+            block.timestamp,
+            v,
+            r,
+            s
+        );
+    }
+
+    function testFailPermitRenewableBadDeadline() public {
+        uint256 privateKey = 0xBEEF;
+        address owner = vm.addr(privateKey);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    funnel.DOMAIN_SEPARATOR(),
+                    keccak256(
+                        abi.encode(
+                            PERMIT_RENEWABLE_TYPEHASH,
+                            owner,
+                            address(0xCAFE),
+                            1e18,
+                            1,
+                            0,
+                            block.timestamp
+                        )
+                    )
+                )
+            )
+        );
+
+        funnel.permitRenewable(
+            owner,
+            address(0xCAFE),
+            1e18,
+            1,
+            block.timestamp + 1,
+            v,
+            r,
+            s
+        );
+    }
+
+    function testFailPermitRenewablePastDeadline() public {
+        uint256 privateKey = 0xBEEF;
+        address owner = vm.addr(privateKey);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    funnel.DOMAIN_SEPARATOR(),
+                    keccak256(
+                        abi.encode(
+                            PERMIT_RENEWABLE_TYPEHASH,
+                            owner,
+                            address(0xCAFE),
+                            1e18,
+                            1,
+                            0,
+                            block.timestamp - 1
+                        )
+                    )
+                )
+            )
+        );
+
+        funnel.permitRenewable(
+            owner,
+            address(0xCAFE),
+            1e18,
+            1,
+            block.timestamp - 1,
+            v,
+            r,
+            s
+        );
+    }
+
+    function testPermitRenewable() public {
+        uint256 privateKey = 0xBEEF;
+        address owner = vm.addr(privateKey);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    funnel.DOMAIN_SEPARATOR(),
+                    keccak256(
+                        abi.encode(
+                            PERMIT_RENEWABLE_TYPEHASH,
+                            owner,
+                            address(0xCAFE),
+                            1e18,
+                            1,
+                            0,
+                            block.timestamp
+                        )
+                    )
+                )
+            )
+        );
+
+        funnel.permitRenewable(
+            owner,
+            address(0xCAFE),
+            1e18,
+            1,
+            block.timestamp,
+            v,
+            r,
+            s
+        );
+
+        assertEq(funnel.allowance(owner, address(0xCAFE)), 1e18);
+        assertEq(funnel.nonces(owner), 1);
+    }
+
+    function testFailPermitRenewableReplay() public {
+        uint256 privateKey = 0xBEEF;
+        address owner = vm.addr(privateKey);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    funnel.DOMAIN_SEPARATOR(),
+                    keccak256(
+                        abi.encode(
+                            PERMIT_RENEWABLE_TYPEHASH,
+                            owner,
+                            address(0xCAFE),
+                            1e18,
+                            1,
+                            0,
+                            block.timestamp
+                        )
+                    )
+                )
+            )
+        );
+
+        funnel.permitRenewable(
+            owner,
+            address(0xCAFE),
+            1e18,
+            1,
+            block.timestamp,
+            v,
+            r,
+            s
+        );
+        funnel.permitRenewable(
+            owner,
+            address(0xCAFE),
+            1e18,
+            1,
+            block.timestamp,
+            v,
+            r,
+            s
+        );
     }
 
     function testSupportsInterfaceProxy() public view {
