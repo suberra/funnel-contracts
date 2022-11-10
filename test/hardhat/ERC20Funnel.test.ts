@@ -54,7 +54,7 @@ describe("ERC20Funnel", function () {
     it("Should set the right name & symbol", async function () {
       const { token } = await loadFixture(deployTokenFixture);
 
-      expect(await token.name()).to.equal("Test USDC(funnel)");
+      expect(await token.name()).to.equal("Test USDC (funnel)");
       expect(await token.symbol()).to.equal("USDC.t");
     });
 
