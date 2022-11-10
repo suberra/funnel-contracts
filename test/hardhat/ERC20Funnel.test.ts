@@ -274,5 +274,143 @@ describe("ERC20Funnel", function () {
         getTokenAmount(99 + 15)
       );
     });
+
+    it("Should revert on permitRenewable with invalid permits (wrong values, nonce, deadline, etc)", async function () {
+      const { token, minter, user2, user3, funnel } = await loadFixture(
+        deployTokenFixture
+      );
+
+      const name = await token.name();
+
+      // invalid deadline
+      {
+        // next block has to be > cur block timestamp
+        // eth yellow paper section 4.4.3
+        const deadline =
+          (await ethers.provider.getBlock("latest")).timestamp;
+        const nonce = await token.nonces(minter.address);
+
+        const data = generateRenewablePermit(
+          await getChainId(),
+          token.address,
+          name,
+          minter.address, // owner
+          user2.address, //spender
+          getTokenAmount(99), // value
+          getTokenAmount(1), // recovery
+          nonce,
+          deadline
+        );
+
+        const { v, r, s } = await signPermit(data, minter);
+
+        await expect(
+          funnel.permitRenewable(
+            minter.address,
+            user2.address,
+            getTokenAmount(99),
+            getTokenAmount(1),
+            deadline,
+            v,
+            r,
+            s
+          )
+        ).to.be.revertedWith("PERMIT_DEADLINE_EXPIRED");
+      }
+
+      // invalid nonce
+      {
+        const deadline =
+          (await ethers.provider.getBlock("latest")).timestamp + 60;
+        const nonce = await token.nonces(minter.address) + 1;
+
+        const data = generateRenewablePermit(
+          await getChainId(),
+          token.address,
+          name,
+          minter.address, // owner
+          user2.address, //spender
+          getTokenAmount(99), // value
+          getTokenAmount(1), // recovery
+          nonce,
+          deadline
+        );
+
+        const { v, r, s } = await signPermit(data, minter);
+
+        await expect(
+          funnel.permitRenewable(
+            minter.address,
+            user2.address,
+            getTokenAmount(99),
+            getTokenAmount(1),
+            deadline,
+            v,
+            r,
+            s
+          )
+        ).to.be.revertedWith("INVALID_SIGNER");
+      }
+
+      // invalid params
+      {
+        const deadline =
+          (await ethers.provider.getBlock("latest")).timestamp + 60;
+        const nonce = await token.nonces(minter.address);
+
+        const data = generateRenewablePermit(
+          await getChainId(),
+          token.address,
+          name,
+          minter.address, // owner
+          user2.address, //spender
+          getTokenAmount(99), // value
+          getTokenAmount(1), // recovery
+          nonce,
+          deadline
+        );
+
+        const { v, r, s } = await signPermit(data, minter);
+
+        await expect(
+          funnel.permitRenewable(
+            minter.address,
+            user3.address,
+            getTokenAmount(99),
+            getTokenAmount(1),
+            deadline,
+            v,
+            r,
+            s
+          )
+        ).to.be.revertedWith("INVALID_SIGNER");
+
+        await expect(
+          funnel.permitRenewable(
+            minter.address,
+            user2.address,
+            getTokenAmount(99) + 1,
+            getTokenAmount(1),
+            deadline,
+            v,
+            r,
+            s
+          )
+        ).to.be.revertedWith("INVALID_SIGNER");
+
+        await expect(
+          funnel.permitRenewable(
+            minter.address,
+            user2.address,
+            getTokenAmount(99),
+            getTokenAmount(1) + 1,
+            deadline,
+            v,
+            r,
+            s
+          )
+        ).to.be.revertedWith("INVALID_SIGNER");
+      }
+    });
   });
 });
