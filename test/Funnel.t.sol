@@ -33,7 +33,8 @@ contract FunnelTest is ERC5827TestSuite {
             user1
         );
 
-        funnel = new Funnel(token);
+        funnel = new Funnel();
+        funnel.initialize(token);
         renewableToken = funnel;
 
         spender = new MockSpenderReceiver();

@@ -23,19 +23,31 @@ describe("ERC20Funnel", function () {
     const [minter, user2, user3, user4] = await ethers.getSigners();
 
     const Token = await ethers.getContractFactory("TestERC20Token");
+    const MockERC1271 = await ethers.getContractFactory("MockERC1271");
+
     const baseToken = await Token.deploy("Test USDC", "USDC.t");
 
     const Funnel = await ethers.getContractFactory("Funnel");
-    const funnel = await Funnel.deploy(baseToken.address);
+
+    const funnel = await Funnel.deploy();
+    await funnel.initialize(baseToken.address);
 
     // delegate all allowance enforcement to funnel
     await baseToken
       .connect(minter)
       .approve(funnel.address, ethers.constants.MaxUint256);
 
+    // smart contract wallet for erc1271 testing
+    const contractWallet = await MockERC1271.deploy();
+    await contractWallet.approveToken(
+      baseToken.address,
+      funnel.address,
+      ethers.constants.MaxUint256
+    );
+
     const token = await ethers.getContractAt("TestERC20Token", funnel.address);
 
-    return { token, minter, user2, user3, user4, funnel };
+    return { token, minter, user2, user3, user4, funnel, contractWallet };
   }
 
   describe("Deployment", function () {
@@ -74,7 +86,7 @@ describe("ERC20Funnel", function () {
     });
   });
 
-  describe("Permits", function () {
+  describe("Permit", function () {
     it("should have the expected DOMAIN_SEPARATOR", async function () {
       const { token, funnel } = await loadFixture(deployTokenFixture);
 
@@ -275,142 +287,256 @@ describe("ERC20Funnel", function () {
       );
     });
 
-    it("Should revert on permitRenewable with invalid permits (wrong values, nonce, deadline, etc)", async function () {
+    it("approves to increase allowance with an ERC1271 permit", async () => {
+      const { token, minter, user2, user3, contractWallet } = await loadFixture(
+        deployTokenFixture
+      );
+
+      await token
+        .connect(minter)
+        .transfer(contractWallet.address, getTokenAmount(1000));
+
+      const deadline =
+        (await ethers.provider.getBlock("latest")).timestamp + 60;
+      const nonce = await token.nonces(contractWallet.address);
+      const name = await token.name();
+
+      const data = generateErc20Permit(
+        await getChainId(),
+        token.address,
+        name,
+        contractWallet.address, // owner
+        user2.address,
+        getTokenAmount(99), // value
+        nonce,
+        deadline
+      );
+
+      const { v, r, s } = await signPermit(data, minter);
+
+      await contractWallet.approveAll();
+
+      await token.permit(
+        contractWallet.address,
+        user2.address,
+        getTokenAmount(99),
+        deadline,
+        v,
+        r,
+        s
+      );
+
+      await token
+        .connect(user2)
+        .transferFrom(
+          contractWallet.address,
+          user3.address,
+          getTokenAmount(99)
+        );
+
+      expect(await token.balanceOf(user3.address)).to.equal(getTokenAmount(99));
+    });
+
+    it("does not approve with invalid ERC1271 permit", async () => {
+      const { token, minter, user2, contractWallet } = await loadFixture(
+        deployTokenFixture
+      );
+
+      const deadline =
+        (await ethers.provider.getBlock("latest")).timestamp + 60;
+      const nonce = await token.nonces(contractWallet.address);
+      const name = await token.name();
+
+      const data = generateErc20Permit(
+        await getChainId(),
+        token.address,
+        name,
+        contractWallet.address, // owner
+        user2.address,
+        getTokenAmount(99), // value
+        nonce,
+        deadline
+      );
+
+      const { v, r, s } = await signPermit(data, minter);
+
+      await expect(
+        token.permit(
+          contractWallet.address,
+          user2.address,
+          getTokenAmount(99),
+          deadline,
+          v,
+          r,
+          s
+        )
+      ).to.revertedWith("IERC1271: invalid permit");
+    });
+  });
+
+  describe("PermitRenewable", function () {
+    it("Should allow transferFrom after permitRenewable", async function () {
       const { token, minter, user2, user3, funnel } = await loadFixture(
         deployTokenFixture
       );
 
+      const deadline =
+        (await ethers.provider.getBlock("latest")).timestamp + 60;
+      const nonce = await token.nonces(minter.address);
       const name = await token.name();
 
-      // invalid deadline
-      {
-        // next block has to be > cur block timestamp
-        // eth yellow paper section 4.4.3
-        const deadline =
-          (await ethers.provider.getBlock("latest")).timestamp;
-        const nonce = await token.nonces(minter.address);
+      const data = generateRenewablePermit(
+        await getChainId(),
+        token.address,
+        name,
+        minter.address, // owner
+        user2.address, //spender
+        getTokenAmount(99), // value
+        getTokenAmount(1), // recovery
+        nonce,
+        deadline
+      );
 
-        const data = generateRenewablePermit(
-          await getChainId(),
-          token.address,
-          name,
-          minter.address, // owner
-          user2.address, //spender
-          getTokenAmount(99), // value
-          getTokenAmount(1), // recovery
-          nonce,
-          deadline
+      const { v, r, s } = await signPermit(data, minter);
+
+      await funnel.permitRenewable(
+        minter.address,
+        user2.address,
+        getTokenAmount(99),
+        getTokenAmount(1),
+        deadline,
+        v,
+        r,
+        s
+      );
+
+      await token
+        .connect(user2)
+        .transferFrom(minter.address, user3.address, getTokenAmount(99));
+
+      expect(await token.balanceOf(user3.address)).to.equal(getTokenAmount(99));
+
+      // recovers allowances in 15s
+      const newTimestamp =
+        (await ethers.provider.getBlock("latest")).timestamp + 15;
+      await ethers.provider.send("evm_setNextBlockTimestamp", [newTimestamp]);
+
+      await token
+        .connect(user2)
+        .transferFrom(minter.address, user3.address, getTokenAmount(15));
+
+      expect(await token.balanceOf(user3.address)).to.equal(
+        getTokenAmount(99 + 15)
+      );
+    });
+
+    it("approves to increase allowance with an ERC1271 permit", async () => {
+      const { token, minter, funnel, user2, user3, contractWallet } =
+        await loadFixture(deployTokenFixture);
+
+      await token
+        .connect(minter)
+        .transfer(contractWallet.address, getTokenAmount(1000));
+
+      const deadline =
+        (await ethers.provider.getBlock("latest")).timestamp + 60;
+      const nonce = await token.nonces(contractWallet.address);
+      const name = await token.name();
+
+      const data = generateRenewablePermit(
+        await getChainId(),
+        token.address,
+        name,
+        contractWallet.address, // owner
+        user2.address, //spender
+        getTokenAmount(99), // value
+        getTokenAmount(1), // recovery
+        nonce,
+        deadline
+      );
+
+      const { v, r, s } = await signPermit(data, minter);
+
+      await contractWallet.approveAll();
+
+      await funnel.permitRenewable(
+        contractWallet.address,
+        user2.address,
+        getTokenAmount(99),
+        getTokenAmount(1),
+        deadline,
+        v,
+        r,
+        s
+      );
+
+      await token
+        .connect(user2)
+        .transferFrom(
+          contractWallet.address,
+          user3.address,
+          getTokenAmount(99)
         );
 
-        const { v, r, s } = await signPermit(data, minter);
+      expect(await token.balanceOf(user3.address)).to.equal(getTokenAmount(99));
 
-        await expect(
-          funnel.permitRenewable(
-            minter.address,
-            user2.address,
-            getTokenAmount(99),
-            getTokenAmount(1),
-            deadline,
-            v,
-            r,
-            s
-          )
-        ).to.be.revertedWith("PERMIT_DEADLINE_EXPIRED");
-      }
+      // recovers allowances in 15s
+      const newTimestamp =
+        (await ethers.provider.getBlock("latest")).timestamp + 15;
+      await ethers.provider.send("evm_setNextBlockTimestamp", [newTimestamp]);
 
-      // invalid nonce
-      {
-        const deadline =
-          (await ethers.provider.getBlock("latest")).timestamp + 60;
-        const nonce = await token.nonces(minter.address) + 1;
-
-        const data = generateRenewablePermit(
-          await getChainId(),
-          token.address,
-          name,
-          minter.address, // owner
-          user2.address, //spender
-          getTokenAmount(99), // value
-          getTokenAmount(1), // recovery
-          nonce,
-          deadline
+      await token
+        .connect(user2)
+        .transferFrom(
+          contractWallet.address,
+          user3.address,
+          getTokenAmount(15)
         );
 
-        const { v, r, s } = await signPermit(data, minter);
+      expect(await token.balanceOf(user3.address)).to.equal(
+        getTokenAmount(99 + 15)
+      );
+    });
 
-        await expect(
-          funnel.permitRenewable(
-            minter.address,
-            user2.address,
-            getTokenAmount(99),
-            getTokenAmount(1),
-            deadline,
-            v,
-            r,
-            s
-          )
-        ).to.be.revertedWith("INVALID_SIGNER");
-      }
+    it("does not approve with invalid ERC1271 permit", async () => {
+      const { token, minter, funnel, user2, user3, contractWallet } =
+        await loadFixture(deployTokenFixture);
 
-      // invalid params
-      {
-        const deadline =
-          (await ethers.provider.getBlock("latest")).timestamp + 60;
-        const nonce = await token.nonces(minter.address);
+      await token
+        .connect(minter)
+        .transfer(contractWallet.address, getTokenAmount(1000));
 
-        const data = generateRenewablePermit(
-          await getChainId(),
-          token.address,
-          name,
-          minter.address, // owner
-          user2.address, //spender
-          getTokenAmount(99), // value
-          getTokenAmount(1), // recovery
-          nonce,
-          deadline
-        );
+      const deadline =
+        (await ethers.provider.getBlock("latest")).timestamp + 60;
+      const nonce = await token.nonces(contractWallet.address);
+      const name = await token.name();
 
-        const { v, r, s } = await signPermit(data, minter);
+      const data = generateRenewablePermit(
+        await getChainId(),
+        token.address,
+        name,
+        contractWallet.address, // owner
+        user2.address, //spender
+        getTokenAmount(99), // value
+        getTokenAmount(1), // recovery
+        nonce,
+        deadline
+      );
 
-        await expect(
-          funnel.permitRenewable(
-            minter.address,
-            user3.address,
-            getTokenAmount(99),
-            getTokenAmount(1),
-            deadline,
-            v,
-            r,
-            s
-          )
-        ).to.be.revertedWith("INVALID_SIGNER");
+      const { v, r, s } = await signPermit(data, minter);
 
-        await expect(
-          funnel.permitRenewable(
-            minter.address,
-            user2.address,
-            getTokenAmount(99) + 1,
-            getTokenAmount(1),
-            deadline,
-            v,
-            r,
-            s
-          )
-        ).to.be.revertedWith("INVALID_SIGNER");
-
-        await expect(
-          funnel.permitRenewable(
-            minter.address,
-            user2.address,
-            getTokenAmount(99),
-            getTokenAmount(1) + 1,
-            deadline,
-            v,
-            r,
-            s
-          )
-        ).to.be.revertedWith("INVALID_SIGNER");
-      }
+      await expect(
+        funnel.permitRenewable(
+          contractWallet.address,
+          user2.address,
+          getTokenAmount(99),
+          getTokenAmount(1),
+          deadline,
+          v,
+          r,
+          s
+        )
+      ).to.revertedWith("IERC1271: invalid permit");
     });
   });
 });
