@@ -33,6 +33,10 @@ contract FunnelTest is ERC5827TestSuite {
     bytes32 constant PERMIT_TYPEHASH =
         0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
 
+    // keccak256("MetaTransaction(uint256 nonce,address from,bytes functionSignature)")
+    bytes32 constant META_TRANSACTION_TYPEHASH =
+        0x23d10def3caacba2e4042e0c75d44a42d2558aabcf5ce951d0642a8032e1e653;
+
     function setUp() public override {
         user1 = address(0x1111111111111111111111111111111111111111);
         user2 = address(0x2222222222222222222222222222222222222222);
@@ -484,6 +488,107 @@ contract FunnelTest is ERC5827TestSuite {
         );
     }
 
+    function testExecuteMetaTransaction() public {
+        uint256 privateKey = 0xBEEF;
+        address owner = vm.addr(privateKey);
+
+        bytes memory functionSignature = abi.encodeWithSignature(
+            "approveRenewable(address,uint256,uint256)",
+            address(0xCAFE),
+            1e18,
+            1
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    funnel.DOMAIN_SEPARATOR(),
+                    keccak256(
+                        abi.encode(
+                            META_TRANSACTION_TYPEHASH,
+                            0,
+                            owner,
+                            keccak256(functionSignature)
+                        )
+                    )
+                )
+            )
+        );
+
+        funnel.executeMetaTransaction(owner, functionSignature, r, s, v);
+
+        assertEq(funnel.allowance(owner, address(0xCAFE)), 1e18);
+        assertEq(funnel.nonces(owner), 1);
+    }
+
+    function testFailExecuteMetaTransactionBadNonce() public {
+        uint256 privateKey = 0xBEEF;
+        address owner = vm.addr(privateKey);
+
+        bytes memory functionSignature = abi.encodeWithSignature(
+            "approveRenewable(address,uint256,uint256)",
+            address(0xCAFE),
+            1e18,
+            1
+        );
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    funnel.DOMAIN_SEPARATOR(),
+                    keccak256(
+                        abi.encode(
+                            META_TRANSACTION_TYPEHASH,
+                            1,
+                            owner,
+                            keccak256(functionSignature)
+                        )
+                    )
+                )
+            )
+        );
+
+        funnel.executeMetaTransaction(owner, functionSignature, r, s, v);
+    }
+
+    function testFailExecuteMetaTransactionReplayProtection() public {
+        uint256 privateKey = 0xBEEF;
+        address owner = vm.addr(privateKey);
+
+        bytes memory functionSignature = abi.encodeWithSignature(
+            "approveRenewable(address,uint256,uint256)",
+            address(0xCAFE),
+            1e18,
+            1
+        );
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    funnel.DOMAIN_SEPARATOR(),
+                    keccak256(
+                        abi.encode(
+                            META_TRANSACTION_TYPEHASH,
+                            0,
+                            owner,
+                            keccak256(functionSignature)
+                        )
+                    )
+                )
+            )
+        );
+
+        funnel.executeMetaTransaction(owner, functionSignature, r, s, v);
+        assertEq(funnel.allowance(owner, address(0xCAFE)), 1e18);
+        assertEq(funnel.nonces(owner), 1);
+        funnel.executeMetaTransaction(owner, functionSignature, r, s, v);
+    }
+
     function testSupportsInterfaceProxy() public view {
         assert(funnel.supportsInterface(0xc55dae63));
     }
@@ -502,6 +607,9 @@ contract FunnelTest is ERC5827TestSuite {
     function testFallbackToBaseToken() public {
         assertEq(IERC20Metadata(address(funnel)).symbol(), token.symbol());
         assertEq(IERC20Metadata(address(funnel)).decimals(), token.decimals());
-        assertEq(IERC20Metadata(address(funnel)).totalSupply(), token.totalSupply());
+        assertEq(
+            IERC20Metadata(address(funnel)).totalSupply(),
+            token.totalSupply()
+        );
     }
 }
