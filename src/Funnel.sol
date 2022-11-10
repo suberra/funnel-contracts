@@ -76,7 +76,7 @@ contract Funnel is IFunnel, MetaTxContext, Nonces, Initializable {
             _name = Strings.toHexString(uint160(address(_baseToken)), 20);
         }
 
-        return string.concat(_name, "(funnel)");
+        return string.concat(_name, " (funnel)");
     }
 
     function computeDomainSeparator() internal view virtual returns (bytes32) {

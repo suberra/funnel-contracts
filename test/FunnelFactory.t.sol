@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.15;
 
+import {console} from "forge-std/console.sol";
 import "forge-std/Test.sol";
+import "openzeppelin-contracts/proxy/Clones.sol";
 import "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 import "../src/FunnelFactory.sol";
 import "../src/interfaces/IFunnelFactory.sol";
@@ -40,12 +42,26 @@ contract FunnelFactoryTest is Test {
         );
     }
 
+    function calcExpectedAddress(address tokenAddr) public view returns (address hash) {
+        return Clones.predictDeterministicAddress(
+            address(implementation),
+            bytes32(uint256(uint160(tokenAddr))),
+            address(funnelFactory)
+        );
+    }   
+
     function testDeployFunnelForToken() public {
         address funnelAddress = funnelFactory.deployFunnelForToken(
             address(token)
         );
+
         assertEq(
             funnelFactory.getFunnelForToken(address(token)),
+            funnelAddress
+        );
+
+        assertEq(
+            calcExpectedAddress(address(token)),
             funnelAddress
         );
     }
