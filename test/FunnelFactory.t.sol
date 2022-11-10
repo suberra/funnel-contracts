@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.15;
 
+import {console} from "forge-std/console.sol";
 import "forge-std/Test.sol";
+import "openzeppelin-contracts/proxy/Clones.sol";
 import "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 import "../src/FunnelFactory.sol";
 import "../src/interfaces/IFunnelFactory.sol";
@@ -18,8 +20,12 @@ contract FunnelFactoryTest is Test {
     address user2;
     address user3;
 
+    Funnel implementation;
+
     function setUp() public {
-        funnelFactory = new FunnelFactory();
+        implementation = new Funnel();
+        funnelFactory = new FunnelFactory(address(implementation));
+
         tokenAddress1 = address(0x1111);
         tokenAddress2 = address(0x2222);
         tokenAddress3 = address(0x3333);
@@ -36,12 +42,26 @@ contract FunnelFactoryTest is Test {
         );
     }
 
+    function calcExpectedAddress(address tokenAddr) public view returns (address hash) {
+        return Clones.predictDeterministicAddress(
+            address(implementation),
+            bytes32(uint256(uint160(tokenAddr))),
+            address(funnelFactory)
+        );
+    }   
+
     function testDeployFunnelForToken() public {
         address funnelAddress = funnelFactory.deployFunnelForToken(
             address(token)
         );
+
         assertEq(
             funnelFactory.getFunnelForToken(address(token)),
+            funnelAddress
+        );
+
+        assertEq(
+            calcExpectedAddress(address(token)),
             funnelAddress
         );
     }
@@ -62,7 +82,9 @@ contract FunnelFactoryTest is Test {
             tokenAddress1
         );
 
-        FunnelFactory funnelFactory2 = new FunnelFactory();
+        FunnelFactory funnelFactory2 = new FunnelFactory(
+            address(implementation)
+        );
         address funnelAddress2 = funnelFactory2.deployFunnelForToken(
             tokenAddress1
         );
@@ -94,7 +116,9 @@ contract FunnelFactoryTest is Test {
     function testIsFunnelFalseForDeployedFunnelFromDifferentFactory() public {
         address funnel = funnelFactory.deployFunnelForToken(address(token));
 
-        FunnelFactory funnelFactory2 = new FunnelFactory();
+        FunnelFactory funnelFactory2 = new FunnelFactory(
+            address(implementation)
+        );
         address funnelAddress2 = funnelFactory2.deployFunnelForToken(
             address(token)
         );

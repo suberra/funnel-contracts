@@ -12,48 +12,40 @@ export type PermitData = {
   primaryType?: string;
 };
 
-export function generatePeriodicAllowancePermit(
+export function generateRenewablePermit(
   chainId: number,
   verifyingContract: string,
+  domainName: string, //  <base token name(Funnel)
   owner: string,
-  token: string,
   spender: string,
-  amount: number | BigNumber,
-  durationMin: number,
-  startMin: number,
-  maxPeriod: number | BigNumber,
-  nonce: number | BigNumber,
+  value: BigNumber,
+  recoveryRate: BigNumber,
+  nonce: BigNumber,
   deadline: number
 ): PermitData {
   return {
     types: {
-      Permit: [
+      PermitRenewable: [
         { name: "owner", type: "address" },
-        { name: "token", type: "address" },
         { name: "spender", type: "address" },
-        { name: "amount", type: "uint192" },
-        { name: "durationMin", type: "uint24" },
-        { name: "startMin", type: "uint40" },
-        { name: "maxPeriod", type: "uint24" },
+        { name: "value", type: "uint256" },
+        { name: "recoveryRate", type: "uint256" },
         { name: "nonce", type: "uint256" },
         { name: "deadline", type: "uint256" },
       ],
     },
-    primaryType: "Permit",
+    primaryType: "PermitRenewable",
     domain: {
-      name: "PeriodicAllowance",
+      name: domainName,
       version: "1",
       chainId,
       verifyingContract,
     },
     message: {
       owner,
-      token,
       spender,
-      amount,
-      startMin,
-      durationMin,
-      maxPeriod,
+      value,
+      recoveryRate,
       nonce,
       deadline,
     },

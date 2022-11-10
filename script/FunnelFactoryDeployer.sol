@@ -10,7 +10,8 @@ contract FunnelFactoryDeployer is Script {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
-        FunnelFactory factory = new FunnelFactory();
+        Funnel implementation = new Funnel();
+        FunnelFactory factory = new FunnelFactory(address(implementation));
 
         vm.stopBroadcast();
     }

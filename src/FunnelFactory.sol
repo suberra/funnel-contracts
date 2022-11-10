@@ -5,11 +5,19 @@ import "./interfaces/IFunnelFactory.sol";
 import "./interfaces/IERC5827.sol";
 import "./interfaces/IERC5827Proxy.sol";
 import "./Funnel.sol";
-import {CREATE3} from "solmate/utils/CREATE3.sol";
+import {Clones} from "openzeppelin-contracts/proxy/Clones.sol";
 
 contract FunnelFactory is IFunnelFactory {
+    using Clones for address;
+
     // tokenAddress => funnelAddress
     mapping(address => address) deployments;
+
+    address public funnelImplementation;
+
+    constructor(address _funnelImplementation) {
+        funnelImplementation = _funnelImplementation;
+    }
 
     /**
      * @dev Deploys a new Funnel contract
@@ -22,6 +30,9 @@ contract FunnelFactory is IFunnelFactory {
         if (deployments[_tokenAddress] != address(0)) {
             revert FunnelAlreadyDeployed();
         }
+
+        // TODO: validate ERC20?
+
         _funnelAddress = _deployFunnel(_tokenAddress);
         deployments[_tokenAddress] = _funnelAddress;
         emit DeployedFunnel(_tokenAddress, _funnelAddress);
@@ -31,15 +42,13 @@ contract FunnelFactory is IFunnelFactory {
      * @dev Deploys a funnel contract to an address dependent on token and factory addresses
      */
     function _deployFunnel(address _tokenAddress) internal returns (address) {
-        return
-            CREATE3.deploy(
-                bytes32(uint256(uint160(_tokenAddress))), // tokenAddress as salt
-                abi.encodePacked(
-                    type(Funnel).creationCode,
-                    abi.encode(_tokenAddress) // constructor arg
-                ),
-                0
-            );
+        address funnelAddress = funnelImplementation.cloneDeterministic(
+            bytes32(uint256(uint160(_tokenAddress)))
+        );
+
+        Funnel(funnelAddress).initialize(IERC20(_tokenAddress));
+
+        return funnelAddress;
     }
 
     /**

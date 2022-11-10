@@ -7,13 +7,23 @@ import {IERC5827Proxy} from "./interfaces/IERC5827Proxy.sol";
 import {IERC5827Spender} from "./interfaces/IERC5827Spender.sol";
 import {IERC5827Payable} from "./interfaces/IERC5827Payable.sol";
 import {MetaTxContext} from "./lib/MetaTxContext.sol";
+import {Nonces} from "./lib/Nonces.sol";
 import {IERC20} from "openzeppelin-contracts/interfaces/IERC20.sol";
+import {IERC20Metadata} from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
 
 import {Address} from "openzeppelin-contracts/utils/Address.sol";
 import {IERC1363Receiver} from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
+import {IERC1271} from "openzeppelin-contracts/interfaces/IERC1271.sol";
 
-contract Funnel is IFunnel, MetaTxContext {
-    IERC20 private immutable _baseToken;
+import {Strings} from "openzeppelin-contracts/utils/Strings.sol";
+import {Initializable} from "openzeppelin-contracts/proxy/utils/Initializable.sol";
+
+contract Funnel is IFunnel, MetaTxContext, Nonces, Initializable {
+    /*//////////////////////////////////////////////////////////////
+                            EIP-5827 STORAGE
+    //////////////////////////////////////////////////////////////*/
+
+    IERC20 private _baseToken;
 
     struct RenewableAllowance {
         uint256 maxAmount;
@@ -25,8 +35,187 @@ contract Funnel is IFunnel, MetaTxContext {
     // owner => spender => renewableAllowance
     mapping(address => mapping(address => RenewableAllowance)) rAllowance;
 
-    constructor(IERC20 _token) {
+    /*//////////////////////////////////////////////////////////////
+                            EIP-2612 STORAGE
+    //////////////////////////////////////////////////////////////*/
+
+    uint256 internal INITIAL_CHAIN_ID;
+
+    bytes32 internal INITIAL_DOMAIN_SEPARATOR;
+
+    bytes32 internal immutable PERMIT_RENEWABLE_TYPEHASH =
+        keccak256(
+            "PermitRenewable(address owner,address spender,uint256 value,uint256 recoveryRate,uint256 nonce,uint256 deadline)"
+        );
+
+    bytes32 internal immutable PERMIT_TYPEHASH =
+        keccak256(
+            "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
+        );
+
+    function initialize(IERC20 _token) public initializer {
         _baseToken = _token;
+
+        INITIAL_CHAIN_ID = block.chainid;
+
+        INITIAL_DOMAIN_SEPARATOR = computeDomainSeparator();
+    }
+
+    /**
+     * @dev Returns the name of the token or fallsback to token address if not found
+     */
+    function name() public view returns (string memory) {
+        string memory _name;
+        (bool success, bytes memory result) = address(_baseToken).staticcall(
+            abi.encodeWithSignature("name()")
+        );
+
+        if (success && result.length > 0) {
+            _name = abi.decode(result, (string));
+        } else {
+            _name = Strings.toHexString(uint160(address(_baseToken)), 20);
+        }
+
+        return string.concat(_name, " (funnel)");
+    }
+
+    function computeDomainSeparator() internal view virtual returns (bytes32) {
+        return
+            keccak256(
+                abi.encode(
+                    keccak256(
+                        "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+                    ),
+                    keccak256(bytes(name())),
+                    keccak256("1"),
+                    block.chainid,
+                    address(this)
+                )
+            );
+    }
+
+    function DOMAIN_SEPARATOR() public view virtual returns (bytes32) {
+        return
+            block.chainid == INITIAL_CHAIN_ID
+                ? INITIAL_DOMAIN_SEPARATOR
+                : computeDomainSeparator();
+    }
+
+    function permit(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) public virtual {
+        require(deadline >= block.timestamp, "PERMIT_DEADLINE_EXPIRED");
+
+        uint256 nonce;
+        unchecked {
+            nonce = _nonces[owner]++;
+        }
+
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                "\x19\x01",
+                DOMAIN_SEPARATOR(),
+                keccak256(
+                    abi.encode(
+                        PERMIT_TYPEHASH,
+                        owner,
+                        spender,
+                        value,
+                        nonce,
+                        deadline
+                    )
+                )
+            )
+        );
+
+        uint256 size;
+        assembly {
+            size := extcodesize(owner)
+        }
+        if (size > 0) {
+            // Owner is a contract
+            require(
+                IERC1271(owner).isValidSignature(
+                    digest,
+                    abi.encodePacked(r, s, v)
+                ) == IERC1271(owner).isValidSignature.selector,
+                "IERC1271: invalid permit"
+            );
+        } else {
+            address recoveredAddress = ecrecover(digest, v, r, s);
+
+            require(
+                recoveredAddress != address(0) && recoveredAddress == owner,
+                "INVALID_SIGNER"
+            );
+        }
+        _approve(owner, spender, value, 0);
+    }
+
+    function permitRenewable(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 recoveryRate,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) public virtual {
+        require(deadline >= block.timestamp, "PERMIT_DEADLINE_EXPIRED");
+
+        uint256 nonce;
+        unchecked {
+            nonce = _nonces[owner]++;
+        }
+
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                "\x19\x01",
+                DOMAIN_SEPARATOR(),
+                keccak256(
+                    abi.encode(
+                        PERMIT_RENEWABLE_TYPEHASH,
+                        owner,
+                        spender,
+                        value,
+                        recoveryRate,
+                        nonce,
+                        deadline
+                    )
+                )
+            )
+        );
+
+        uint256 size;
+        assembly {
+            size := extcodesize(owner)
+        }
+        if (size > 0) {
+            // Owner is a contract
+            require(
+                IERC1271(owner).isValidSignature(
+                    digest,
+                    abi.encodePacked(r, s, v)
+                ) == IERC1271(owner).isValidSignature.selector,
+                "IERC1271: invalid permit"
+            );
+        } else {
+            address recoveredAddress = ecrecover(digest, v, r, s);
+
+            require(
+                recoveredAddress != address(0) && recoveredAddress == owner,
+                "INVALID_SIGNER"
+            );
+        }
+
+        _approve(owner, spender, value, recoveryRate);
     }
 
     function approve(address _spender, uint256 _value)
