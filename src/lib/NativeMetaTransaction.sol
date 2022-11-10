@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
-import "openzeppelin-contracts/utils/cryptography/draft-EIP712.sol";
+import {EIP712} from "./EIP712.sol";
 import "./Nonces.sol";
 
 abstract contract NativeMetaTransaction is EIP712, Nonces {
@@ -38,10 +38,7 @@ abstract contract NativeMetaTransaction is EIP712, Nonces {
             functionSignature: functionSignature
         });
 
-        require(
-            _verify(userAddress, metaTx, sigR, sigS, sigV),
-            "Signer and signature do not match"
-        );
+        _verifyMetaTx(userAddress, metaTx, sigV, sigR, sigS);
 
         // Append userAddress and relayer address at the end to extract it from calling context
         // solhint-disable-next-line avoid-low-level-calls
@@ -60,16 +57,16 @@ abstract contract NativeMetaTransaction is EIP712, Nonces {
         return returnData;
     }
 
-    function _verify(
+    function _verifyMetaTx(
         address signer,
         MetaTransaction memory metaTx,
-        bytes32 sigR,
-        bytes32 sigS,
-        uint8 sigV
+        uint8 v,
+        bytes32 r,
+        bytes32 s
     ) internal view returns (bool) {
         require(signer != address(0), "NativeMetaTransaction: INVALID_SIGNER");
 
-        bytes32 data = keccak256(
+        bytes32 hashStruct = keccak256(
             abi.encode(
                 META_TRANSACTION_TYPEHASH,
                 metaTx.nonce,
@@ -78,6 +75,6 @@ abstract contract NativeMetaTransaction is EIP712, Nonces {
             )
         );
 
-        return ecrecover(_hashTypedDataV4(data), sigV, sigR, sigS) == signer;
+        return _verifySig(signer, hashStruct, v, r, s);
     }
 }

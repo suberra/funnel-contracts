@@ -8,6 +8,8 @@ import {IERC5827Spender} from "./interfaces/IERC5827Spender.sol";
 import {IERC5827Payable} from "./interfaces/IERC5827Payable.sol";
 import {MetaTxContext} from "./lib/MetaTxContext.sol";
 import {Nonces} from "./lib/Nonces.sol";
+import {EIP712} from "./lib/EIP712.sol";
+import {NativeMetaTransaction} from "./lib/NativeMetaTransaction.sol";
 import {IERC20} from "openzeppelin-contracts/interfaces/IERC20.sol";
 import {IERC20Metadata} from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
 
@@ -18,7 +20,12 @@ import {IERC1271} from "openzeppelin-contracts/interfaces/IERC1271.sol";
 import {Strings} from "openzeppelin-contracts/utils/Strings.sol";
 import {Initializable} from "openzeppelin-contracts/proxy/utils/Initializable.sol";
 
-contract Funnel is IFunnel, MetaTxContext, Nonces, Initializable {
+contract Funnel is
+    IFunnel,
+    NativeMetaTransaction,
+    MetaTxContext,
+    Initializable
+{
     /*//////////////////////////////////////////////////////////////
                             EIP-5827 STORAGE
     //////////////////////////////////////////////////////////////*/
@@ -94,7 +101,7 @@ contract Funnel is IFunnel, MetaTxContext, Nonces, Initializable {
             );
     }
 
-    function DOMAIN_SEPARATOR() public view virtual returns (bytes32) {
+    function DOMAIN_SEPARATOR() public view override returns (bytes32) {
         return
             block.chainid == INITIAL_CHAIN_ID
                 ? INITIAL_DOMAIN_SEPARATOR
@@ -117,44 +124,12 @@ contract Funnel is IFunnel, MetaTxContext, Nonces, Initializable {
             nonce = _nonces[owner]++;
         }
 
-        bytes32 digest = keccak256(
-            abi.encodePacked(
-                "\x19\x01",
-                DOMAIN_SEPARATOR(),
-                keccak256(
-                    abi.encode(
-                        PERMIT_TYPEHASH,
-                        owner,
-                        spender,
-                        value,
-                        nonce,
-                        deadline
-                    )
-                )
-            )
+        bytes32 hashStruct = keccak256(
+            abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonce, deadline)
         );
 
-        uint256 size;
-        assembly {
-            size := extcodesize(owner)
-        }
-        if (size > 0) {
-            // Owner is a contract
-            require(
-                IERC1271(owner).isValidSignature(
-                    digest,
-                    abi.encodePacked(r, s, v)
-                ) == IERC1271(owner).isValidSignature.selector,
-                "IERC1271: invalid permit"
-            );
-        } else {
-            address recoveredAddress = ecrecover(digest, v, r, s);
+        _verifySig(owner, hashStruct, v, r, s);
 
-            require(
-                recoveredAddress != address(0) && recoveredAddress == owner,
-                "INVALID_SIGNER"
-            );
-        }
         _approve(owner, spender, value, 0);
     }
 
@@ -175,45 +150,19 @@ contract Funnel is IFunnel, MetaTxContext, Nonces, Initializable {
             nonce = _nonces[owner]++;
         }
 
-        bytes32 digest = keccak256(
-            abi.encodePacked(
-                "\x19\x01",
-                DOMAIN_SEPARATOR(),
-                keccak256(
-                    abi.encode(
-                        PERMIT_RENEWABLE_TYPEHASH,
-                        owner,
-                        spender,
-                        value,
-                        recoveryRate,
-                        nonce,
-                        deadline
-                    )
-                )
+        bytes32 hashStruct = keccak256(
+            abi.encode(
+                PERMIT_RENEWABLE_TYPEHASH,
+                owner,
+                spender,
+                value,
+                recoveryRate,
+                nonce,
+                deadline
             )
         );
 
-        uint256 size;
-        assembly {
-            size := extcodesize(owner)
-        }
-        if (size > 0) {
-            // Owner is a contract
-            require(
-                IERC1271(owner).isValidSignature(
-                    digest,
-                    abi.encodePacked(r, s, v)
-                ) == IERC1271(owner).isValidSignature.selector,
-                "IERC1271: invalid permit"
-            );
-        } else {
-            address recoveredAddress = ecrecover(digest, v, r, s);
-
-            require(
-                recoveredAddress != address(0) && recoveredAddress == owner,
-                "INVALID_SIGNER"
-            );
-        }
+        _verifySig(owner, hashStruct, v, r, s);
 
         _approve(owner, spender, value, recoveryRate);
     }
