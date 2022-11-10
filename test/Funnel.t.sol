@@ -118,12 +118,13 @@ contract FunnelTest is ERC5827TestSuite {
     function testOverriddenName() public {
         assertEq(
             IERC20Metadata(address(funnel)).name(),
-            string.concat(token.name(), "(funnel)")
+            string.concat(token.name(), " (funnel)")
         );
     }
 
     function testFallbackToBaseToken() public {
         assertEq(IERC20Metadata(address(funnel)).symbol(), token.symbol());
         assertEq(IERC20Metadata(address(funnel)).decimals(), token.decimals());
+        assertEq(IERC20Metadata(address(funnel)).totalSupply(), token.totalSupply());
     }
 }
