@@ -36,6 +36,7 @@ abstract contract EIP712 {
                 "IERC1271: invalid permit"
             );
         } else {
+            // EOA signer
             address recoveredAddress = ecrecover(digest, v, r, s);
 
             require(

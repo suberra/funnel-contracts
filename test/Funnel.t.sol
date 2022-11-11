@@ -38,9 +38,10 @@ contract FunnelTest is ERC5827TestSuite {
         0x23d10def3caacba2e4042e0c75d44a42d2558aabcf5ce951d0642a8032e1e653;
 
     function setUp() public override {
-        user1 = address(0x1111111111111111111111111111111111111111);
-        user2 = address(0x2222222222222222222222222222222222222222);
-        user3 = address(0x3333333333333333333333333333333333333333);
+        uint256 privateKey = 0xBEEF;
+        user1 = vm.addr(privateKey);
+        user2 = address(0xCAFE);
+        user3 = address(0xDEAD);
 
         token = new ERC20PresetFixedSupply(
             "Existing USDC token",
@@ -149,7 +150,7 @@ contract FunnelTest is ERC5827TestSuite {
                         abi.encode(
                             PERMIT_TYPEHASH,
                             owner,
-                            address(0xCAFE),
+                            user2,
                             1e18,
                             0,
                             block.timestamp
@@ -159,9 +160,9 @@ contract FunnelTest is ERC5827TestSuite {
             )
         );
 
-        funnel.permit(owner, address(0xCAFE), 1e18, block.timestamp, v, r, s);
+        funnel.permit(owner, user2, 1e18, block.timestamp, v, r, s);
 
-        assertEq(funnel.allowance(owner, address(0xCAFE)), 1e18);
+        assertEq(funnel.allowance(owner, user2), 1e18);
         assertEq(funnel.nonces(owner), 1);
     }
 
@@ -179,7 +180,7 @@ contract FunnelTest is ERC5827TestSuite {
                         abi.encode(
                             PERMIT_TYPEHASH,
                             owner,
-                            address(0xCAFE),
+                            user2,
                             1e18,
                             1,
                             block.timestamp
@@ -189,7 +190,7 @@ contract FunnelTest is ERC5827TestSuite {
             )
         );
 
-        funnel.permit(owner, address(0xCAFE), 1e18, block.timestamp, v, r, s);
+        funnel.permit(owner, user2, 1e18, block.timestamp, v, r, s);
     }
 
     function testFailPermitBadDeadline() public {
@@ -206,7 +207,7 @@ contract FunnelTest is ERC5827TestSuite {
                         abi.encode(
                             PERMIT_TYPEHASH,
                             owner,
-                            address(0xCAFE),
+                            user2,
                             1e18,
                             0,
                             block.timestamp
@@ -216,15 +217,7 @@ contract FunnelTest is ERC5827TestSuite {
             )
         );
 
-        funnel.permit(
-            owner,
-            address(0xCAFE),
-            1e18,
-            block.timestamp + 1,
-            v,
-            r,
-            s
-        );
+        funnel.permit(owner, user2, 1e18, block.timestamp + 1, v, r, s);
     }
 
     function testFailPermitPastDeadline() public {
@@ -241,7 +234,7 @@ contract FunnelTest is ERC5827TestSuite {
                         abi.encode(
                             PERMIT_TYPEHASH,
                             owner,
-                            address(0xCAFE),
+                            user2,
                             1e18,
                             0,
                             block.timestamp - 1
@@ -251,15 +244,7 @@ contract FunnelTest is ERC5827TestSuite {
             )
         );
 
-        funnel.permit(
-            owner,
-            address(0xCAFE),
-            1e18,
-            block.timestamp - 1,
-            v,
-            r,
-            s
-        );
+        funnel.permit(owner, user2, 1e18, block.timestamp - 1, v, r, s);
     }
 
     function testFailPermitReplay() public {
@@ -276,7 +261,7 @@ contract FunnelTest is ERC5827TestSuite {
                         abi.encode(
                             PERMIT_TYPEHASH,
                             owner,
-                            address(0xCAFE),
+                            user2,
                             1e18,
                             0,
                             block.timestamp
@@ -286,8 +271,8 @@ contract FunnelTest is ERC5827TestSuite {
             )
         );
 
-        funnel.permit(owner, address(0xCAFE), 1e18, block.timestamp, v, r, s);
-        funnel.permit(owner, address(0xCAFE), 1e18, block.timestamp, v, r, s);
+        funnel.permit(owner, user2, 1e18, block.timestamp, v, r, s);
+        funnel.permit(owner, user2, 1e18, block.timestamp, v, r, s);
     }
 
     function testFailPermitRenewableBadNonce() public {
@@ -304,7 +289,7 @@ contract FunnelTest is ERC5827TestSuite {
                         abi.encode(
                             PERMIT_RENEWABLE_TYPEHASH,
                             owner,
-                            address(0xCAFE),
+                            user2,
                             1e18,
                             1,
                             1,
@@ -315,16 +300,7 @@ contract FunnelTest is ERC5827TestSuite {
             )
         );
 
-        funnel.permitRenewable(
-            owner,
-            address(0xCAFE),
-            1e18,
-            1,
-            block.timestamp,
-            v,
-            r,
-            s
-        );
+        funnel.permitRenewable(owner, user2, 1e18, 1, block.timestamp, v, r, s);
     }
 
     function testFailPermitRenewableBadDeadline() public {
@@ -341,7 +317,7 @@ contract FunnelTest is ERC5827TestSuite {
                         abi.encode(
                             PERMIT_RENEWABLE_TYPEHASH,
                             owner,
-                            address(0xCAFE),
+                            user2,
                             1e18,
                             1,
                             0,
@@ -354,7 +330,7 @@ contract FunnelTest is ERC5827TestSuite {
 
         funnel.permitRenewable(
             owner,
-            address(0xCAFE),
+            user2,
             1e18,
             1,
             block.timestamp + 1,
@@ -378,7 +354,7 @@ contract FunnelTest is ERC5827TestSuite {
                         abi.encode(
                             PERMIT_RENEWABLE_TYPEHASH,
                             owner,
-                            address(0xCAFE),
+                            user2,
                             1e18,
                             1,
                             0,
@@ -391,7 +367,7 @@ contract FunnelTest is ERC5827TestSuite {
 
         funnel.permitRenewable(
             owner,
-            address(0xCAFE),
+            user2,
             1e18,
             1,
             block.timestamp - 1,
@@ -415,7 +391,7 @@ contract FunnelTest is ERC5827TestSuite {
                         abi.encode(
                             PERMIT_RENEWABLE_TYPEHASH,
                             owner,
-                            address(0xCAFE),
+                            user2,
                             1e18,
                             1,
                             0,
@@ -426,18 +402,9 @@ contract FunnelTest is ERC5827TestSuite {
             )
         );
 
-        funnel.permitRenewable(
-            owner,
-            address(0xCAFE),
-            1e18,
-            1,
-            block.timestamp,
-            v,
-            r,
-            s
-        );
+        funnel.permitRenewable(owner, user2, 1e18, 1, block.timestamp, v, r, s);
 
-        assertEq(funnel.allowance(owner, address(0xCAFE)), 1e18);
+        assertEq(funnel.allowance(owner, user2), 1e18);
         assertEq(funnel.nonces(owner), 1);
     }
 
@@ -455,7 +422,7 @@ contract FunnelTest is ERC5827TestSuite {
                         abi.encode(
                             PERMIT_RENEWABLE_TYPEHASH,
                             owner,
-                            address(0xCAFE),
+                            user2,
                             1e18,
                             1,
                             0,
@@ -466,35 +433,17 @@ contract FunnelTest is ERC5827TestSuite {
             )
         );
 
-        funnel.permitRenewable(
-            owner,
-            address(0xCAFE),
-            1e18,
-            1,
-            block.timestamp,
-            v,
-            r,
-            s
-        );
-        funnel.permitRenewable(
-            owner,
-            address(0xCAFE),
-            1e18,
-            1,
-            block.timestamp,
-            v,
-            r,
-            s
-        );
+        funnel.permitRenewable(owner, user2, 1e18, 1, block.timestamp, v, r, s);
+        funnel.permitRenewable(owner, user2, 1e18, 1, block.timestamp, v, r, s);
     }
 
-    function testExecuteMetaTransaction() public {
+    function testExecuteMetaTransactionApproveRenewable() public {
         uint256 privateKey = 0xBEEF;
         address owner = vm.addr(privateKey);
 
         bytes memory functionSignature = abi.encodeWithSignature(
             "approveRenewable(address,uint256,uint256)",
-            address(0xCAFE),
+            user2,
             1e18,
             1
         );
@@ -518,8 +467,40 @@ contract FunnelTest is ERC5827TestSuite {
 
         funnel.executeMetaTransaction(owner, functionSignature, r, s, v);
 
-        assertEq(funnel.allowance(owner, address(0xCAFE)), 1e18);
+        assertEq(funnel.allowance(owner, user2), 1e18);
         assertEq(funnel.nonces(owner), 1);
+    }
+
+    function testExecuteMetaTransactionTransfer() public {
+        uint256 privateKey = 0xBEEF;
+
+        bytes memory functionSignature = abi.encodeWithSignature(
+            "transfer(address,uint256)",
+            user2,
+            1337
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    funnel.DOMAIN_SEPARATOR(),
+                    keccak256(
+                        abi.encode(
+                            META_TRANSACTION_TYPEHASH,
+                            0,
+                            user1,
+                            keccak256(functionSignature)
+                        )
+                    )
+                )
+            )
+        );
+
+        funnel.executeMetaTransaction(user1, functionSignature, r, s, v);
+
+        assertEq(funnel.balanceOf(user2), 1337);
+        assertEq(funnel.nonces(user1), 1);
     }
 
     function testFailExecuteMetaTransactionBadNonce() public {
@@ -528,7 +509,7 @@ contract FunnelTest is ERC5827TestSuite {
 
         bytes memory functionSignature = abi.encodeWithSignature(
             "approveRenewable(address,uint256,uint256)",
-            address(0xCAFE),
+            user2,
             1e18,
             1
         );
@@ -560,7 +541,7 @@ contract FunnelTest is ERC5827TestSuite {
 
         bytes memory functionSignature = abi.encodeWithSignature(
             "approveRenewable(address,uint256,uint256)",
-            address(0xCAFE),
+            user2,
             1e18,
             1
         );
@@ -584,7 +565,7 @@ contract FunnelTest is ERC5827TestSuite {
         );
 
         funnel.executeMetaTransaction(owner, functionSignature, r, s, v);
-        assertEq(funnel.allowance(owner, address(0xCAFE)), 1e18);
+        assertEq(funnel.allowance(owner, user2), 1e18);
         assertEq(funnel.nonces(owner), 1);
         funnel.executeMetaTransaction(owner, functionSignature, r, s, v);
     }
