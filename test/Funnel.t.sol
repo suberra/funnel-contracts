@@ -221,6 +221,7 @@ contract FunnelTest is ERC5827TestSuite {
     }
 
     function testFailPermitPastDeadline() public {
+        uint256 oldTimestamp = block.timestamp;
         uint256 privateKey = 0xBEEF;
         address owner = vm.addr(privateKey);
 
@@ -234,17 +235,18 @@ contract FunnelTest is ERC5827TestSuite {
                         abi.encode(
                             PERMIT_TYPEHASH,
                             owner,
-                            user2,
+                            address(0xCAFE),
                             1e18,
                             0,
-                            block.timestamp - 1
+                            oldTimestamp
                         )
                     )
                 )
             )
         );
 
-        funnel.permit(owner, user2, 1e18, block.timestamp - 1, v, r, s);
+        vm.warp(block.timestamp + 1);
+        funnel.permit(owner, address(0xCAFE), 1e18, oldTimestamp, v, r, s);
     }
 
     function testFailPermitReplay() public {
@@ -341,6 +343,7 @@ contract FunnelTest is ERC5827TestSuite {
     }
 
     function testFailPermitRenewablePastDeadline() public {
+        uint256 oldTimestamp = block.timestamp;
         uint256 privateKey = 0xBEEF;
         address owner = vm.addr(privateKey);
 
@@ -358,23 +361,16 @@ contract FunnelTest is ERC5827TestSuite {
                             1e18,
                             1,
                             0,
-                            block.timestamp - 1
+                            oldTimestamp
                         )
                     )
                 )
             )
         );
 
-        funnel.permitRenewable(
-            owner,
-            user2,
-            1e18,
-            1,
-            block.timestamp - 1,
-            v,
-            r,
-            s
-        );
+        vm.warp(oldTimestamp + 1);
+
+        funnel.permitRenewable(owner, user2, 1e18, 1, oldTimestamp, v, r, s);
     }
 
     function testPermitRenewable() public {
