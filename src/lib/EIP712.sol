@@ -8,7 +8,7 @@ abstract contract EIP712 {
     /**
      * Checks if signer's signature matches the data
      * @param signer address of the signer
-     * @param hashStruct hash of the abi encoded data, see https://eips.ethereum.org/EIPS/eip-712#definition-of-hashstruct[hashed struct]
+     * @param hashStruct hash of the typehash & abi encoded data, see https://eips.ethereum.org/EIPS/eip-712#definition-of-hashstruct[hashed struct]
      */
     function _verifySig(
         address signer,

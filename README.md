@@ -4,6 +4,8 @@ Funnels are contracts that enforces renewable token allowances [EIP-5827](https:
 
 Each funnel contract is a proxy/wrapper for an underlying ERC20 token, funneling a large unlimited allowance to a limited allowance that regains over time.
 
+![Funnels overview](overview.png)
+
 ## Factory
 
 The funnel factory is a contract that deploys new funnel contracts, it is the only contract that can create new funnels.
