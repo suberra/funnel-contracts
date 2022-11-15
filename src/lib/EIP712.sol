@@ -33,7 +33,7 @@ abstract contract EIP712 {
                     digest,
                     abi.encodePacked(r, s, v)
                 ) == IERC1271(signer).isValidSignature.selector,
-                "IERC1271: invalid permit"
+                "IERC1271: invalid signature"
             );
         } else {
             // EOA signer
