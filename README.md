@@ -4,6 +4,8 @@ Funnels are contracts that enforces renewable token allowances [EIP-5827](https:
 
 Each funnel contract is a proxy/wrapper for an underlying ERC20 token, funneling a large unlimited allowance to a limited allowance that regains over time.
 
+![Funnels overview](overview.png)
+
 ## Factory
 
 The funnel factory is a contract that deploys new funnel contracts, it is the only contract that can create new funnels.
@@ -18,6 +20,7 @@ Goal is to deploy a factory onto all supported chains at the same address, and *
 
 `getFunnelForToken(address _tokenAddress)` - Returns the funnel contract address for a given token address
 
+`isFunnel` - Returns true if the funnel contract is a funnel deployed by the factory.
 
 ### Funnel.sol - Funnel contract for ERC20 tokens
 
@@ -40,3 +43,11 @@ Deploy to local fork
 Deploy factory to goerli
 
 `forge script script/FunnelFactoryDeployer.sol:FunnelFactoryDeployer --rpc-url $GOERLI_RPC_URL --broadcast`  
+
+# Deployments
+
+| Network | Contract      | Address                                    |
+| ------- | ------------- | ------------------------------------------ |
+| Goerli  | Funnel (impl) | 0x962050e8ea6b07b58e761646bfd4848c5af53d50 |
+| Goerli  | FunnelFactory | 0xae322b3564ae7f4d72be7fa33c9e307d21358ae0 |
+| Goerli  | USDC (funnel) | 0x1f87877f29E5FB0BBDdfB702B710Dc6c3501302c |

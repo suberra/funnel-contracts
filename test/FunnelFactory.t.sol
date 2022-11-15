@@ -26,13 +26,16 @@ contract FunnelFactoryTest is Test {
         implementation = new Funnel();
         funnelFactory = new FunnelFactory(address(implementation));
 
-        tokenAddress1 = address(0x1111);
-        tokenAddress2 = address(0x2222);
-        tokenAddress3 = address(0x3333);
-
         user1 = address(0x1111111111111111111111111111111111111111);
         user2 = address(0x2222222222222222222222222222222222222222);
         user3 = address(0x3333333333333333333333333333333333333333);
+
+        ERC20 t1 = new ERC20PresetFixedSupply("Token 1", "T1", 11111, user1);
+        ERC20 t2 = new ERC20PresetFixedSupply("Token 2", "T2", 11111, user1);
+
+        tokenAddress1 = address(t1);
+        tokenAddress2 = address(t2);
+        tokenAddress3 = address(0x3333);
 
         token = new ERC20PresetFixedSupply(
             "Existing USDC token",
@@ -42,13 +45,18 @@ contract FunnelFactoryTest is Test {
         );
     }
 
-    function calcExpectedAddress(address tokenAddr) public view returns (address hash) {
-        return Clones.predictDeterministicAddress(
-            address(implementation),
-            bytes32(uint256(uint160(tokenAddr))),
-            address(funnelFactory)
-        );
-    }   
+    function calcExpectedAddress(address tokenAddr)
+        public
+        view
+        returns (address hash)
+    {
+        return
+            Clones.predictDeterministicAddress(
+                address(implementation),
+                bytes32(uint256(uint160(tokenAddr))),
+                address(funnelFactory)
+            );
+    }
 
     function testDeployFunnelForToken() public {
         address funnelAddress = funnelFactory.deployFunnelForToken(
@@ -60,10 +68,7 @@ contract FunnelFactoryTest is Test {
             funnelAddress
         );
 
-        assertEq(
-            calcExpectedAddress(address(token)),
-            funnelAddress
-        );
+        assertEq(calcExpectedAddress(address(token)), funnelAddress);
     }
 
     function testDeployFunnelForDifferentTokens() public {
@@ -93,20 +98,25 @@ contract FunnelFactoryTest is Test {
     }
 
     function testDeployFunnelForTokenRevertsIfAlreadyDeployed() public {
-        funnelFactory.deployFunnelForToken(tokenAddress3);
+        funnelFactory.deployFunnelForToken(tokenAddress2);
 
         vm.expectRevert(IFunnelFactory.FunnelAlreadyDeployed.selector);
-        funnelFactory.deployFunnelForToken(tokenAddress3);
+        funnelFactory.deployFunnelForToken(tokenAddress2);
     }
 
     function testGetFunnelForTokenRevertsIfNotDeployed() public {
         vm.expectRevert(IFunnelFactory.FunnelNotDeployed.selector);
-        funnelFactory.getFunnelForToken(tokenAddress3);
+        funnelFactory.getFunnelForToken(tokenAddress2);
+    }
+
+    function testNoCodeTokenReverts() public {
+        vm.expectRevert(IFunnelFactory.InvalidToken.selector);
+        funnelFactory.deployFunnelForToken(tokenAddress3);
     }
 
     function testIsFunnelTrueForDeployedFunnel() public {
         address funnel = funnelFactory.deployFunnelForToken(address(token));
-        assertEq(funnelFactory.isFunnel(funnel), true);
+        assertTrue(funnelFactory.isFunnel(funnel));
     }
 
     function testIsFunnelFalseForUndeployedFunnel() public {
@@ -123,7 +133,7 @@ contract FunnelFactoryTest is Test {
             address(token)
         );
 
-        assertEq(funnelFactory.isFunnel(funnel), true);
+        assertTrue(funnelFactory.isFunnel(funnel));
         assertFalse(funnelFactory.isFunnel(funnelAddress2));
     }
 
