@@ -90,10 +90,7 @@ contract FunnelTest is ERC5827TestSuite {
         vm.prank(user2);
         vm.expectEmit(true, false, false, true);
         emit TransferReceived(user2, user1, 10);
-        assertEq(
-            funnel.transferFromAndCall(user1, address(spender), 10, ""),
-            true
-        );
+        assertTrue(funnel.transferFromAndCall(user1, address(spender), 10, ""));
     }
 
     function testTransferFromAndCallRevertNonContract() public {
