@@ -116,7 +116,7 @@ contract FunnelFactoryTest is Test {
 
     function testIsFunnelTrueForDeployedFunnel() public {
         address funnel = funnelFactory.deployFunnelForToken(address(token));
-        assertEq(funnelFactory.isFunnel(funnel), true);
+        assertTrue(funnelFactory.isFunnel(funnel));
     }
 
     function testIsFunnelFalseForUndeployedFunnel() public {
@@ -133,7 +133,7 @@ contract FunnelFactoryTest is Test {
             address(token)
         );
 
-        assertEq(funnelFactory.isFunnel(funnel), true);
+        assertTrue(funnelFactory.isFunnel(funnel));
         assertFalse(funnelFactory.isFunnel(funnelAddress2));
     }
 
