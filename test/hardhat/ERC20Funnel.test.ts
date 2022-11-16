@@ -378,7 +378,7 @@ describe("ERC20Funnel", function () {
   });
 
   describe("PermitRenewable", function () {
-    it("Should allow  transferFrom after permitRenewable", async function () {
+    it("Should allow transferFrom after permitRenewable", async function () {
       const { token, minter, user2, user3, funnel } = await loadFixture(
         deployTokenFixture
       );
@@ -584,6 +584,51 @@ describe("ERC20Funnel", function () {
       expect(await token.allowance(minter.address, user2.address)).to.equal(
         getTokenAmount(42)
       );
+    });
+
+    it("executeMetaTransaction() on transfer() works as expected", async function () {
+      const { token, minter, funnel, user2, user3 } = await loadFixture(
+        deployTokenFixture
+      );
+
+      const nonce = await token.nonces(minter.address);
+      const name = await token.name();
+
+      const approvePeriodicCalldata = token.interface.encodeFunctionData(
+        "transfer",
+        [
+          user2.address, // recipient
+          getTokenAmount(42),
+        ]
+      );
+
+      const metaTxPermitData = generateMetaTxPermit(
+        await getChainId(),
+        funnel.address,
+        name,
+        nonce,
+        minter.address,
+        approvePeriodicCalldata
+      );
+
+      const metaTxSig = await signPermit(metaTxPermitData, minter);
+
+      await expect(
+        funnel
+          .connect(user3)
+          .executeMetaTransaction(
+            minter.address,
+            approvePeriodicCalldata,
+            metaTxSig.r,
+            metaTxSig.s,
+            metaTxSig.v
+          )
+      ).to.emit(funnel, "MetaTransactionExecuted");
+
+      expect(await token.balanceOf(minter.address)).to.equal(
+        MAX_UINT256.sub(getTokenAmount(42))
+      );
+      expect(await token.balanceOf(user2.address)).to.equal(getTokenAmount(42));
     });
 
     it("executeMetaTransaction() on approveRenewable() works as expected", async function () {
