@@ -7,3 +7,6 @@
 [submodule "lib/solmate"]
 	path = lib/solmate
 	url = https://github.com/transmissions11/solmate
+[submodule "lib/pnm-contracts"]
+	path = lib/pnm-contracts
+	url = https://github.com/pwnednomore/pnm-contracts
