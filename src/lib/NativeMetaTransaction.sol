@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
-import {EIP712} from "./EIP712.sol";
+import { EIP712 } from "./EIP712.sol";
 import "./Nonces.sol";
 
 abstract contract NativeMetaTransaction is EIP712, Nonces {
@@ -48,11 +48,7 @@ abstract contract NativeMetaTransaction is EIP712, Nonces {
 
         require(success, "Function call not successful");
 
-        emit MetaTransactionExecuted(
-            userAddress,
-            payable(msg.sender),
-            functionSignature
-        );
+        emit MetaTransactionExecuted(userAddress, payable(msg.sender), functionSignature);
 
         return returnData;
     }

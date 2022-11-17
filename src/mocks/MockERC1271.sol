@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.15;
 
-import {IERC1271} from "openzeppelin-contracts/interfaces/IERC1271.sol";
-import {IERC20} from "openzeppelin-contracts/interfaces/IERC20.sol";
+import { IERC1271 } from "openzeppelin-contracts/interfaces/IERC1271.sol";
+import { IERC20 } from "openzeppelin-contracts/interfaces/IERC20.sol";
 
 contract MockERC1271 is IERC1271 {
     address immutable owner;
@@ -89,15 +89,11 @@ contract MockERC1271 is IERC1271 {
             uint256(s) >
             0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0
         ) {
-            revert(
-                "SignatureValidator#recoverSigner: invalid signature 's' value"
-            );
+            revert("SignatureValidator#recoverSigner: invalid signature 's' value");
         }
 
         if (v != 27 && v != 28) {
-            revert(
-                "SignatureValidator#recoverSigner: invalid signature 'v' value"
-            );
+            revert("SignatureValidator#recoverSigner: invalid signature 'v' value");
         }
 
         // Recover ECDSA signer

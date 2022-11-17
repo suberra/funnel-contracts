@@ -1,20 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.15;
 
-import {TestSetup} from "./TestSetup.sol";
-import {IERC20} from "openzeppelin-contracts/interfaces/IERC20.sol";
-import {stdStorage, StdStorage} from "forge-std/Test.sol";
+import { TestSetup } from "./TestSetup.sol";
+import { IERC20 } from "openzeppelin-contracts/interfaces/IERC20.sol";
+import { stdStorage, StdStorage } from "forge-std/Test.sol";
 
 abstract contract ERC20TestBase is TestSetup {
     IERC20 public token;
     uint256 mintAmount = 1e76;
 
     event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(
-        address indexed owner,
-        address indexed spender,
-        uint256 value
-    );
+    event Approval(address indexed owner, address indexed spender, uint256 value);
 
     function setUp() public virtual override {
         super.setUp();
@@ -25,10 +21,7 @@ abstract contract ERC20TestBase is TestSetup {
     // functions to be overridden
     //////////
 
-    function mintTokens(address to, uint256 amount)
-        public
-        virtual
-        returns (bool);
+    function mintTokens(address to, uint256 amount) public virtual returns (bool);
 
     //////////
     // util funcs
@@ -97,9 +90,7 @@ abstract contract ERC20TestBalanceOf is ERC20TestBase {
         testBalanceOfOnMint(type(uint256).max / 2);
     }
 
-    function testBalanceOfOnTransfer(uint256 mintAmount, uint256 transferAmount)
-        public
-    {
+    function testBalanceOfOnTransfer(uint256 mintAmount, uint256 transferAmount) public {
         transferAmount = bound(transferAmount, 0, type(uint256).max / 2);
         mintAmount = bound(mintAmount, transferAmount, type(uint256).max / 2);
         mintTokens(user2, mintAmount);
@@ -192,17 +183,12 @@ abstract contract ERC20TestApprove is ERC20TestBase {
         assertEq(token.allowance(user1, user3), 0);
     }
 
-    function testApproveWithTransferFuzzing(
-        uint256 approveAmount,
-        uint256 transferAmount
-    ) public {
+    function testApproveWithTransferFuzzing(uint256 approveAmount, uint256 transferAmount)
+        public
+    {
         vm.assume(approveAmount != type(uint256).max);
         transferAmount = bound(transferAmount, 0, mintAmount);
-        approveAmount = bound(
-            approveAmount,
-            transferAmount,
-            type(uint256).max - 1
-        );
+        approveAmount = bound(approveAmount, transferAmount, type(uint256).max - 1);
 
         approveWorksCorrectly(user1, user2, approveAmount);
 

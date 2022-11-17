@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.15;
 
-import {console} from "forge-std/console.sol";
+import { console } from "forge-std/console.sol";
 import "forge-std/Test.sol";
 import "openzeppelin-contracts/proxy/Clones.sol";
 import "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
@@ -37,19 +37,10 @@ contract FunnelFactoryTest is Test {
         tokenAddress2 = address(t2);
         tokenAddress3 = address(0x3333);
 
-        token = new ERC20PresetFixedSupply(
-            "Existing USDC token",
-            "USDC",
-            13370,
-            user1
-        );
+        token = new ERC20PresetFixedSupply("Existing USDC token", "USDC", 13370, user1);
     }
 
-    function calcExpectedAddress(address tokenAddr)
-        public
-        view
-        returns (address hash)
-    {
+    function calcExpectedAddress(address tokenAddr) public view returns (address hash) {
         return
             Clones.predictDeterministicAddress(
                 address(implementation),
@@ -59,40 +50,25 @@ contract FunnelFactoryTest is Test {
     }
 
     function testDeployFunnelForToken() public {
-        address funnelAddress = funnelFactory.deployFunnelForToken(
-            address(token)
-        );
+        address funnelAddress = funnelFactory.deployFunnelForToken(address(token));
 
-        assertEq(
-            funnelFactory.getFunnelForToken(address(token)),
-            funnelAddress
-        );
+        assertEq(funnelFactory.getFunnelForToken(address(token)), funnelAddress);
 
         assertEq(calcExpectedAddress(address(token)), funnelAddress);
     }
 
     function testDeployFunnelForDifferentTokens() public {
-        address funnelAddress1 = funnelFactory.deployFunnelForToken(
-            tokenAddress1
-        );
+        address funnelAddress1 = funnelFactory.deployFunnelForToken(tokenAddress1);
 
-        address funnelAddress2 = funnelFactory.deployFunnelForToken(
-            tokenAddress2
-        );
+        address funnelAddress2 = funnelFactory.deployFunnelForToken(tokenAddress2);
         assertFalse(funnelAddress1 == funnelAddress2);
     }
 
     function testDeployFunnelFromDifferentFactory() public {
-        address funnelAddress1 = funnelFactory.deployFunnelForToken(
-            tokenAddress1
-        );
+        address funnelAddress1 = funnelFactory.deployFunnelForToken(tokenAddress1);
 
-        FunnelFactory funnelFactory2 = new FunnelFactory(
-            address(implementation)
-        );
-        address funnelAddress2 = funnelFactory2.deployFunnelForToken(
-            tokenAddress1
-        );
+        FunnelFactory funnelFactory2 = new FunnelFactory(address(implementation));
+        address funnelAddress2 = funnelFactory2.deployFunnelForToken(tokenAddress1);
 
         assertFalse(funnelAddress1 == funnelAddress2);
     }
@@ -126,12 +102,8 @@ contract FunnelFactoryTest is Test {
     function testIsFunnelFalseForDeployedFunnelFromDifferentFactory() public {
         address funnel = funnelFactory.deployFunnelForToken(address(token));
 
-        FunnelFactory funnelFactory2 = new FunnelFactory(
-            address(implementation)
-        );
-        address funnelAddress2 = funnelFactory2.deployFunnelForToken(
-            address(token)
-        );
+        FunnelFactory funnelFactory2 = new FunnelFactory(address(implementation));
+        address funnelAddress2 = funnelFactory2.deployFunnelForToken(address(token));
 
         assertTrue(funnelFactory.isFunnel(funnel));
         assertFalse(funnelFactory.isFunnel(funnelAddress2));

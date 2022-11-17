@@ -1,16 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.15;
 
-import {IERC1363Receiver} from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
+import { IERC1363Receiver } from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
 import "../interfaces/IERC5827Spender.sol";
 
 contract MockSpenderReceiver is IERC1363Receiver, IERC5827Spender {
     event TransferReceived(address operator, address from, uint256 value);
-    event RenewableApprovalReceived(
-        address owner,
-        uint256 value,
-        uint256 recoveryRate
-    );
+    event RenewableApprovalReceived(address owner, uint256 value, uint256 recoveryRate);
 
     function onTransferReceived(
         address operator,
@@ -32,12 +28,7 @@ contract MockSpenderReceiver is IERC1363Receiver, IERC5827Spender {
         return IERC5827Spender.onRenewableApprovalReceived.selector;
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        returns (bool)
-    {
+    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
         return
             interfaceId == type(IERC1363Receiver).interfaceId ||
             interfaceId == type(IERC5827Spender).interfaceId;

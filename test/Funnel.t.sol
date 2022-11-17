@@ -3,18 +3,14 @@ pragma solidity ^0.8.15;
 
 import "forge-std/Test.sol";
 import "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
-import {IERC20Metadata} from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
+import { IERC20Metadata } from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
 import "../src/Funnel.sol";
 import "./ERC5827TestSuite.sol";
 import "../src/mocks/MockSpenderReceiver.sol";
 
 contract FunnelTest is ERC5827TestSuite {
     event TransferReceived(address operator, address from, uint256 value);
-    event RenewableApprovalReceived(
-        address owner,
-        uint256 value,
-        uint256 recoveryRate
-    );
+    event RenewableApprovalReceived(address owner, uint256 value, uint256 recoveryRate);
 
     ERC20 token;
     Funnel funnel;
@@ -43,12 +39,7 @@ contract FunnelTest is ERC5827TestSuite {
         user2 = address(0xCAFE);
         user3 = address(0xDEAD);
 
-        token = new ERC20PresetFixedSupply(
-            "Existing USDC token",
-            "USDC",
-            13370,
-            user1
-        );
+        token = new ERC20PresetFixedSupply("Existing USDC token", "USDC", 13370, user1);
 
         funnel = new Funnel();
         funnel.initialize(token);
@@ -106,9 +97,7 @@ contract FunnelTest is ERC5827TestSuite {
         funnel.approveRenewable(user2, 1337, 1);
 
         vm.prank(user2);
-        vm.expectRevert(
-            "IERC5827Payable: transfer to non IERC1363Receiver implementer"
-        );
+        vm.expectRevert("IERC5827Payable: transfer to non IERC1363Receiver implementer");
         funnel.transferFromAndCall(user1, address(token), 1337, "");
     }
 
@@ -116,9 +105,7 @@ contract FunnelTest is ERC5827TestSuite {
         vm.prank(user1);
         vm.expectEmit(true, false, false, true);
         emit RenewableApprovalReceived(user1, 1337, 1);
-        assertTrue(
-            funnel.approveRenewableAndCall(address(spender), 1337, 1, "")
-        );
+        assertTrue(funnel.approveRenewableAndCall(address(spender), 1337, 1, ""));
     }
 
     function testApproveRenewableAndCallRevertNonContract() public {
@@ -127,9 +114,7 @@ contract FunnelTest is ERC5827TestSuite {
     }
 
     function testApproveRenewableAndCallRevertNonReceiver() public {
-        vm.expectRevert(
-            "IERC5827Payable: approve a non IERC5827Spender implementer"
-        );
+        vm.expectRevert("IERC5827Payable: approve a non IERC5827Spender implementer");
         funnel.approveRenewableAndCall(address(token), 1337, 1, "");
     }
 
@@ -259,14 +244,7 @@ contract FunnelTest is ERC5827TestSuite {
                     "\x19\x01",
                     funnel.DOMAIN_SEPARATOR(),
                     keccak256(
-                        abi.encode(
-                            PERMIT_TYPEHASH,
-                            owner,
-                            user2,
-                            1e18,
-                            0,
-                            timestamp
-                        )
+                        abi.encode(PERMIT_TYPEHASH, owner, user2, 1e18, 0, timestamp)
                     )
                 )
             )
@@ -360,16 +338,7 @@ contract FunnelTest is ERC5827TestSuite {
             )
         );
 
-        funnel.permitRenewable(
-            owner,
-            user2,
-            1e18,
-            1,
-            block.timestamp + 1,
-            v,
-            r,
-            s
-        );
+        funnel.permitRenewable(owner, user2, 1e18, 1, block.timestamp + 1, v, r, s);
     }
 
     function testFailPermitRenewablePastDeadline() public {
@@ -585,9 +554,6 @@ contract FunnelTest is ERC5827TestSuite {
     function testFallbackToBaseToken() public {
         assertEq(IERC20Metadata(address(funnel)).symbol(), token.symbol());
         assertEq(IERC20Metadata(address(funnel)).decimals(), token.decimals());
-        assertEq(
-            IERC20Metadata(address(funnel)).totalSupply(),
-            token.totalSupply()
-        );
+        assertEq(IERC20Metadata(address(funnel)).totalSupply(), token.totalSupply());
     }
 }

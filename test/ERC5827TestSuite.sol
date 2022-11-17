@@ -1,15 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.15;
 
-import {TestSetup} from "./TestSetup.sol";
+import { TestSetup } from "./TestSetup.sol";
 import "../src/interfaces/IERC5827.sol";
 
 abstract contract ERC5827TestSuite is TestSetup {
-    event Approval(
-        address indexed _owner,
-        address indexed _spender,
-        uint256 _value
-    );
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 
     event RenewableApproval(
         address indexed _owner,

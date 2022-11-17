@@ -1,31 +1,26 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
-import {IFunnel} from "./interfaces/IFunnel.sol";
-import {IERC5827} from "./interfaces/IERC5827.sol";
-import {IERC5827Proxy} from "./interfaces/IERC5827Proxy.sol";
-import {IERC5827Spender} from "./interfaces/IERC5827Spender.sol";
-import {IERC5827Payable} from "./interfaces/IERC5827Payable.sol";
-import {MetaTxContext} from "./lib/MetaTxContext.sol";
-import {Nonces} from "./lib/Nonces.sol";
-import {EIP712} from "./lib/EIP712.sol";
-import {NativeMetaTransaction} from "./lib/NativeMetaTransaction.sol";
-import {IERC20} from "openzeppelin-contracts/interfaces/IERC20.sol";
-import {IERC20Metadata} from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
+import { IFunnel } from "./interfaces/IFunnel.sol";
+import { IERC5827 } from "./interfaces/IERC5827.sol";
+import { IERC5827Proxy } from "./interfaces/IERC5827Proxy.sol";
+import { IERC5827Spender } from "./interfaces/IERC5827Spender.sol";
+import { IERC5827Payable } from "./interfaces/IERC5827Payable.sol";
+import { MetaTxContext } from "./lib/MetaTxContext.sol";
+import { Nonces } from "./lib/Nonces.sol";
+import { EIP712 } from "./lib/EIP712.sol";
+import { NativeMetaTransaction } from "./lib/NativeMetaTransaction.sol";
+import { IERC20 } from "openzeppelin-contracts/interfaces/IERC20.sol";
+import { IERC20Metadata } from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
 
-import {Address} from "openzeppelin-contracts/utils/Address.sol";
-import {IERC1363Receiver} from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
-import {IERC1271} from "openzeppelin-contracts/interfaces/IERC1271.sol";
+import { Address } from "openzeppelin-contracts/utils/Address.sol";
+import { IERC1363Receiver } from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
+import { IERC1271 } from "openzeppelin-contracts/interfaces/IERC1271.sol";
 
-import {Strings} from "openzeppelin-contracts/utils/Strings.sol";
-import {Initializable} from "openzeppelin-contracts/proxy/utils/Initializable.sol";
+import { Strings } from "openzeppelin-contracts/utils/Strings.sol";
+import { Initializable } from "openzeppelin-contracts/proxy/utils/Initializable.sol";
 
-contract Funnel is
-    IFunnel,
-    NativeMetaTransaction,
-    MetaTxContext,
-    Initializable
-{
+contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable {
     /*//////////////////////////////////////////////////////////////
                             EIP-5827 STORAGE
     //////////////////////////////////////////////////////////////*/
@@ -224,8 +219,7 @@ contract Funnel is
 
         uint256 recovered = a.recoveryRate * (block.timestamp - a.lastUpdated);
         uint256 remainingAllowance = a.remaining + recovered;
-        return
-            remainingAllowance > a.maxAmount ? a.maxAmount : remainingAllowance;
+        return remainingAllowance > a.maxAmount ? a.maxAmount : remainingAllowance;
     }
 
     /// @notice fetch approved max amount and recovery rate
@@ -251,18 +245,12 @@ contract Funnel is
     ) public returns (bool) {
         uint256 remainingAllowance = _remainingAllowance(from, _msgSender());
         if (remainingAllowance < amount) {
-            revert InsufficientRenewableAllowance({
-                available: remainingAllowance
-            });
+            revert InsufficientRenewableAllowance({ available: remainingAllowance });
         }
 
         if (remainingAllowance != type(uint256).max) {
-            rAllowance[from][_msgSender()].remaining =
-                remainingAllowance -
-                amount;
-            rAllowance[from][_msgSender()].lastUpdated = uint64(
-                block.timestamp
-            );
+            rAllowance[from][_msgSender()].remaining = remainingAllowance - amount;
+            rAllowance[from][_msgSender()].lastUpdated = uint64(block.timestamp);
         }
 
         _baseToken.transferFrom(from, to, amount);
@@ -322,9 +310,7 @@ contract Funnel is
             return retval == IERC1363Receiver.onTransferReceived.selector;
         } catch (bytes memory reason) {
             if (reason.length == 0) {
-                revert(
-                    "IERC5827Payable: transfer to non IERC1363Receiver implementer"
-                );
+                revert("IERC5827Payable: transfer to non IERC1363Receiver implementer");
             } else {
                 /// @solidity memory-safe-assembly
                 assembly {
@@ -376,13 +362,10 @@ contract Funnel is
                 data
             )
         returns (bytes4 retval) {
-            return
-                retval == IERC5827Spender.onRenewableApprovalReceived.selector;
+            return retval == IERC5827Spender.onRenewableApprovalReceived.selector;
         } catch (bytes memory reason) {
             if (reason.length == 0) {
-                revert(
-                    "IERC5827Payable: approve a non IERC5827Spender implementer"
-                );
+                revert("IERC5827Payable: approve a non IERC5827Spender implementer");
             } else {
                 /// @solidity memory-safe-assembly
                 assembly {
@@ -396,12 +379,7 @@ contract Funnel is
         return address(_baseToken);
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        returns (bool)
-    {
+    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
         return
             interfaceId == type(IERC5827).interfaceId ||
             interfaceId == type(IERC5827Payable).interfaceId ||
@@ -435,14 +413,7 @@ contract Funnel is
 
             // Call the implementation.
             // out and outsize are 0 because we don't know the size yet.
-            let result := staticcall(
-                gas(),
-                implementation,
-                0,
-                calldatasize(),
-                0,
-                0
-            )
+            let result := staticcall(gas(), implementation, 0, calldatasize(), 0, 0)
 
             // Copy the returned data.
             returndatacopy(0, 0, returndatasize())

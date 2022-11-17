@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
-import {IERC1271} from "openzeppelin-contracts/interfaces/IERC1271.sol";
+import { IERC1271 } from "openzeppelin-contracts/interfaces/IERC1271.sol";
 
 abstract contract EIP712 {
     function DOMAIN_SEPARATOR() public view virtual returns (bytes32);
@@ -29,10 +29,8 @@ abstract contract EIP712 {
         if (size > 0) {
             // signer is a contract
             require(
-                IERC1271(signer).isValidSignature(
-                    digest,
-                    abi.encodePacked(r, s, v)
-                ) == IERC1271(signer).isValidSignature.selector,
+                IERC1271(signer).isValidSignature(digest, abi.encodePacked(r, s, v)) ==
+                    IERC1271(signer).isValidSignature.selector,
                 "IERC1271: invalid signature"
             );
         } else {

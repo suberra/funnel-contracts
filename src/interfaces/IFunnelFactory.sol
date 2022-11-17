@@ -6,10 +6,7 @@ interface IFunnelFactory {
     error FunnelAlreadyDeployed();
     error InvalidToken();
 
-    event DeployedFunnel(
-        address indexed tokenAddress,
-        address indexed funnelAddress
-    );
+    event DeployedFunnel(address indexed tokenAddress, address indexed funnelAddress);
 
     /**
      * @dev Deploys a new Funnel contract

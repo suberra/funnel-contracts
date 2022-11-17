@@ -2,7 +2,7 @@
 pragma solidity ^0.8.15;
 
 import "forge-std/Test.sol";
-import {IERC1363Receiver} from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
+import { IERC1363Receiver } from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
 import "../src/interfaces/IERC5827Spender.sol";
 import "../src/mocks/MockSpenderReceiver.sol";
 
@@ -17,9 +17,7 @@ contract MockSpenderReceiverTest is Test {
 
     function testSupportInterfaceReceiver() public {
         assertTrue(
-            receiver.supportsInterface(
-                IERC1363Receiver.onTransferReceived.selector
-            )
+            receiver.supportsInterface(IERC1363Receiver.onTransferReceived.selector)
         );
     }
 
