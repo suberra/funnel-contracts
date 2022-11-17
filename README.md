@@ -39,6 +39,16 @@ Goal is to deploy a factory onto all supported chains at the same address, and *
 
 # Usage
 
+## Testing
+
+Our tests consist of both Foundry tests and hardhat tests. 
+
+`forge test` - Runs the Foundry tests
+
+`npx hardhat test` - Runs hardhat tests
+
+`npm test` - Runs all tests
+
 ## Deployment
 
 Make copy of `.env.template` to `.env` and fill in the values.

@@ -17,12 +17,7 @@ contract FunnelERC20Test is ERC20TestSuite {
 
     address minter;
 
-    function mintTokens(address to, uint256 amount)
-        public
-        virtual
-        override
-        returns (bool success)
-    {
+    function mintTokens(address to, uint256 amount) public virtual override {
         vm.prank(minter);
         baseToken.mint(to, amount);
     }

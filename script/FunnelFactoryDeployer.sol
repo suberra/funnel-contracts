@@ -11,7 +11,7 @@ contract FunnelFactoryDeployer is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         Funnel implementation = new Funnel();
-        FunnelFactory factory = new FunnelFactory(address(implementation));
+        new FunnelFactory(address(implementation));
 
         vm.stopBroadcast();
     }

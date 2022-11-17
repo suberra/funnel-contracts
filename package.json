@@ -19,6 +19,7 @@
     "renewable",
     "allowance",
     "ERC5827",
+    "ERC20",
     "funnel",
     "proxy",
     "tokens"

@@ -21,7 +21,7 @@ abstract contract ERC20TestBase is TestSetup {
     // functions to be overridden
     //////////
 
-    function mintTokens(address to, uint256 amount) public virtual returns (bool);
+    function mintTokens(address to, uint256 amount) public virtual;
 
     //////////
     // util funcs
