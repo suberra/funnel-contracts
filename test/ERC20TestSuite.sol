@@ -52,7 +52,7 @@ abstract contract ERC20TestBase is TestSetup {
 
 abstract contract ERC20TestTotalSupply is ERC20TestBase {
     function testTotalSupply(uint256 amount) public {
-        vm.assume(amount <= type(uint256).max / 2);
+        amount = bound(amount, 0, type(uint256).max / 2);
 
         uint256 expectedSupply = token.totalSupply() + amount;
 
@@ -80,7 +80,7 @@ abstract contract ERC20TestBalanceOf is ERC20TestBase {
     }
         
     function testBalanceOfOnMint(uint256 amount) public {
-        vm.assume(amount <= type(uint256).max / 2);
+        amount = bound(amount, 0, type(uint256).max / 2);
         uint256 expectedBalance = token.balanceOf(user2) + amount;
 
         mintTokens(user2, amount);
@@ -94,8 +94,8 @@ abstract contract ERC20TestBalanceOf is ERC20TestBase {
     }
 
     function testBalanceOfOnTransfer(uint256 mintAmount, uint256 transferAmount) public {
-        vm.assume(mintAmount >= transferAmount);
-        vm.assume(mintAmount <= type(uint256).max / 2);
+        transferAmount = bound(transferAmount, 0, type(uint256).max / 2);
+        mintAmount = bound(mintAmount, transferAmount, type(uint256).max / 2);
         mintTokens(user2, mintAmount);
         
         uint256 expectedBalanceUser1 = token.balanceOf(user1);
@@ -149,13 +149,13 @@ abstract contract ERC20TestTransfer is ERC20TestBase {
     }
 
     function testTransferFuzzing(uint256 amount) public {
-        vm.assume(amount <= mintAmount);
+        amount = bound(amount, 0, mintAmount);
 
         transferWorksCorrectly(user1, user2, amount);
     }
 
     function testFailTransferExceedsBalance(uint256 amount) public {
-        vm.assume(amount > mintAmount);
+        amount = bound(amount, mintAmount + 1, type(uint256).max / 2);
 
         transferWorksCorrectly(user1, user2, amount);
     }
@@ -187,9 +187,9 @@ abstract contract ERC20TestApprove is ERC20TestBase {
     }
 
     function testApproveWithTransferFuzzing(uint256 approveAmount, uint256 transferAmount) public {
-        vm.assume(transferAmount <= approveAmount);
-        vm.assume(transferAmount <= mintAmount);
         vm.assume(approveAmount != type(uint256).max);
+        transferAmount = bound(transferAmount, 0, mintAmount);
+        approveAmount = bound(approveAmount, transferAmount, type(uint256).max);
 
         approveWorksCorrectly(user1, user2, approveAmount);
 
