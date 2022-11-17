@@ -4,11 +4,9 @@ pragma solidity ^0.8.15;
 interface IFunnelFactory {
     error FunnelNotDeployed();
     error FunnelAlreadyDeployed();
+    error InvalidToken();
 
-    event DeployedFunnel(
-        address indexed tokenAddress,
-        address indexed funnelAddress
-    );
+    event DeployedFunnel(address indexed tokenAddress, address indexed funnelAddress);
 
     /**
      * @dev Deploys a new Funnel contract

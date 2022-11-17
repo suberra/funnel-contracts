@@ -1,12 +1,14 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import {
   generateErc20Permit,
+  generateMetaTxPermit,
   generateRenewablePermit,
   signPermit,
 } from "./lib/sdk";
+
+const MAX_UINT256 = ethers.constants.MaxUint256;
 
 async function getChainId() {
   return ethers.provider.getNetwork().then((n) => n.chainId);
@@ -25,7 +27,12 @@ describe("ERC20Funnel", function () {
     const Token = await ethers.getContractFactory("TestERC20Token");
     const MockERC1271 = await ethers.getContractFactory("MockERC1271");
 
-    const baseToken = await Token.deploy("Test USDC", "USDC.t");
+    const baseToken = await Token.deploy(
+      "Test USDC",
+      "USDC.t",
+      minter.address,
+      MAX_UINT256
+    );
 
     const Funnel = await ethers.getContractFactory("Funnel");
 
@@ -61,9 +68,7 @@ describe("ERC20Funnel", function () {
     it("Should mint the minter initial tokens", async function () {
       const { token, minter } = await loadFixture(deployTokenFixture);
 
-      expect(await token.balanceOf(minter.address)).to.equal(
-        BigNumber.from(10).pow(26)
-      );
+      expect(await token.balanceOf(minter.address)).to.equal(MAX_UINT256);
     });
   });
 
@@ -221,7 +226,7 @@ describe("ERC20Funnel", function () {
           r,
           s
         )
-      ).to.revertedWith("INVALID_SIGNER");
+      ).to.revertedWith("EIP712: invalid signature");
 
       await expect(
         token
@@ -287,7 +292,7 @@ describe("ERC20Funnel", function () {
       );
     });
 
-    it("approves to increase allowance with an ERC1271 permit", async () => {
+    it("approves contract wallet to increase allowance with an ERC1271 permit", async () => {
       const { token, minter, user2, user3, contractWallet } = await loadFixture(
         deployTokenFixture
       );
@@ -314,8 +319,6 @@ describe("ERC20Funnel", function () {
 
       const { v, r, s } = await signPermit(data, minter);
 
-      await contractWallet.approveAll();
-
       await token.permit(
         contractWallet.address,
         user2.address,
@@ -337,7 +340,7 @@ describe("ERC20Funnel", function () {
       expect(await token.balanceOf(user3.address)).to.equal(getTokenAmount(99));
     });
 
-    it("does not approve with invalid ERC1271 permit", async () => {
+    it("does not approve contract wallet with invalid ERC1271 permit", async () => {
       const { token, minter, user2, contractWallet } = await loadFixture(
         deployTokenFixture
       );
@@ -358,7 +361,7 @@ describe("ERC20Funnel", function () {
         deadline
       );
 
-      const { v, r, s } = await signPermit(data, minter);
+      const { v, r, s } = await signPermit(data, user2); //user2 is not contractWallet's owner
 
       await expect(
         token.permit(
@@ -370,7 +373,7 @@ describe("ERC20Funnel", function () {
           r,
           s
         )
-      ).to.revertedWith("IERC1271: invalid permit");
+      ).to.revertedWith("IERC1271: invalid signature");
     });
   });
 
@@ -430,7 +433,7 @@ describe("ERC20Funnel", function () {
       );
     });
 
-    it("approves to increase allowance with an ERC1271 permit", async () => {
+    it("approves contract wallet to increase allowance with an ERC1271 permit", async () => {
       const { token, minter, funnel, user2, user3, contractWallet } =
         await loadFixture(deployTokenFixture);
 
@@ -456,8 +459,6 @@ describe("ERC20Funnel", function () {
       );
 
       const { v, r, s } = await signPermit(data, minter);
-
-      await contractWallet.approveAll();
 
       await funnel.permitRenewable(
         contractWallet.address,
@@ -498,7 +499,7 @@ describe("ERC20Funnel", function () {
       );
     });
 
-    it("does not approve with invalid ERC1271 permit", async () => {
+    it("does not approve contract wallet with invalid ERC1271 permit", async () => {
       const { token, minter, funnel, user2, user3, contractWallet } =
         await loadFixture(deployTokenFixture);
 
@@ -523,7 +524,7 @@ describe("ERC20Funnel", function () {
         deadline
       );
 
-      const { v, r, s } = await signPermit(data, minter);
+      const { v, r, s } = await signPermit(data, user2);
 
       await expect(
         funnel.permitRenewable(
@@ -536,7 +537,393 @@ describe("ERC20Funnel", function () {
           r,
           s
         )
-      ).to.revertedWith("IERC1271: invalid permit");
+      ).to.revertedWith("IERC1271: invalid signature");
+    });
+  });
+
+  describe("MetaTx", function () {
+    it("executeMetaTransaction() on approve() works as expected", async function () {
+      const { token, minter, funnel, user2, user3 } = await loadFixture(
+        deployTokenFixture
+      );
+
+      const nonce = await token.nonces(minter.address);
+      const name = await token.name();
+
+      const approvePeriodicCalldata = token.interface.encodeFunctionData(
+        "approve",
+        [
+          user2.address, // spender
+          getTokenAmount(42),
+        ]
+      );
+
+      const metaTxPermitData = generateMetaTxPermit(
+        await getChainId(),
+        funnel.address,
+        name,
+        nonce,
+        minter.address,
+        approvePeriodicCalldata
+      );
+
+      const metaTxSig = await signPermit(metaTxPermitData, minter);
+
+      await expect(
+        funnel
+          .connect(user3)
+          .executeMetaTransaction(
+            minter.address,
+            approvePeriodicCalldata,
+            metaTxSig.r,
+            metaTxSig.s,
+            metaTxSig.v
+          )
+      ).to.emit(funnel, "MetaTransactionExecuted");
+
+      expect(await token.allowance(minter.address, user2.address)).to.equal(
+        getTokenAmount(42)
+      );
+    });
+
+    it("executeMetaTransaction() on transfer() works as expected", async function () {
+      const { token, minter, funnel, user2, user3 } = await loadFixture(
+        deployTokenFixture
+      );
+
+      const nonce = await token.nonces(minter.address);
+      const name = await token.name();
+
+      const approvePeriodicCalldata = token.interface.encodeFunctionData(
+        "transfer",
+        [
+          user2.address, // recipient
+          getTokenAmount(42),
+        ]
+      );
+
+      const metaTxPermitData = generateMetaTxPermit(
+        await getChainId(),
+        funnel.address,
+        name,
+        nonce,
+        minter.address,
+        approvePeriodicCalldata
+      );
+
+      const metaTxSig = await signPermit(metaTxPermitData, minter);
+
+      await expect(
+        funnel
+          .connect(user3)
+          .executeMetaTransaction(
+            minter.address,
+            approvePeriodicCalldata,
+            metaTxSig.r,
+            metaTxSig.s,
+            metaTxSig.v
+          )
+      ).to.emit(funnel, "MetaTransactionExecuted");
+
+      expect(await token.balanceOf(minter.address)).to.equal(
+        MAX_UINT256.sub(getTokenAmount(42))
+      );
+      expect(await token.balanceOf(user2.address)).to.equal(getTokenAmount(42));
+    });
+
+    it("executeMetaTransaction() on approveRenewable() works as expected", async function () {
+      const { token, minter, funnel, user2, user3 } = await loadFixture(
+        deployTokenFixture
+      );
+
+      const nonce = await token.nonces(minter.address);
+      const name = await token.name();
+
+      const approvePeriodicCalldata = funnel.interface.encodeFunctionData(
+        "approveRenewable",
+        [
+          user2.address, // spender
+          getTokenAmount(42),
+          getTokenAmount(1),
+        ]
+      );
+
+      const metaTxPermitData = generateMetaTxPermit(
+        await getChainId(),
+        funnel.address,
+        name,
+        nonce,
+        minter.address,
+        approvePeriodicCalldata
+      );
+
+      const metaTxSig = await signPermit(metaTxPermitData, minter);
+
+      await expect(
+        funnel
+          .connect(user3)
+          .executeMetaTransaction(
+            minter.address,
+            approvePeriodicCalldata,
+            metaTxSig.r,
+            metaTxSig.s,
+            metaTxSig.v
+          )
+      ).to.emit(funnel, "MetaTransactionExecuted");
+
+      expect(await token.allowance(minter.address, user2.address)).to.equal(
+        getTokenAmount(42)
+      );
+
+      const [initialMaxAmount, recoveryRate] = await funnel.renewableAllowance(
+        minter.address,
+        user2.address
+      );
+
+      expect(initialMaxAmount).to.equal(getTokenAmount(42));
+
+      expect(recoveryRate).to.equal(getTokenAmount(1));
+    });
+
+    it("executeMetaTransaction() on nested permit() works as expected", async function () {
+      const { token, minter, funnel, user2, user3 } = await loadFixture(
+        deployTokenFixture
+      );
+
+      const deadline =
+        (await ethers.provider.getBlock("latest")).timestamp + 60;
+      const nonce = await token.nonces(minter.address);
+      const name = await token.name();
+
+      const data = generateErc20Permit(
+        await getChainId(),
+        token.address,
+        name,
+        minter.address, // owner
+        user2.address,
+        getTokenAmount(99), // value
+        nonce.add(1), // metatx uses the same nonce
+        deadline
+      );
+
+      const { v, r, s } = await signPermit(data, minter);
+
+      const permitCalldata = token.interface.encodeFunctionData("permit", [
+        minter.address,
+        user2.address, // spender
+        getTokenAmount(99),
+        deadline,
+        v,
+        r,
+        s,
+      ]);
+
+      const metaTxPermitData = generateMetaTxPermit(
+        await getChainId(),
+        funnel.address,
+        name,
+        nonce,
+        minter.address,
+        permitCalldata
+      );
+
+      const metaTxSig = await signPermit(metaTxPermitData, minter);
+
+      await expect(
+        funnel
+          .connect(user3)
+          .executeMetaTransaction(
+            minter.address,
+            permitCalldata,
+            metaTxSig.r,
+            metaTxSig.s,
+            metaTxSig.v
+          )
+      ).to.emit(funnel, "MetaTransactionExecuted");
+
+      expect(await token.allowance(minter.address, user2.address)).to.equal(
+        getTokenAmount(99)
+      );
+    });
+
+    it("executeMetaTransaction() on nested permit() works as expected with contract wallet", async function () {
+      const { token, minter, funnel, user2, user3, contractWallet } =
+        await loadFixture(deployTokenFixture);
+
+      const deadline =
+        (await ethers.provider.getBlock("latest")).timestamp + 60;
+      const nonce = await token.nonces(minter.address);
+      const name = await token.name();
+
+      const data = generateErc20Permit(
+        await getChainId(),
+        token.address,
+        name,
+        contractWallet.address, // owner
+        user2.address,
+        getTokenAmount(99), // value
+        nonce.add(1), // metatx uses the same nonce
+        deadline
+      );
+
+      const { v, r, s } = await signPermit(data, minter);
+
+      const permitCalldata = token.interface.encodeFunctionData("permit", [
+        contractWallet.address,
+        user2.address, // spender
+        getTokenAmount(99),
+        deadline,
+        v,
+        r,
+        s,
+      ]);
+
+      const metaTxPermitData = generateMetaTxPermit(
+        await getChainId(),
+        funnel.address,
+        name,
+        nonce,
+        contractWallet.address,
+        permitCalldata
+      );
+
+      const metaTxSig = await signPermit(metaTxPermitData, minter);
+
+      await expect(
+        funnel
+          .connect(user3)
+          .executeMetaTransaction(
+            contractWallet.address,
+            permitCalldata,
+            metaTxSig.r,
+            metaTxSig.s,
+            metaTxSig.v
+          )
+      ).to.emit(funnel, "MetaTransactionExecuted");
+
+      expect(
+        await token.allowance(contractWallet.address, user2.address)
+      ).to.equal(getTokenAmount(99));
+    });
+
+    it("executeMetaTransaction() reverts on invalid signer of a contract wallet", async function () {
+      const { token, funnel, user2, user3, contractWallet } = await loadFixture(
+        deployTokenFixture
+      );
+
+      const nonce = await token.nonces(contractWallet.address);
+      const name = await token.name();
+
+      const approvePeriodicCalldata = token.interface.encodeFunctionData(
+        "approve",
+        [
+          user2.address, // spender
+          getTokenAmount(42),
+        ]
+      );
+
+      const metaTxPermitData = generateMetaTxPermit(
+        await getChainId(),
+        funnel.address,
+        name,
+        nonce,
+        contractWallet.address,
+        approvePeriodicCalldata
+      );
+
+      const metaTxSig = await signPermit(metaTxPermitData, user3);
+
+      await expect(
+        funnel
+          .connect(user3)
+          .executeMetaTransaction(
+            contractWallet.address,
+            approvePeriodicCalldata,
+            metaTxSig.r,
+            metaTxSig.s,
+            metaTxSig.v
+          )
+      ).to.be.revertedWith("IERC1271: invalid signature");
+    });
+
+    it("executeMetaTransaction() reverts on invalid signer", async function () {
+      const { token, minter, funnel, user2, user3 } = await loadFixture(
+        deployTokenFixture
+      );
+
+      const nonce = await token.nonces(minter.address);
+      const name = await token.name();
+
+      const approvePeriodicCalldata = token.interface.encodeFunctionData(
+        "approve",
+        [
+          user2.address, // spender
+          getTokenAmount(42),
+        ]
+      );
+
+      const metaTxPermitData = generateMetaTxPermit(
+        await getChainId(),
+        funnel.address,
+        name,
+        nonce,
+        minter.address,
+        approvePeriodicCalldata
+      );
+
+      const metaTxSig = await signPermit(metaTxPermitData, user3);
+
+      await expect(
+        funnel
+          .connect(user3)
+          .executeMetaTransaction(
+            minter.address,
+            approvePeriodicCalldata,
+            metaTxSig.r,
+            metaTxSig.s,
+            metaTxSig.v
+          )
+      ).to.be.revertedWith("EIP712: invalid signature");
+    });
+
+    it("executeMetaTransaction() reverts on invalid nonce", async function () {
+      const { token, minter, funnel, user2, user3 } = await loadFixture(
+        deployTokenFixture
+      );
+
+      const nonce = (await token.nonces(minter.address)).add(1); // invalid nonce
+      const name = await token.name();
+
+      const approvePeriodicCalldata = token.interface.encodeFunctionData(
+        "approve",
+        [
+          user2.address, // spender
+          getTokenAmount(42),
+        ]
+      );
+
+      const metaTxPermitData = generateMetaTxPermit(
+        await getChainId(),
+        funnel.address,
+        name,
+        nonce,
+        minter.address,
+        approvePeriodicCalldata
+      );
+
+      const metaTxSig = await signPermit(metaTxPermitData, user3);
+
+      await expect(
+        funnel
+          .connect(user3)
+          .executeMetaTransaction(
+            minter.address,
+            approvePeriodicCalldata,
+            metaTxSig.r,
+            metaTxSig.s,
+            metaTxSig.v
+          )
+      ).to.be.revertedWith("EIP712: invalid signature");
     });
   });
 });

@@ -3,13 +3,7 @@ pragma solidity ^0.8.15;
 import "openzeppelin-contracts/utils/Context.sol";
 
 abstract contract MetaTxContext is Context {
-    function _msgSender()
-        internal
-        view
-        virtual
-        override
-        returns (address sender)
-    {
+    function _msgSender() internal view virtual override returns (address sender) {
         if (msg.sender == address(this)) {
             bytes memory array = msg.data;
             uint256 index = msg.data.length;

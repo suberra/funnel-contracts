@@ -66,9 +66,7 @@ interface IERC5827 is IERC20, IERC165 {
      * @param _spender allowed spender of token
      * @param _value   allowance given to spender
      */
-    function approve(address _spender, uint256 _value)
-        external
-        returns (bool success);
+    function approve(address _spender, uint256 _value) external returns (bool success);
 
     /*
      * @notice Moves `amount` tokens from `from` to `to` using the

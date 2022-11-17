@@ -1,24 +1,26 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
-import {IFunnel} from "./interfaces/IFunnel.sol";
-import {IERC5827} from "./interfaces/IERC5827.sol";
-import {IERC5827Proxy} from "./interfaces/IERC5827Proxy.sol";
-import {IERC5827Spender} from "./interfaces/IERC5827Spender.sol";
-import {IERC5827Payable} from "./interfaces/IERC5827Payable.sol";
-import {MetaTxContext} from "./lib/MetaTxContext.sol";
-import {Nonces} from "./lib/Nonces.sol";
-import {IERC20} from "openzeppelin-contracts/interfaces/IERC20.sol";
-import {IERC20Metadata} from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
+import { IFunnel } from "./interfaces/IFunnel.sol";
+import { IERC5827 } from "./interfaces/IERC5827.sol";
+import { IERC5827Proxy } from "./interfaces/IERC5827Proxy.sol";
+import { IERC5827Spender } from "./interfaces/IERC5827Spender.sol";
+import { IERC5827Payable } from "./interfaces/IERC5827Payable.sol";
+import { MetaTxContext } from "./lib/MetaTxContext.sol";
+import { Nonces } from "./lib/Nonces.sol";
+import { EIP712 } from "./lib/EIP712.sol";
+import { NativeMetaTransaction } from "./lib/NativeMetaTransaction.sol";
+import { IERC20 } from "openzeppelin-contracts/interfaces/IERC20.sol";
+import { IERC20Metadata } from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
 
-import {Address} from "openzeppelin-contracts/utils/Address.sol";
-import {IERC1363Receiver} from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
-import {IERC1271} from "openzeppelin-contracts/interfaces/IERC1271.sol";
+import { Address } from "openzeppelin-contracts/utils/Address.sol";
+import { IERC1363Receiver } from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
+import { IERC1271 } from "openzeppelin-contracts/interfaces/IERC1271.sol";
 
-import {Strings} from "openzeppelin-contracts/utils/Strings.sol";
-import {Initializable} from "openzeppelin-contracts/proxy/utils/Initializable.sol";
+import { Strings } from "openzeppelin-contracts/utils/Strings.sol";
+import { Initializable } from "openzeppelin-contracts/proxy/utils/Initializable.sol";
 
-contract Funnel is IFunnel, MetaTxContext, Nonces, Initializable {
+contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable {
     /*//////////////////////////////////////////////////////////////
                             EIP-5827 STORAGE
     //////////////////////////////////////////////////////////////*/
@@ -94,7 +96,7 @@ contract Funnel is IFunnel, MetaTxContext, Nonces, Initializable {
             );
     }
 
-    function DOMAIN_SEPARATOR() public view virtual returns (bytes32) {
+    function DOMAIN_SEPARATOR() public view override returns (bytes32) {
         return
             block.chainid == INITIAL_CHAIN_ID
                 ? INITIAL_DOMAIN_SEPARATOR
@@ -117,44 +119,12 @@ contract Funnel is IFunnel, MetaTxContext, Nonces, Initializable {
             nonce = _nonces[owner]++;
         }
 
-        bytes32 digest = keccak256(
-            abi.encodePacked(
-                "\x19\x01",
-                DOMAIN_SEPARATOR(),
-                keccak256(
-                    abi.encode(
-                        PERMIT_TYPEHASH,
-                        owner,
-                        spender,
-                        value,
-                        nonce,
-                        deadline
-                    )
-                )
-            )
+        bytes32 hashStruct = keccak256(
+            abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonce, deadline)
         );
 
-        uint256 size;
-        assembly {
-            size := extcodesize(owner)
-        }
-        if (size > 0) {
-            // Owner is a contract
-            require(
-                IERC1271(owner).isValidSignature(
-                    digest,
-                    abi.encodePacked(r, s, v)
-                ) == IERC1271(owner).isValidSignature.selector,
-                "IERC1271: invalid permit"
-            );
-        } else {
-            address recoveredAddress = ecrecover(digest, v, r, s);
+        _verifySig(owner, hashStruct, v, r, s);
 
-            require(
-                recoveredAddress != address(0) && recoveredAddress == owner,
-                "INVALID_SIGNER"
-            );
-        }
         _approve(owner, spender, value, 0);
     }
 
@@ -175,45 +145,19 @@ contract Funnel is IFunnel, MetaTxContext, Nonces, Initializable {
             nonce = _nonces[owner]++;
         }
 
-        bytes32 digest = keccak256(
-            abi.encodePacked(
-                "\x19\x01",
-                DOMAIN_SEPARATOR(),
-                keccak256(
-                    abi.encode(
-                        PERMIT_RENEWABLE_TYPEHASH,
-                        owner,
-                        spender,
-                        value,
-                        recoveryRate,
-                        nonce,
-                        deadline
-                    )
-                )
+        bytes32 hashStruct = keccak256(
+            abi.encode(
+                PERMIT_RENEWABLE_TYPEHASH,
+                owner,
+                spender,
+                value,
+                recoveryRate,
+                nonce,
+                deadline
             )
         );
 
-        uint256 size;
-        assembly {
-            size := extcodesize(owner)
-        }
-        if (size > 0) {
-            // Owner is a contract
-            require(
-                IERC1271(owner).isValidSignature(
-                    digest,
-                    abi.encodePacked(r, s, v)
-                ) == IERC1271(owner).isValidSignature.selector,
-                "IERC1271: invalid permit"
-            );
-        } else {
-            address recoveredAddress = ecrecover(digest, v, r, s);
-
-            require(
-                recoveredAddress != address(0) && recoveredAddress == owner,
-                "INVALID_SIGNER"
-            );
-        }
+        _verifySig(owner, hashStruct, v, r, s);
 
         _approve(owner, spender, value, recoveryRate);
     }
@@ -275,8 +219,7 @@ contract Funnel is IFunnel, MetaTxContext, Nonces, Initializable {
 
         uint256 recovered = a.recoveryRate * (block.timestamp - a.lastUpdated);
         uint256 remainingAllowance = a.remaining + recovered;
-        return
-            remainingAllowance > a.maxAmount ? a.maxAmount : remainingAllowance;
+        return remainingAllowance > a.maxAmount ? a.maxAmount : remainingAllowance;
     }
 
     /// @notice fetch approved max amount and recovery rate
@@ -302,13 +245,13 @@ contract Funnel is IFunnel, MetaTxContext, Nonces, Initializable {
     ) public returns (bool) {
         uint256 remainingAllowance = _remainingAllowance(from, _msgSender());
         if (remainingAllowance < amount) {
-            revert InsufficientRenewableAllowance({
-                available: remainingAllowance
-            });
+            revert InsufficientRenewableAllowance({ available: remainingAllowance });
         }
 
-        rAllowance[from][_msgSender()].remaining = remainingAllowance - amount;
-        rAllowance[from][_msgSender()].lastUpdated = uint64(block.timestamp);
+        if (remainingAllowance != type(uint256).max) {
+            rAllowance[from][_msgSender()].remaining = remainingAllowance - amount;
+            rAllowance[from][_msgSender()].lastUpdated = uint64(block.timestamp);
+        }
 
         _baseToken.transferFrom(from, to, amount);
         return true;
@@ -367,9 +310,7 @@ contract Funnel is IFunnel, MetaTxContext, Nonces, Initializable {
             return retval == IERC1363Receiver.onTransferReceived.selector;
         } catch (bytes memory reason) {
             if (reason.length == 0) {
-                revert(
-                    "IERC5827Payable: transfer to non IERC1363Receiver implementer"
-                );
+                revert("IERC5827Payable: transfer to non IERC1363Receiver implementer");
             } else {
                 /// @solidity memory-safe-assembly
                 assembly {
@@ -421,13 +362,10 @@ contract Funnel is IFunnel, MetaTxContext, Nonces, Initializable {
                 data
             )
         returns (bytes4 retval) {
-            return
-                retval == IERC5827Spender.onRenewableApprovalReceived.selector;
+            return retval == IERC5827Spender.onRenewableApprovalReceived.selector;
         } catch (bytes memory reason) {
             if (reason.length == 0) {
-                revert(
-                    "IERC5827Payable: approve a non IERC5827Spender implementer"
-                );
+                revert("IERC5827Payable: approve a non IERC5827Spender implementer");
             } else {
                 /// @solidity memory-safe-assembly
                 assembly {
@@ -441,12 +379,7 @@ contract Funnel is IFunnel, MetaTxContext, Nonces, Initializable {
         return address(_baseToken);
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        returns (bool)
-    {
+    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
         return
             interfaceId == type(IERC5827).interfaceId ||
             interfaceId == type(IERC5827Payable).interfaceId ||
@@ -480,14 +413,7 @@ contract Funnel is IFunnel, MetaTxContext, Nonces, Initializable {
 
             // Call the implementation.
             // out and outsize are 0 because we don't know the size yet.
-            let result := staticcall(
-                gas(),
-                implementation,
-                0,
-                calldatasize(),
-                0,
-                0
-            )
+            let result := staticcall(gas(), implementation, 0, calldatasize(), 0, 0)
 
             // Copy the returned data.
             returndatacopy(0, 0, returndatasize())

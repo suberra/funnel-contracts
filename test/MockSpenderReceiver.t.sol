@@ -2,7 +2,7 @@
 pragma solidity ^0.8.15;
 
 import "forge-std/Test.sol";
-import {IERC1363Receiver} from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
+import { IERC1363Receiver } from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
 import "../src/interfaces/IERC5827Spender.sol";
 import "../src/mocks/MockSpenderReceiver.sol";
 
@@ -16,21 +16,17 @@ contract MockSpenderReceiverTest is Test {
     }
 
     function testSupportInterfaceReceiver() public {
-        assertEq(
-            receiver.supportsInterface(
-                IERC1363Receiver.onTransferReceived.selector
-            ),
-            true
+        assertTrue(
+            receiver.supportsInterface(IERC1363Receiver.onTransferReceived.selector)
         );
     }
 
     function testSupportInterfaceSpender() public {
-        assertEq(receiver.supportsInterface(0xb868618d), true);
-        assertEq(
+        assertTrue(receiver.supportsInterface(0xb868618d));
+        assertTrue(
             receiver.supportsInterface(
                 IERC5827Spender.onRenewableApprovalReceived.selector
-            ),
-            true
+            )
         );
     }
 }

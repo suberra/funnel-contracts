@@ -1,15 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.15;
 
-import "forge-std/Test.sol";
+import { TestSetup } from "./TestSetup.sol";
 import "../src/interfaces/IERC5827.sol";
 
-abstract contract ERC5827TestSuite is Test {
-    event Approval(
-        address indexed _owner,
-        address indexed _spender,
-        uint256 _value
-    );
+abstract contract ERC5827TestSuite is TestSetup {
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 
     event RenewableApproval(
         address indexed _owner,
@@ -21,17 +17,6 @@ abstract contract ERC5827TestSuite is Test {
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
 
     IERC5827 public renewableToken;
-
-    address user1;
-    address user2;
-    address user3;
-
-    function setUp() public virtual {
-        user1 = address(0x1111111111111111111111111111111111111111);
-        user2 = address(0x2222222222222222222222222222222222222222);
-        user3 = address(0x3333333333333333333333333333333333333333);
-        vm.prank(user1);
-    }
 
     function testApprove() public {
         // normal approves should still work normally

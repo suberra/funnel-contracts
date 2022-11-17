@@ -5,7 +5,7 @@ import "./interfaces/IFunnelFactory.sol";
 import "./interfaces/IERC5827.sol";
 import "./interfaces/IERC5827Proxy.sol";
 import "./Funnel.sol";
-import {Clones} from "openzeppelin-contracts/proxy/Clones.sol";
+import { Clones } from "openzeppelin-contracts/proxy/Clones.sol";
 
 contract FunnelFactory is IFunnelFactory {
     using Clones for address;
@@ -31,7 +31,7 @@ contract FunnelFactory is IFunnelFactory {
             revert FunnelAlreadyDeployed();
         }
 
-        // TODO: validate ERC20?
+        if (_tokenAddress.code.length == 0) revert InvalidToken();
 
         _funnelAddress = _deployFunnel(_tokenAddress);
         deployments[_tokenAddress] = _funnelAddress;
