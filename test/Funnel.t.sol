@@ -250,6 +250,8 @@ contract FunnelTest is ERC5827TestSuite {
         uint256 privateKey = 0xBEEF;
         address owner = vm.addr(privateKey);
 
+        uint256 timestamp = block.timestamp;
+
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
             privateKey,
             keccak256(
@@ -263,6 +265,35 @@ contract FunnelTest is ERC5827TestSuite {
                             user2,
                             1e18,
                             0,
+                            timestamp
+                        )
+                    )
+                )
+            )
+        );
+
+        funnel.permit(owner, user2, 1e18, timestamp, v, r, s);
+        funnel.permit(owner, user2, 1e18, timestamp, v, r, s);
+    }
+
+    function testPermitRenewable() public {
+        uint256 privateKey = 0xBEEF;
+        address owner = vm.addr(privateKey);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    funnel.DOMAIN_SEPARATOR(),
+                    keccak256(
+                        abi.encode(
+                            PERMIT_RENEWABLE_TYPEHASH,
+                            owner,
+                            user2,
+                            1e18,
+                            1,
+                            0,
                             block.timestamp
                         )
                     )
@@ -270,8 +301,10 @@ contract FunnelTest is ERC5827TestSuite {
             )
         );
 
-        funnel.permit(owner, user2, 1e18, block.timestamp, v, r, s);
-        funnel.permit(owner, user2, 1e18, block.timestamp, v, r, s);
+        funnel.permitRenewable(owner, user2, 1e18, 1, block.timestamp, v, r, s);
+
+        assertEq(funnel.allowance(owner, user2), 1e18);
+        assertEq(funnel.nonces(owner), 1);
     }
 
     function testFailPermitRenewableBadNonce() public {
@@ -370,41 +403,12 @@ contract FunnelTest is ERC5827TestSuite {
         funnel.permitRenewable(owner, user2, 1e18, 1, oldTimestamp, v, r, s);
     }
 
-    function testPermitRenewable() public {
-        uint256 privateKey = 0xBEEF;
-        address owner = vm.addr(privateKey);
-
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
-            privateKey,
-            keccak256(
-                abi.encodePacked(
-                    "\x19\x01",
-                    funnel.DOMAIN_SEPARATOR(),
-                    keccak256(
-                        abi.encode(
-                            PERMIT_RENEWABLE_TYPEHASH,
-                            owner,
-                            user2,
-                            1e18,
-                            1,
-                            0,
-                            block.timestamp
-                        )
-                    )
-                )
-            )
-        );
-
-        funnel.permitRenewable(owner, user2, 1e18, 1, block.timestamp, v, r, s);
-
-        assertEq(funnel.allowance(owner, user2), 1e18);
-        assertEq(funnel.nonces(owner), 1);
-    }
-
     function testFailPermitRenewableReplay() public {
         uint256 privateKey = 0xBEEF;
         address owner = vm.addr(privateKey);
 
+        uint256 timestamp = block.timestamp;
+
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
             privateKey,
             keccak256(
@@ -419,15 +423,15 @@ contract FunnelTest is ERC5827TestSuite {
                             1e18,
                             1,
                             0,
-                            block.timestamp
+                            timestamp
                         )
                     )
                 )
             )
         );
 
-        funnel.permitRenewable(owner, user2, 1e18, 1, block.timestamp, v, r, s);
-        funnel.permitRenewable(owner, user2, 1e18, 1, block.timestamp, v, r, s);
+        funnel.permitRenewable(owner, user2, 1e18, 1, timestamp, v, r, s);
+        funnel.permitRenewable(owner, user2, 1e18, 1, timestamp, v, r, s);
     }
 
     function testExecuteMetaTransactionApproveRenewable() public {
