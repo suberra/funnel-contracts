@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.15;
 
+import {console} from "forge-std/console.sol";
 import "forge-std/Test.sol";
+import "openzeppelin-contracts/proxy/Clones.sol";
 import "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 import "../src/FunnelFactory.sol";
 import "../src/interfaces/IFunnelFactory.sol";
@@ -18,15 +20,22 @@ contract FunnelFactoryTest is Test {
     address user2;
     address user3;
 
+    Funnel implementation;
+
     function setUp() public {
-        funnelFactory = new FunnelFactory();
-        tokenAddress1 = address(0x1111);
-        tokenAddress2 = address(0x2222);
-        tokenAddress3 = address(0x3333);
+        implementation = new Funnel();
+        funnelFactory = new FunnelFactory(address(implementation));
 
         user1 = address(0x1111111111111111111111111111111111111111);
         user2 = address(0x2222222222222222222222222222222222222222);
         user3 = address(0x3333333333333333333333333333333333333333);
+
+        ERC20 t1 = new ERC20PresetFixedSupply("Token 1", "T1", 11111, user1);
+        ERC20 t2 = new ERC20PresetFixedSupply("Token 2", "T2", 11111, user1);
+
+        tokenAddress1 = address(t1);
+        tokenAddress2 = address(t2);
+        tokenAddress3 = address(0x3333);
 
         token = new ERC20PresetFixedSupply(
             "Existing USDC token",
@@ -36,14 +45,30 @@ contract FunnelFactoryTest is Test {
         );
     }
 
+    function calcExpectedAddress(address tokenAddr)
+        public
+        view
+        returns (address hash)
+    {
+        return
+            Clones.predictDeterministicAddress(
+                address(implementation),
+                bytes32(uint256(uint160(tokenAddr))),
+                address(funnelFactory)
+            );
+    }
+
     function testDeployFunnelForToken() public {
         address funnelAddress = funnelFactory.deployFunnelForToken(
             address(token)
         );
+
         assertEq(
             funnelFactory.getFunnelForToken(address(token)),
             funnelAddress
         );
+
+        assertEq(calcExpectedAddress(address(token)), funnelAddress);
     }
 
     function testDeployFunnelForDifferentTokens() public {
@@ -62,7 +87,9 @@ contract FunnelFactoryTest is Test {
             tokenAddress1
         );
 
-        FunnelFactory funnelFactory2 = new FunnelFactory();
+        FunnelFactory funnelFactory2 = new FunnelFactory(
+            address(implementation)
+        );
         address funnelAddress2 = funnelFactory2.deployFunnelForToken(
             tokenAddress1
         );
@@ -71,20 +98,25 @@ contract FunnelFactoryTest is Test {
     }
 
     function testDeployFunnelForTokenRevertsIfAlreadyDeployed() public {
-        funnelFactory.deployFunnelForToken(tokenAddress3);
+        funnelFactory.deployFunnelForToken(tokenAddress2);
 
         vm.expectRevert(IFunnelFactory.FunnelAlreadyDeployed.selector);
-        funnelFactory.deployFunnelForToken(tokenAddress3);
+        funnelFactory.deployFunnelForToken(tokenAddress2);
     }
 
     function testGetFunnelForTokenRevertsIfNotDeployed() public {
         vm.expectRevert(IFunnelFactory.FunnelNotDeployed.selector);
-        funnelFactory.getFunnelForToken(tokenAddress3);
+        funnelFactory.getFunnelForToken(tokenAddress2);
+    }
+
+    function testNoCodeTokenReverts() public {
+        vm.expectRevert(IFunnelFactory.InvalidToken.selector);
+        funnelFactory.deployFunnelForToken(tokenAddress3);
     }
 
     function testIsFunnelTrueForDeployedFunnel() public {
         address funnel = funnelFactory.deployFunnelForToken(address(token));
-        assertEq(funnelFactory.isFunnel(funnel), true);
+        assertTrue(funnelFactory.isFunnel(funnel));
     }
 
     function testIsFunnelFalseForUndeployedFunnel() public {
@@ -94,12 +126,14 @@ contract FunnelFactoryTest is Test {
     function testIsFunnelFalseForDeployedFunnelFromDifferentFactory() public {
         address funnel = funnelFactory.deployFunnelForToken(address(token));
 
-        FunnelFactory funnelFactory2 = new FunnelFactory();
+        FunnelFactory funnelFactory2 = new FunnelFactory(
+            address(implementation)
+        );
         address funnelAddress2 = funnelFactory2.deployFunnelForToken(
             address(token)
         );
 
-        assertEq(funnelFactory.isFunnel(funnel), true);
+        assertTrue(funnelFactory.isFunnel(funnel));
         assertFalse(funnelFactory.isFunnel(funnelAddress2));
     }
 

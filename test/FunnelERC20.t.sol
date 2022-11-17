@@ -21,10 +21,12 @@ contract FunnelERC20Test is ERC20TestSuite {
 
     address minter;
 
-    function mintTokens(
-        address to,
-        uint256 amount
-    ) public virtual override returns (bool success) {
+    function mintTokens(address to, uint256 amount)
+        public
+        virtual
+        override
+        returns (bool success)
+    {
         vm.prank(minter);
         baseToken.mint(to, amount);
     }
@@ -35,12 +37,10 @@ contract FunnelERC20Test is ERC20TestSuite {
         minter = address(0x0123456789012345678901234567890123456789);
 
         vm.prank(minter);
-        baseToken = new ERC20PresetMinterPauser(
-            "Test Base Token",
-            "TEST"
-        );
+        baseToken = new ERC20PresetMinterPauser("Test Base Token", "TEST");
 
-        funnel = new Funnel(baseToken);
+        funnel = new Funnel();
+        funnel.initialize(baseToken);
         token = funnel;
 
         vm.prank(user1);
@@ -54,6 +54,5 @@ contract FunnelERC20Test is ERC20TestSuite {
     }
 
     // not applicable for us
-    function testBalanceOfReflectsSlot(uint256 amount) public override {
-    }
+    function testBalanceOfReflectsSlot(uint256 amount) public override {}
 }
