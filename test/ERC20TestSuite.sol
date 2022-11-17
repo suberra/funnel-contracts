@@ -10,26 +10,30 @@ abstract contract ERC20TestBase is TestSetup {
     uint256 mintAmount = 1e76;
 
     event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
 
     function setUp() public virtual override {
         super.setUp();
         mintTokens(user1, mintAmount);
     }
-    
+
     //////////
     // functions to be overridden
     //////////
 
-    function mintTokens(
-        address to,
-        uint256 amount
-    ) public virtual returns (bool);
+    function mintTokens(address to, uint256 amount)
+        public
+        virtual
+        returns (bool);
 
     //////////
     // util funcs
     //////////
-    
+
     // transfer()
     function transferTokens(
         address from,
@@ -78,7 +82,7 @@ abstract contract ERC20TestBalanceOf is ERC20TestBase {
         assertEq(token.balanceOf(user2), amount);
         assertEq(token.balanceOf(user3), 0);
     }
-        
+
     function testBalanceOfOnMint(uint256 amount) public {
         amount = bound(amount, 0, type(uint256).max / 2);
         uint256 expectedBalance = token.balanceOf(user2) + amount;
@@ -93,11 +97,13 @@ abstract contract ERC20TestBalanceOf is ERC20TestBase {
         testBalanceOfOnMint(type(uint256).max / 2);
     }
 
-    function testBalanceOfOnTransfer(uint256 mintAmount, uint256 transferAmount) public {
+    function testBalanceOfOnTransfer(uint256 mintAmount, uint256 transferAmount)
+        public
+    {
         transferAmount = bound(transferAmount, 0, type(uint256).max / 2);
         mintAmount = bound(mintAmount, transferAmount, type(uint256).max / 2);
         mintTokens(user2, mintAmount);
-        
+
         uint256 expectedBalanceUser1 = token.balanceOf(user1);
         uint256 expectedBalanceUser2 = token.balanceOf(user2) - transferAmount;
         uint256 expectedBalanceUser3 = token.balanceOf(user3) + transferAmount;
@@ -186,10 +192,17 @@ abstract contract ERC20TestApprove is ERC20TestBase {
         assertEq(token.allowance(user1, user3), 0);
     }
 
-    function testApproveWithTransferFuzzing(uint256 approveAmount, uint256 transferAmount) public {
+    function testApproveWithTransferFuzzing(
+        uint256 approveAmount,
+        uint256 transferAmount
+    ) public {
         vm.assume(approveAmount != type(uint256).max);
         transferAmount = bound(transferAmount, 0, mintAmount);
-        approveAmount = bound(approveAmount, transferAmount, type(uint256).max);
+        approveAmount = bound(
+            approveAmount,
+            transferAmount,
+            type(uint256).max - 1
+        );
 
         approveWorksCorrectly(user1, user2, approveAmount);
 
@@ -199,9 +212,7 @@ abstract contract ERC20TestApprove is ERC20TestBase {
         uint256 allowanceAfter = token.allowance(user1, user2);
 
         assertTrue(success);
-        assertTrue(
-            allowanceBefore - allowanceAfter == transferAmount
-        );
+        assertTrue(allowanceBefore - allowanceAfter == transferAmount);
     }
 
     function testApproveMaxWithTransfer() public {
@@ -213,8 +224,8 @@ abstract contract ERC20TestApprove is ERC20TestBase {
 
         assertTrue(success);
         assertTrue(
-            allowanceAfter == type(uint256).max || 
-            allowanceAfter == type(uint256).max - 31337
+            allowanceAfter == type(uint256).max ||
+                allowanceAfter == type(uint256).max - 31337
         );
     }
 
@@ -241,5 +252,5 @@ abstract contract ERC20TestSuite is
     ERC20TestTotalSupply,
     ERC20TestBalanceOf,
     ERC20TestTransfer,
-    ERC20TestApprove {}
-
+    ERC20TestApprove
+{}
