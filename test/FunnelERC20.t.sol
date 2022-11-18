@@ -4,7 +4,7 @@ pragma solidity ^0.8.15;
 import "forge-std/Test.sol";
 import "openzeppelin-contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
 import { IERC20Metadata } from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
-import "../src/Funnel.sol";
+import { Funnel, IFunnel } from "../src/Funnel.sol";
 import { TestSetup, ERC20TestBase, ERC20TestSuite } from "./ERC20TestSuite.sol";
 import "../src/mocks/MockSpenderReceiver.sol";
 
@@ -31,7 +31,7 @@ contract FunnelERC20Test is ERC20TestSuite {
         baseToken = new ERC20PresetMinterPauser("Test Base Token", "TEST");
 
         funnel = new Funnel();
-        funnel.initialize(baseToken);
+        funnel.initialize(address(baseToken));
         token = funnel;
 
         vm.prank(user1);

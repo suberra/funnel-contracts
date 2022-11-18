@@ -10,22 +10,24 @@ import { MetaTxContext } from "./lib/MetaTxContext.sol";
 import { Nonces } from "./lib/Nonces.sol";
 import { EIP712 } from "./lib/EIP712.sol";
 import { NativeMetaTransaction } from "./lib/NativeMetaTransaction.sol";
-import { IERC20 } from "openzeppelin-contracts/interfaces/IERC20.sol";
+import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { IERC20Metadata } from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
 
 import { Address } from "openzeppelin-contracts/utils/Address.sol";
 import { IERC1363Receiver } from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
 import { IERC1271 } from "openzeppelin-contracts/interfaces/IERC1271.sol";
-
+import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 import { Strings } from "openzeppelin-contracts/utils/Strings.sol";
 import { Initializable } from "openzeppelin-contracts/proxy/utils/Initializable.sol";
 
 contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable {
+    using SafeTransferLib for ERC20;
+
     /*//////////////////////////////////////////////////////////////
                             EIP-5827 STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    IERC20 private _baseToken;
+    ERC20 private _baseToken;
 
     struct RenewableAllowance {
         uint256 maxAmount;
@@ -55,8 +57,8 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
             "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
         );
 
-    function initialize(IERC20 _token) public initializer {
-        _baseToken = _token;
+    function initialize(address _token) public initializer {
+        _baseToken = ERC20(_token);
 
         INITIAL_CHAIN_ID = block.chainid;
 
@@ -253,7 +255,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
             rAllowance[from][_msgSender()].lastUpdated = uint64(block.timestamp);
         }
 
-        _baseToken.transferFrom(from, to, amount);
+        _baseToken.safeTransferFrom(from, to, amount);
         return true;
     }
 

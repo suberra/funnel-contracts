@@ -5,7 +5,8 @@ import { console } from "forge-std/console.sol";
 import "forge-std/Test.sol";
 import "openzeppelin-contracts/proxy/Clones.sol";
 import "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
-import "../src/FunnelFactory.sol";
+import { FunnelFactory } from "../src/FunnelFactory.sol";
+import { Funnel } from "../src/Funnel.sol";
 import "../src/interfaces/IFunnelFactory.sol";
 
 contract FunnelFactoryTest is Test {

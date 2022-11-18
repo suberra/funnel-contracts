@@ -46,7 +46,7 @@ contract FunnelFactory is IFunnelFactory {
             bytes32(uint256(uint160(_tokenAddress)))
         );
 
-        Funnel(funnelAddress).initialize(IERC20(_tokenAddress));
+        Funnel(funnelAddress).initialize(_tokenAddress);
 
         return funnelAddress;
     }

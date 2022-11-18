@@ -4,7 +4,7 @@ pragma solidity ^0.8.15;
 import "forge-std/Test.sol";
 import "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 import { IERC20Metadata } from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
-import "../src/Funnel.sol";
+import { Funnel, IFunnel } from "../src/Funnel.sol";
 import "./ERC5827TestSuite.sol";
 import "../src/mocks/MockSpenderReceiver.sol";
 
@@ -42,7 +42,7 @@ contract FunnelTest is ERC5827TestSuite {
         token = new ERC20PresetFixedSupply("Existing USDC token", "USDC", 13370, user1);
 
         funnel = new Funnel();
-        funnel.initialize(token);
+        funnel.initialize(address(token));
         renewableToken = funnel;
 
         spender = new MockSpenderReceiver();
