@@ -183,9 +183,10 @@ abstract contract ERC20TestApprove is ERC20TestBase {
         assertEq(token.allowance(user1, user3), 0);
     }
 
-    function testApproveWithTransferFuzzing(uint256 approveAmount, uint256 transferAmount)
-        public
-    {
+    function testApproveWithTransferFuzzing(
+        uint256 approveAmount,
+        uint256 transferAmount
+    ) public {
         vm.assume(approveAmount != type(uint256).max);
         transferAmount = bound(transferAmount, 0, mintAmount);
         approveAmount = bound(approveAmount, transferAmount, type(uint256).max - 1);
