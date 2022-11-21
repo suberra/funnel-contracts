@@ -14,14 +14,15 @@ interface IERC5827Spender {
      */
 
     /**
-     * @notice Handle the approval of IPeriodicPayable tokens
-     * @dev IPeriodicPayable calls this function on the recipient
+     * @notice Handle the approval of IERC5827Payable tokens
+     * @dev IERC5827Payable calls this function on the recipient
      * after an `approve`. This function MAY throw to revert and reject the
      * approval. Return of other than the magic value MUST result in the
      * transaction being reverted.
      * Note: the token contract address is always the message sender.
      * @param owner address owner of the funds
-     * @param amount uint192 The amount of tokens to be spent
+     * @param amount uint256 The amount of tokens to be spent
+     * @param recoveryRate uint256 The amount of tokens to be spent
      * @param data bytes Additional data with no specified format
      * @return `bytes4(keccak256("onRenewableApprovalReceived(address,uint256,uint256,bytes)"))`
      *  unless throwing
