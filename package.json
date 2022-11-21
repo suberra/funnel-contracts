@@ -2,12 +2,12 @@
   "name": "funnel-contracts",
   "version": "1.0.0",
   "description": "Proxy contracts that enable renewable allowance on existing erc20 tokens",
-  "main": "index.js",
-  "directories": {
-    "lib": "lib",
-    "test": "test"
-  },
+  "files": [
+    "src/**/*.sol",
+    "!src/mocks/**/*"
+  ],
   "scripts": {
+    "lint": "prettier --write src/**/*.sol",
     "test": "forge test && hardhat test"
   },
   "repository": {
@@ -46,7 +46,9 @@
     "solidity-coverage": "^0.7.21",
     "ts-node": ">=8.0.0",
     "typechain": "^8.1.0",
-    "typescript": ">=4.5.0"
+    "typescript": ">=4.5.0",
+    "prettier": "^2.7.1",
+    "prettier-plugin-solidity": "^1.0.0-beta.13"
   },
   "dependencies": {
     "dotenv": "^16.0.3"

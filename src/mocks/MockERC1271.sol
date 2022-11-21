@@ -14,12 +14,10 @@ contract MockERC1271 is IERC1271 {
     /**
      * @notice Verifies that the signer is the owner of the signing contract.
      */
-    function isValidSignature(bytes32 _hash, bytes calldata _signature)
-        external
-        view
-        override
-        returns (bytes4)
-    {
+    function isValidSignature(
+        bytes32 _hash,
+        bytes calldata _signature
+    ) external view override returns (bytes4) {
         // Validate signatures
         if (recoverSigner(_hash, _signature) == owner) {
             return 0x1626ba7e;
@@ -28,15 +26,9 @@ contract MockERC1271 is IERC1271 {
         }
     }
 
-    function splitSignature(bytes memory sig)
-        internal
-        pure
-        returns (
-            uint8,
-            bytes32,
-            bytes32
-        )
-    {
+    function splitSignature(
+        bytes memory sig
+    ) internal pure returns (uint8, bytes32, bytes32) {
         require(sig.length == 65, "invalid signature length");
 
         bytes32 r;
@@ -61,11 +53,10 @@ contract MockERC1271 is IERC1271 {
      * @param _hash       Hash of message that was signed
      * @param _signature  Signature encoded as (bytes32 r, bytes32 s, uint8 v)
      */
-    function recoverSigner(bytes32 _hash, bytes memory _signature)
-        internal
-        pure
-        returns (address signer)
-    {
+    function recoverSigner(
+        bytes32 _hash,
+        bytes memory _signature
+    ) internal pure returns (address signer) {
         uint8 v;
         bytes32 r;
         bytes32 s;
@@ -108,11 +99,7 @@ contract MockERC1271 is IERC1271 {
         return signer;
     }
 
-    function approveToken(
-        IERC20 token,
-        address spender,
-        uint256 amount
-    ) public {
+    function approveToken(IERC20 token, address spender, uint256 amount) public {
         token.approve(spender, amount);
     }
 }
