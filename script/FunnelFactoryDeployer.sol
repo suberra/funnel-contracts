@@ -5,13 +5,12 @@ import "forge-std/Script.sol";
 import "../src/FunnelFactory.sol";
 
 contract FunnelFactoryDeployer is Script {
-    // TODO: use create3 to deploy to stable address across chains
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
-        Funnel implementation = new Funnel();
-        new FunnelFactory(address(implementation));
+        Funnel implementation = new Funnel{ salt: keccak256("Funnel") }();
+        new FunnelFactory{ salt: keccak256("FunnelFactory") }(address(implementation));
 
         vm.stopBroadcast();
     }
