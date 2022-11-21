@@ -7,7 +7,7 @@
     "!src/mocks/**/*"
   ],
   "scripts": {
-    "lint": "prettier --write src/**/*.sol",
+    "lint": "prettier --write 'src/**/*.sol'",
     "test": "forge test && hardhat test"
   },
   "repository": {
@@ -47,8 +47,8 @@
     "ts-node": ">=8.0.0",
     "typechain": "^8.1.0",
     "typescript": ">=4.5.0",
-    "prettier": "^2.7.1",
-    "prettier-plugin-solidity": "^1.0.0-beta.13"
+    "prettier": "^2.3.1",
+    "prettier-plugin-solidity": "1.0.0-beta.17"
   },
   "dependencies": {
     "dotenv": "^16.0.3"

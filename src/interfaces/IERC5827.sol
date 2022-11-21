@@ -55,10 +55,10 @@ interface IERC5827 is IERC20, IERC165 {
      * @return amount initial and maximum allowance given to spender
      * @return recoveryRate recovery amount per second
      */
-    function renewableAllowance(
-        address _owner,
-        address _spender
-    ) external view returns (uint256 amount, uint256 recoveryRate);
+    function renewableAllowance(address _owner, address _spender)
+        external
+        view
+        returns (uint256 amount, uint256 recoveryRate);
 
     /*
      * @notice Grants a (non-increasing) allowance of _value to _spender.
@@ -87,8 +87,8 @@ interface IERC5827 is IERC20, IERC165 {
      * @notice Returns amounts spendable by `_spender`.
      * @return remaining allowance at the current point in time
      */
-    function allowance(
-        address _owner,
-        address _spender
-    ) external view returns (uint256 remaining);
+    function allowance(address _owner, address _spender)
+        external
+        view
+        returns (uint256 remaining);
 }
