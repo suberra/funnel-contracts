@@ -2,11 +2,11 @@
 pragma solidity ^0.8.15;
 
 import "forge-std/Test.sol";
-import "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
+import { ERC20PresetFixedSupply, ERC20 } from "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 import { IERC20Metadata } from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
 import { Funnel, IFunnel } from "../src/Funnel.sol";
-import "./ERC5827TestSuite.sol";
-import "../src/mocks/MockSpenderReceiver.sol";
+import { ERC5827TestSuite } from "./ERC5827TestSuite.sol";
+import { MockSpenderReceiver } from "../src/mocks/MockSpenderReceiver.sol";
 
 contract FunnelTest is ERC5827TestSuite {
     event TransferReceived(address operator, address from, uint256 value);

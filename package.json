@@ -7,7 +7,7 @@
     "!src/mocks/**/*"
   ],
   "scripts": {
-    "lint": "prettier --write 'src/**/*.sol'",
+    "lint": "prettier --write '**/*.sol'",
     "test": "forge test && hardhat test"
   },
   "repository": {

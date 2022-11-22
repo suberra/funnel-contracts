@@ -2,7 +2,7 @@
 pragma solidity ^0.8.15;
 
 import { IERC1363Receiver } from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
-import "../interfaces/IERC5827Spender.sol";
+import { IERC5827Spender } from "../interfaces/IERC5827Spender.sol";
 
 contract MockSpenderReceiver is IERC1363Receiver, IERC5827Spender {
     event TransferReceived(address operator, address from, uint256 value);

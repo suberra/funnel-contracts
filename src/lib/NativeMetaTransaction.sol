@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 import { EIP712 } from "./EIP712.sol";
-import "./Nonces.sol";
+import { Nonces } from "./Nonces.sol";
 
 abstract contract NativeMetaTransaction is EIP712, Nonces {
     // keccak256("MetaTransaction(uint256 nonce,address from,bytes functionSignature)")

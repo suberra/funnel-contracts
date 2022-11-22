@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
-import "./interfaces/IFunnelFactory.sol";
-import "./interfaces/IERC5827.sol";
-import "./interfaces/IERC5827Proxy.sol";
-import "./Funnel.sol";
+import { IFunnelFactory } from "./interfaces/IFunnelFactory.sol";
+import { IERC5827 } from "./interfaces/IERC5827.sol";
+import { IERC5827Proxy } from "./interfaces/IERC5827Proxy.sol";
+import { Funnel } from "./Funnel.sol";
 import { Clones } from "openzeppelin-contracts/proxy/Clones.sol";
 
 contract FunnelFactory is IFunnelFactory {
