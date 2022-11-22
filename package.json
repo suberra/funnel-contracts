@@ -1,6 +1,6 @@
 {
   "name": "funnel-contracts",
-  "version": "1.0.0",
+  "version": "0.1.1-alpha",
   "description": "Proxy contracts that enable renewable allowance on existing erc20 tokens",
   "files": [
     "src/**/*.sol",
