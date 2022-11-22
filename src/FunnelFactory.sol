@@ -74,10 +74,11 @@ contract FunnelFactory is IFunnelFactory {
         // Not a deployed contract
         if (_funnelAddress.code.length == 0) return false;
 
-        address baseToken = IERC5827Proxy(_funnelAddress).baseToken();
-
-        if (baseToken == address(0)) return false;
-
-        return _funnelAddress == getFunnelForToken(baseToken);
+        try IERC5827Proxy(_funnelAddress).baseToken() returns (address baseToken) {
+            if (baseToken == address(0)) return false;
+            return _funnelAddress == getFunnelForToken(baseToken);
+        } catch {
+            return false;
+        }
     }
 }
