@@ -1,6 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
+import { ERC20 } from "solmate/tokens/ERC20.sol";
+import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
+import { IERC20Metadata } from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
+import { Address } from "openzeppelin-contracts/utils/Address.sol";
+import { IERC1363Receiver } from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
+import { IERC1271 } from "openzeppelin-contracts/interfaces/IERC1271.sol";
+import { Strings } from "openzeppelin-contracts/utils/Strings.sol";
+import { Initializable } from "openzeppelin-contracts/proxy/utils/Initializable.sol";
+
 import { IFunnel } from "./interfaces/IFunnel.sol";
 import { IERC5827 } from "./interfaces/IERC5827.sol";
 import { IERC5827Proxy } from "./interfaces/IERC5827Proxy.sol";
@@ -10,15 +19,6 @@ import { MetaTxContext } from "./lib/MetaTxContext.sol";
 import { Nonces } from "./lib/Nonces.sol";
 import { EIP712 } from "./lib/EIP712.sol";
 import { NativeMetaTransaction } from "./lib/NativeMetaTransaction.sol";
-import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { IERC20Metadata } from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
-
-import { Address } from "openzeppelin-contracts/utils/Address.sol";
-import { IERC1363Receiver } from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
-import { IERC1271 } from "openzeppelin-contracts/interfaces/IERC1271.sol";
-import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
-import { Strings } from "openzeppelin-contracts/utils/Strings.sol";
-import { Initializable } from "openzeppelin-contracts/proxy/utils/Initializable.sol";
 
 contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable {
     using SafeTransferLib for ERC20;

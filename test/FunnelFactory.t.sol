@@ -3,11 +3,11 @@ pragma solidity ^0.8.15;
 
 import { console } from "forge-std/console.sol";
 import "forge-std/Test.sol";
-import "openzeppelin-contracts/proxy/Clones.sol";
-import "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
+import { ERC20PresetFixedSupply, ERC20 } from "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 import { FunnelFactory } from "../src/FunnelFactory.sol";
 import { Funnel } from "../src/Funnel.sol";
-import "../src/interfaces/IFunnelFactory.sol";
+import { IFunnelFactory } from "../src/interfaces/IFunnelFactory.sol";
+import { Clones } from "openzeppelin-contracts/proxy/Clones.sol";
 
 contract FunnelFactoryTest is Test {
     FunnelFactory funnelFactory;

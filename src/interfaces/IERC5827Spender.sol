@@ -21,8 +21,8 @@ interface IERC5827Spender {
      * transaction being reverted.
      * Note: the token contract address is always the message sender.
      * @param owner address owner of the funds
-     * @param amount uint256 The amount of tokens to be spent
-     * @param recoveryRate uint256 The amount of tokens to be spent
+     * @param amount uint256 The initial and maximum amount of tokens to be spent
+     * @param recoveryRate uint256 amount recovered per second
      * @param data bytes Additional data with no specified format
      * @return `bytes4(keccak256("onRenewableApprovalReceived(address,uint256,uint256,bytes)"))`
      *  unless throwing
