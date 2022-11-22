@@ -100,6 +100,10 @@ contract FunnelFactoryTest is Test {
         assertFalse(funnelFactory.isFunnel(address(0x1234)));
     }
 
+    function testIsFunnelFalseForNonFunnel() public {
+        assertFalse(funnelFactory.isFunnel(address(token)));
+    }
+
     function testIsFunnelFalseForDeployedFunnelFromDifferentFactory() public {
         address funnel = funnelFactory.deployFunnelForToken(address(token));
 
