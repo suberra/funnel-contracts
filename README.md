@@ -62,15 +62,17 @@ Deploy to local fork
 
 Deploy factory to goerli
 
-`forge script script/FunnelFactoryDeployer.sol:FunnelFactoryDeployer --rpc-url $GOERLI_RPC_URL --broadcast`  
+`forge script script/FunnelFactoryDeployer.sol:FunnelFactoryDeployer --rpc-url $GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY`  
+
+Note: Deployment addresses are dependent on deployer's private key, FunnelFactory bytecode and salt used. Multiple deployments will fail.
 
 # Deployments
 
 | Network | Contract      | Address                                    |
 | ------- | ------------- | ------------------------------------------ |
-| Goerli  | Funnel (impl) | 0x962050e8ea6b07b58e761646bfd4848c5af53d50 |
-| Goerli  | FunnelFactory | 0xae322b3564ae7f4d72be7fa33c9e307d21358ae0 |
-| Goerli  | USDC (funnel) | 0x1f87877f29E5FB0BBDdfB702B710Dc6c3501302c |
+| Goerli  | Funnel (impl) | 0x3B1bbB0756250Bd981EEC8C02801d06ad5F86B75 |
+| Goerli  | FunnelFactory | 0xDd3e9D430D0681Eaa833DbD6B186E7f031f71837 |
+| Goerli  | USDC (funnel) | 0x3d5499808F8082d239a62B5c4876B6ffD23526d5 |
 
 
 # License 

@@ -2,6 +2,7 @@
 src = 'src'
 out = 'out'
 libs = ['lib']
+extra_output_files = ['metadata']
 
 [rpc_endpoints]
 goerli = "${GOERLI_RPC_URL}"

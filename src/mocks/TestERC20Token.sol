@@ -21,4 +21,8 @@ contract TestERC20Token is ERC20Permit {
     function burn(address from, uint256 amount) public {
         _burn(from, amount);
     }
+
+    function version() public pure returns (string memory) {
+        return "1";
+    }
 }
