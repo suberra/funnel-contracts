@@ -9,7 +9,7 @@ abstract contract NativeMetaTransaction is EIP712, Nonces {
         0x23d10def3caacba2e4042e0c75d44a42d2558aabcf5ce951d0642a8032e1e653;
 
     event MetaTransactionExecuted(
-        address userAddress,
+        address indexed userAddress,
         address payable relayerAddress,
         bytes functionSignature
     );

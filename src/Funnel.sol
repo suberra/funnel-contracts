@@ -3,10 +3,8 @@ pragma solidity ^0.8.15;
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
-import { IERC20Metadata } from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
 import { Address } from "openzeppelin-contracts/utils/Address.sol";
 import { IERC1363Receiver } from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
-import { IERC1271 } from "openzeppelin-contracts/interfaces/IERC1271.sol";
 import { Strings } from "openzeppelin-contracts/utils/Strings.sol";
 import { Initializable } from "openzeppelin-contracts/proxy/utils/Initializable.sol";
 
@@ -16,8 +14,6 @@ import { IERC5827Proxy } from "./interfaces/IERC5827Proxy.sol";
 import { IERC5827Spender } from "./interfaces/IERC5827Spender.sol";
 import { IERC5827Payable } from "./interfaces/IERC5827Payable.sol";
 import { MetaTxContext } from "./lib/MetaTxContext.sol";
-import { Nonces } from "./lib/Nonces.sol";
-import { EIP712 } from "./lib/EIP712.sol";
 import { NativeMetaTransaction } from "./lib/NativeMetaTransaction.sol";
 
 contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable {
@@ -47,12 +43,12 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
 
     bytes32 internal INITIAL_DOMAIN_SEPARATOR;
 
-    bytes32 internal immutable PERMIT_RENEWABLE_TYPEHASH =
+    bytes32 internal constant PERMIT_RENEWABLE_TYPEHASH =
         keccak256(
             "PermitRenewable(address owner,address spender,uint256 value,uint256 recoveryRate,uint256 nonce,uint256 deadline)"
         );
 
-    bytes32 internal immutable PERMIT_TYPEHASH =
+    bytes32 internal constant PERMIT_TYPEHASH =
         keccak256(
             "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
         );
@@ -166,7 +162,6 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
 
     function approve(address _spender, uint256 _value)
         public
-        override
         returns (bool success)
     {
         _approve(_msgSender(), _spender, _value, 0);
@@ -381,7 +376,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         return address(_baseToken);
     }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public pure returns (bool) {
         return
             interfaceId == type(IERC5827).interfaceId ||
             interfaceId == type(IERC5827Payable).interfaceId ||
