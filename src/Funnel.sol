@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
-import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 import { Address } from "openzeppelin-contracts/utils/Address.sol";
 import { IERC1363Receiver } from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
 import { Strings } from "openzeppelin-contracts/utils/Strings.sol";
 import { Initializable } from "openzeppelin-contracts/proxy/utils/Initializable.sol";
 
 import { IFunnel } from "./interfaces/IFunnel.sol";
+import { IERC20 } from 'openzeppelin-contracts/token/ERC20/IERC20.sol';
+import { SafeERC20 } from 'openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol';
 import { IERC5827 } from "./interfaces/IERC5827.sol";
 import { IERC5827Proxy } from "./interfaces/IERC5827Proxy.sol";
 import { IERC5827Spender } from "./interfaces/IERC5827Spender.sol";
@@ -17,13 +17,13 @@ import { MetaTxContext } from "./lib/MetaTxContext.sol";
 import { NativeMetaTransaction } from "./lib/NativeMetaTransaction.sol";
 
 contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable {
-    using SafeTransferLib for ERC20;
+    using SafeERC20 for IERC20;
 
     /*//////////////////////////////////////////////////////////////
                             EIP-5827 STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    ERC20 private _baseToken;
+    IERC20 private _baseToken;
 
     struct RenewableAllowance {
         uint256 maxAmount;
@@ -54,7 +54,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         );
 
     function initialize(address _token) public initializer {
-        _baseToken = ERC20(_token);
+        _baseToken = IERC20(_token);
 
         INITIAL_CHAIN_ID = block.chainid;
 
@@ -393,7 +393,8 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     }
 
     function transfer(address to, uint256 amount) external returns (bool) {
-        return _baseToken.transferFrom(_msgSender(), to, amount);
+        _baseToken.safeTransferFrom(_msgSender(), to, amount);
+        return true;
     }
 
     fallback() external {
