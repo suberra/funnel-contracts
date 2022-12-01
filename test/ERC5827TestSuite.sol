@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity 0.8.17;
 
 import { TestSetup } from "./TestSetup.sol";
 import { IERC5827 } from "../src/interfaces/IERC5827.sol";

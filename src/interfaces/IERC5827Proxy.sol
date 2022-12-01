@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: CC0-1.0
-pragma solidity 0.8.18;
+pragma solidity 0.8.17;
 
 interface IERC5827Proxy {
     /*

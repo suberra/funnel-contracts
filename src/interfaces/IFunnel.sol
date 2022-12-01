@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity 0.8.17;
 
 import { IERC5827 } from "./IERC5827.sol";
 import { IERC5827Payable } from "./IERC5827Payable.sol";
