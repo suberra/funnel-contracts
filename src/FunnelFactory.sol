@@ -15,6 +15,7 @@ contract FunnelFactory is IFunnelFactory {
     address public funnelImplementation;
 
     constructor(address _funnelImplementation) {
+        require(_funnelImplementation != address(0));
         funnelImplementation = _funnelImplementation;
     }
 
@@ -24,7 +25,7 @@ contract FunnelFactory is IFunnelFactory {
      */
     function deployFunnelForToken(
         address _tokenAddress
-    ) public returns (address _funnelAddress) {
+    ) external returns (address _funnelAddress) {
         if (deployments[_tokenAddress] != address(0)) {
             revert FunnelAlreadyDeployed();
         }
@@ -68,7 +69,7 @@ contract FunnelFactory is IFunnelFactory {
     /**
      * @dev Returns true if contract address is a deployed Funnel contract
      */
-    function isFunnel(address _funnelAddress) public view returns (bool) {
+    function isFunnel(address _funnelAddress) external view returns (bool) {
         // Not a deployed contract
         if (_funnelAddress.code.length == 0) return false;
 

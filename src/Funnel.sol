@@ -53,7 +53,8 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
             "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
         );
 
-    function initialize(address _token) public initializer {
+    function initialize(address _token) external initializer {
+        require(_token != address(0));
         _baseToken = IERC20(_token);
 
         INITIAL_CHAIN_ID = block.chainid;
@@ -109,7 +110,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) public virtual {
+    ) external virtual {
         require(deadline >= block.timestamp, "PERMIT_DEADLINE_EXPIRED");
 
         uint256 nonce;
@@ -135,7 +136,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) public virtual {
+    ) external virtual {
         require(deadline >= block.timestamp, "PERMIT_DEADLINE_EXPIRED");
 
         uint256 nonce;
@@ -161,7 +162,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     }
 
     function approve(address _spender, uint256 _value)
-        public
+        external
         returns (bool success)
     {
         _approve(_msgSender(), _spender, _value, 0);
@@ -172,7 +173,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         address _spender,
         uint256 _value,
         uint256 _recoveryRate
-    ) public returns (bool success) {
+    ) external returns (bool success) {
         _approve(_msgSender(), _spender, _value, _recoveryRate);
         return true;
     }
@@ -223,7 +224,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     /// @return amount initial and maximum allowance given to spender
     /// @return recoveryRate recovery amount per second
     function renewableAllowance(address _owner, address _spender)
-        public
+        external
         view
         returns (uint256 amount, uint256 recoveryRate)
     {
@@ -376,7 +377,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         return address(_baseToken);
     }
 
-    function supportsInterface(bytes4 interfaceId) public pure returns (bool) {
+    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
         return
             interfaceId == type(IERC5827).interfaceId ||
             interfaceId == type(IERC5827Payable).interfaceId ||
