@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.15;
+pragma solidity 0.8.18;
 
 import { IFunnelFactory } from "./interfaces/IFunnelFactory.sol";
 import { IERC5827Proxy } from "./interfaces/IERC5827Proxy.sol";
@@ -71,10 +71,14 @@ contract FunnelFactory is IFunnelFactory {
      */
     function isFunnel(address _funnelAddress) external view returns (bool) {
         // Not a deployed contract
-        if (_funnelAddress.code.length == 0) return false;
+        if (_funnelAddress.code.length == 0) {
+            return false;
+        }
 
         try IERC5827Proxy(_funnelAddress).baseToken() returns (address baseToken) {
-            if (baseToken == address(0)) return false;
+            if (baseToken == address(0)) {
+                return false;
+            }
             return _funnelAddress == getFunnelForToken(baseToken);
         } catch {
             return false;

@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.15;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.18;
 
 import { IERC1363Receiver } from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
 import { IERC5827Spender } from "../interfaces/IERC5827Spender.sol";
