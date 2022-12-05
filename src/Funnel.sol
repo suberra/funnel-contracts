@@ -5,10 +5,10 @@ import { Address } from "openzeppelin-contracts/utils/Address.sol";
 import { IERC1363Receiver } from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
 import { Strings } from "openzeppelin-contracts/utils/Strings.sol";
 import { Initializable } from "openzeppelin-contracts/proxy/utils/Initializable.sol";
+import { IERC20 } from "openzeppelin-contracts/token/ERC20/IERC20.sol";
+import { SafeERC20 } from "openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
 
 import { IFunnel } from "./interfaces/IFunnel.sol";
-import { IERC20 } from 'openzeppelin-contracts/token/ERC20/IERC20.sol';
-import { SafeERC20 } from 'openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol';
 import { IERC5827 } from "./interfaces/IERC5827.sol";
 import { IERC5827Proxy } from "./interfaces/IERC5827Proxy.sol";
 import { IERC5827Spender } from "./interfaces/IERC5827Spender.sol";
@@ -161,10 +161,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         _approve(owner, spender, value, recoveryRate);
     }
 
-    function approve(address _spender, uint256 _value)
-        external
-        returns (bool success)
-    {
+    function approve(address _spender, uint256 _value) external returns (bool success) {
         _approve(_msgSender(), _spender, _value, 0);
         return true;
     }
@@ -292,7 +289,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         address recipient,
         uint256 value,
         bytes memory data
-    ) internal virtual returns (bool) {
+    ) internal returns (bool) {
         if (!Address.isContract(recipient)) {
             revert("IERC5827Payable: transfer to non contract address");
         }
@@ -347,7 +344,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         uint256 _value,
         uint256 _recoveryRate,
         bytes memory data
-    ) internal virtual returns (bool) {
+    ) internal returns (bool) {
         if (!Address.isContract(_spender)) {
             revert("IERC5827Payable: approve a non contract address");
         }
@@ -377,7 +374,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         return address(_baseToken);
     }
 
-    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
+    function supportsInterface(bytes4 interfaceId) external pure virtual returns (bool) {
         return
             interfaceId == type(IERC5827).interfaceId ||
             interfaceId == type(IERC5827Payable).interfaceId ||

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.15;
+pragma solidity 0.8.17;
 import { EIP712 } from "./EIP712.sol";
 import { Nonces } from "./Nonces.sol";
 
