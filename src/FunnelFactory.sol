@@ -23,9 +23,10 @@ contract FunnelFactory is IFunnelFactory {
      * @dev Deploys a new Funnel contract
      * Throws if `_tokenAddress` has already been deployed
      */
-    function deployFunnelForToken(
-        address _tokenAddress
-    ) external returns (address _funnelAddress) {
+    function deployFunnelForToken(address _tokenAddress)
+        external
+        returns (address _funnelAddress)
+    {
         if (deployments[_tokenAddress] != address(0)) {
             revert FunnelAlreadyDeployed();
         }
@@ -34,31 +35,24 @@ contract FunnelFactory is IFunnelFactory {
             revert InvalidToken();
         }
 
-        _funnelAddress = _deployFunnel(_tokenAddress);
-        deployments[_tokenAddress] = _funnelAddress;
-        emit DeployedFunnel(_tokenAddress, _funnelAddress);
-    }
-
-    /**
-     * @dev Deploys a funnel contract to an address dependent on token and factory addresses
-     */
-    function _deployFunnel(address _tokenAddress) internal returns (address) {
-        address funnelAddress = funnelImplementation.cloneDeterministic(
+        _funnelAddress = funnelImplementation.cloneDeterministic(
             bytes32(uint256(uint160(_tokenAddress)))
         );
 
-        Funnel(funnelAddress).initialize(_tokenAddress);
-
-        return funnelAddress;
+        deployments[_tokenAddress] = _funnelAddress;
+        Funnel(_funnelAddress).initialize(_tokenAddress);
+        emit DeployedFunnel(_tokenAddress, _funnelAddress);
     }
 
     /**
      * @dev Returns the Funnel contract address for a given token address
      * Reverts with FunnelNotDeployed if `_tokenAddress` has not been deployed
      */
-    function getFunnelForToken(
-        address _tokenAddress
-    ) public view returns (address _funnelAddress) {
+    function getFunnelForToken(address _tokenAddress)
+        public
+        view
+        returns (address _funnelAddress)
+    {
         if (deployments[_tokenAddress] == address(0)) {
             revert FunnelNotDeployed();
         }
