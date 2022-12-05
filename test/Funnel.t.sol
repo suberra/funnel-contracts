@@ -62,6 +62,15 @@ contract FunnelTest is ERC5827TestSuite {
         funnel.approveRenewable(user2, 100, 101);
     }
 
+    function testBaseTokenAllowance() public {
+        vm.startPrank(user1);
+        token.approve(address(funnel), 100);
+        assertEq(token.allowance(user1, address(funnel)), 100);
+
+        funnel.approveRenewable(address(spender), type(uint256).max, 1);
+        assertEq(funnel.allowance(user1, address(spender)), 100); // reflects base token allowance
+    }
+
     function testInfiniteApproveTransferFrom() public {
         vm.prank(user1);
         funnel.approve(address(this), type(uint256).max);

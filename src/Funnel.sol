@@ -205,16 +205,20 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         return _remainingAllowance(_owner, _spender);
     }
 
+    // @notice fetch remaining allowance between _owner and _spender while accounting for base token allowance.
     function _remainingAllowance(address _owner, address _spender)
         private
         view
         returns (uint256)
     {
         RenewableAllowance memory a = rAllowance[_owner][_spender];
-
+        uint256 baseAllowance = _baseToken.allowance(_owner, address(this));
         uint256 recovered = a.recoveryRate * (block.timestamp - a.lastUpdated);
         uint256 remainingAllowance = a.remaining + recovered;
-        return remainingAllowance > a.maxAmount ? a.maxAmount : remainingAllowance;
+        uint256 currentAllowance = remainingAllowance > a.maxAmount
+            ? a.maxAmount
+            : remainingAllowance;
+        return currentAllowance > baseAllowance ? baseAllowance : currentAllowance;
     }
 
     /// @notice fetch approved max amount and recovery rate
