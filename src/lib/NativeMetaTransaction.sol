@@ -40,7 +40,7 @@ abstract contract NativeMetaTransaction is EIP712, Nonces {
 
         _verifyMetaTx(userAddress, metaTx, sigV, sigR, sigS);
 
-        // Append userAddress and relayer address at the end to extract it from calling context
+        // Appends userAddress at the end to extract it from calling context
         // solhint-disable-next-line avoid-low-level-calls
         (bool success, bytes memory returnData) = address(this).call(
             abi.encodePacked(functionSignature, userAddress)
