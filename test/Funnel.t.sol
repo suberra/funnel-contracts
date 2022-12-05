@@ -143,6 +143,16 @@ contract FunnelTest is ERC5827TestSuite {
         assertEq(token.balanceOf(user3), type(uint256).max);
     }
 
+    function testRecoveryRateCasting() public {
+        vm.prank(user1);
+        funnel.approveRenewable(user2, type(uint256).max, type(uint256).max);
+
+        (uint256 initial, uint256 recoveryRate) = funnel.renewableAllowance(user1, user2);
+
+        assertEq(initial, type(uint256).max);
+        assertEq(recoveryRate, type(uint192).max);
+    }
+
     function testTransferFromAndCallRevertNonContract() public {
         vm.prank(user1);
         funnel.approveRenewable(user2, 1337, 1);
