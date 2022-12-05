@@ -39,7 +39,12 @@ contract FunnelTest is ERC5827TestSuite {
         user2 = address(0xCAFE);
         user3 = address(0xDEAD);
 
-        token = new ERC20PresetFixedSupply("Existing USDC token", "USDC", 13370, user1);
+        token = new ERC20PresetFixedSupply(
+            "Existing USDC token",
+            "USDC",
+            type(uint256).max,
+            user1
+        );
 
         funnel = new Funnel();
         funnel.initialize(address(token));
@@ -79,7 +84,7 @@ contract FunnelTest is ERC5827TestSuite {
 
         assertEq(funnel.allowance(user1, address(this)), type(uint256).max);
 
-        assertEq(funnel.balanceOf(user1), 0);
+        assertEq(funnel.balanceOf(user1), type(uint256).max - 13370);
         assertEq(funnel.balanceOf(user2), 13370);
     }
 
@@ -91,6 +96,51 @@ contract FunnelTest is ERC5827TestSuite {
         vm.expectEmit(true, false, false, true);
         emit TransferReceived(user2, user1, 10);
         assertTrue(funnel.transferFromAndCall(user1, address(spender), 10, ""));
+    }
+
+    function testOverflow() public {
+        vm.prank(user1);
+        funnel.approveRenewable(
+            address(user2),
+            type(uint256).max - type(uint192).max + 1,
+            type(uint192).max
+        );
+        vm.warp(2);
+        vm.prank(user2);
+        vm.expectEmit(true, false, false, true);
+        emit Transfer(user1, user2, type(uint256).max - type(uint192).max + 1);
+        assertTrue(
+            funnel.transferFrom(user1, user3, type(uint256).max - type(uint192).max + 1)
+        );
+        assertEq(token.balanceOf(user3), type(uint256).max - type(uint192).max + 1);
+    }
+
+    function testOverflow2() public {
+        vm.prank(user1);
+        funnel.approveRenewable(
+            user2,
+            type(uint256).max - type(uint64).max + 1,
+            type(uint64).max
+        );
+        vm.warp(2);
+        vm.prank(user2);
+        vm.expectEmit(true, false, false, true);
+        emit Transfer(user1, user2, type(uint256).max - type(uint64).max + 1);
+        assertTrue(
+            funnel.transferFrom(user1, user3, type(uint256).max - type(uint64).max + 1)
+        );
+        assertEq(token.balanceOf(user3), type(uint256).max - type(uint64).max + 1);
+    }
+
+    function testOverflow3() public {
+        vm.prank(user1);
+        funnel.approveRenewable(user2, type(uint256).max, type(uint64).max);
+        vm.warp(2);
+        vm.prank(user2);
+        vm.expectEmit(true, false, false, true);
+        emit Transfer(user1, user2, type(uint256).max);
+        assertTrue(funnel.transferFrom(user1, user3, type(uint256).max));
+        assertEq(token.balanceOf(user3), type(uint256).max);
     }
 
     function testTransferFromAndCallRevertNonContract() public {

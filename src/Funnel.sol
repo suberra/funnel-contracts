@@ -213,8 +213,8 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     {
         RenewableAllowance memory a = rAllowance[_owner][_spender];
         uint256 baseAllowance = _baseToken.allowance(_owner, address(this));
-        uint256 recovered = a.recoveryRate * (block.timestamp - a.lastUpdated);
-        uint256 remainingAllowance = a.remaining + recovered;
+        uint256 recovered = a.recoveryRate * uint64(block.timestamp - a.lastUpdated); // uint192 * uint64 = uint256
+        uint256 remainingAllowance = a.remaining + recovered; // uint256 + uint256 potential overflow
         uint256 currentAllowance = remainingAllowance > a.maxAmount
             ? a.maxAmount
             : remainingAllowance;
