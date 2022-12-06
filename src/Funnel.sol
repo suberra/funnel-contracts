@@ -198,7 +198,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     /// @notice fetch amounts spendable by _spender
     /// @return remaining allowance at the current point in time
     function allowance(address _owner, address _spender)
-        public
+        external
         view
         returns (uint256 remaining)
     {
