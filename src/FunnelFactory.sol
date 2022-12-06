@@ -15,7 +15,7 @@ contract FunnelFactory is IFunnelFactory {
     address public funnelImplementation;
 
     constructor(address _funnelImplementation) {
-        require(_funnelImplementation != address(0));
+        require(_funnelImplementation != address(0), "implementation cannot be zero");
         funnelImplementation = _funnelImplementation;
     }
 

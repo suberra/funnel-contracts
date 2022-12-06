@@ -54,7 +54,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         );
 
     function initialize(address _token) external initializer {
-        require(_token != address(0));
+        require(_token != address(0), "token address cannot be 0");
         _baseToken = IERC20(_token);
 
         INITIAL_CHAIN_ID = block.chainid;
