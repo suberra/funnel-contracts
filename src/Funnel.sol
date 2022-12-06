@@ -110,7 +110,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external virtual {
+    ) external {
         require(deadline >= block.timestamp, "PERMIT_DEADLINE_EXPIRED");
 
         uint256 nonce;
@@ -136,7 +136,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external virtual {
+    ) external {
         require(deadline >= block.timestamp, "PERMIT_DEADLINE_EXPIRED");
 
         uint256 nonce;
