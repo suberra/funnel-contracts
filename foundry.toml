@@ -3,9 +3,13 @@ src = 'src'
 out = 'out'
 libs = ['lib']
 extra_output_files = ['metadata']
+gas_reports = ["Funnel", "FunnelFactory"]
 
 [rpc_endpoints]
 goerli = "${GOERLI_RPC_URL}"
+polygon = "${POLYGON_RPC_URL}"
+avalanche = "${AVAX_RPC_URL}"
+arbitrum = "${ARBITRUM_RPC_URL}"
 
 [etherscan]
 goerli = { key = "${ETHERSCAN_API_KEY}" }
