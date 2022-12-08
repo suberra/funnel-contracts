@@ -66,6 +66,13 @@ Deploy factory to goerli
 
 Note: Deployment addresses are dependent on deployer's private key, FunnelFactory bytecode and salt used. Multiple deployments will fail.
 
+## Misc 
+
+Run prettier to format the code
+```sh
+npx prettier --write 'src/**/*.sol'  
+```
+
 # Deployments
 
 | Network | Contract      | Address                                    |

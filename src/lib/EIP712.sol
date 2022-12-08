@@ -3,15 +3,14 @@ pragma solidity 0.8.17;
 import { IERC1271 } from "openzeppelin-contracts/interfaces/IERC1271.sol";
 
 abstract contract EIP712 {
-
-    /// DOMAIN_SEPARATOR should be unique to the contract and chain to prevent replay attacks from 
+    /// DOMAIN_SEPARATOR should be unique to the contract and chain to prevent replay attacks from
     /// other domains, and satisfy the requirements of EIP-712
     function DOMAIN_SEPARATOR() public view virtual returns (bytes32);
 
-     /// Checks if signer's signature matches the data
-     /// @param signer address of the signer
-     /// @param hashStruct hash of the typehash & abi encoded data, see https://eips.ethereum.org/EIPS/eip-712#definition-of-hashstruct[hashed struct]
-     /// @return bool true if the signature is valid, false otherwise
+    /// @notice Checks if signer's signature matches the data
+    /// @param signer address of the signer
+    /// @param hashStruct hash of the typehash & abi encoded data, see https://eips.ethereum.org/EIPS/eip-712#definition-of-hashstruct[hashed struct]
+    /// @return bool true if the signature is valid, false otherwise
     function _verifySig(
         address signer,
         bytes32 hashStruct,
@@ -24,9 +23,7 @@ abstract contract EIP712 {
             size := extcodesize(signer)
         }
 
-        bytes32 digest = keccak256(
-            abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR(), hashStruct)
-        );
+        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR(), hashStruct));
 
         if (size > 0) {
             // signer is a contract
@@ -39,10 +36,7 @@ abstract contract EIP712 {
             // EOA signer
             address recoveredAddress = ecrecover(digest, v, r, s);
 
-            require(
-                recoveredAddress != address(0) && recoveredAddress == signer,
-                "EIP712: invalid signature"
-            );
+            require(recoveredAddress != address(0) && recoveredAddress == signer, "EIP712: invalid signature");
         }
 
         return true;

@@ -2,12 +2,13 @@
 pragma solidity 0.8.17;
 
 abstract contract Nonces {
+    /// mapping between the user and the nonce of the account
     mapping(address => uint256) internal _nonces;
 
     /// @notice Nonces for permit / meta-transactions
     /// @param owner Token owner's address
-    /// @return Next nonce
-    function nonces(address owner) external view returns (uint256) {
+    /// @return nextNonce Next nonce for the owner
+    function nonces(address owner) external view returns (uint256 nextNonce) {
         return _nonces[owner];
     }
 }

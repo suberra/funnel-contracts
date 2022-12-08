@@ -7,7 +7,7 @@ import { Funnel } from "./Funnel.sol";
 import { Clones } from "openzeppelin-contracts/proxy/Clones.sol";
 
 /// @title Factory for all the funnel contracts
-
+/// @author Zac (zlace0x), zhongfu (zhongfu), Edison (edison0xyz)
 
 contract FunnelFactory is IFunnelFactory {
     using Clones for address;
@@ -15,8 +15,13 @@ contract FunnelFactory is IFunnelFactory {
     // Stores the mapping between tokenAddress => funnelAddress
     mapping(address => address) deployments;
 
-    address immutable public funnelImplementation;
+    /// address of the implementation. This is immutable due to security as implementation is not
+    /// supposed to change after deployment
+    address public immutable funnelImplementation;
 
+    /// @notice Deploys the FunnelFactory contract
+    /// @dev requires a valid funnelImplementation address
+    /// @param _funnelImplementation The address of the implementation
     constructor(address _funnelImplementation) {
         require(_funnelImplementation != address(0), "implementation cannot be zero");
         funnelImplementation = _funnelImplementation;
@@ -26,10 +31,7 @@ contract FunnelFactory is IFunnelFactory {
     /// @param _tokenAddress The address of the token
     /// @return _funnelAddress The address of the deployed Funnel contract
     /// @dev Throws if `_tokenAddress` has already been deployed
-    function deployFunnelForToken(address _tokenAddress)
-        external
-        returns (address _funnelAddress)
-    {
+    function deployFunnelForToken(address _tokenAddress) external returns (address _funnelAddress) {
         if (deployments[_tokenAddress] != address(0)) {
             revert FunnelAlreadyDeployed();
         }
@@ -38,9 +40,7 @@ contract FunnelFactory is IFunnelFactory {
             revert InvalidToken();
         }
 
-        _funnelAddress = funnelImplementation.cloneDeterministic(
-            bytes32(uint256(uint160(_tokenAddress)))
-        );
+        _funnelAddress = funnelImplementation.cloneDeterministic(bytes32(uint256(uint160(_tokenAddress))));
 
         deployments[_tokenAddress] = _funnelAddress;
         Funnel(_funnelAddress).initialize(_tokenAddress);
@@ -66,14 +66,11 @@ contract FunnelFactory is IFunnelFactory {
         }
     }
 
-    /// @notice Returns the Funnel contract address for a given token address
+    /// @notice Retrieves the Funnel contract address for a given token address
     /// @param _tokenAddress The address of the token
+    /// @return _funnelAddress The address of the deployed Funnel contract
     /// @dev Reverts with FunnelNotDeployed if `_tokenAddress` has not been deployed
-    function getFunnelForToken(address _tokenAddress)
-        public
-        view
-        returns (address _funnelAddress)
-    {
+    function getFunnelForToken(address _tokenAddress) public view returns (address _funnelAddress) {
         if (deployments[_tokenAddress] == address(0)) {
             revert FunnelNotDeployed();
         }

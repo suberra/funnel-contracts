@@ -17,7 +17,7 @@ import { MetaTxContext } from "./lib/MetaTxContext.sol";
 import { NativeMetaTransaction } from "./lib/NativeMetaTransaction.sol";
 
 /// @title Funnel contracts for ERC20
-/// @author zlace0x, zhongfu, edison0xyz
+/// @author Zac (zlace0x), zhongfu (zhongfu), Edison (edison0xyz)
 /// @notice This contract is a funnel for ERC20 tokens. It enforces renewable allowances
 contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable {
     using SafeERC20 for IERC20;
@@ -26,8 +26,16 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     ///                      EIP-5827 STORAGE
     //////////////////////////////////////////////////////////////
 
+    // address of the base token (e.g. USDC, DAI, WETH)
     IERC20 private _baseToken;
 
+    /// @notice RenewableAllowance struct that is stored on the contract
+    /// @param maxAmount The maximum amount of allowance possible
+    /// @param remaining The remaining allowance left at the last updated time
+    /// @param recoveryRate The rate at which the allowance recovers
+    /// @param lastUpdated Timestamp that the allowance is last updated.
+    /// @dev The actual remaining allowance at any point of time must be derived from recoveryRate, lastUpdated and maxAmount.
+    /// See getter function for implementation details.
     struct RenewableAllowance {
         uint256 maxAmount;
         uint256 remaining;
@@ -42,34 +50,43 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     ///                        EIP-2612 STORAGE
     //////////////////////////////////////////////////////////////
 
+    // initial_chain_id to be set during initiailisation
     uint256 internal initial_chain_id;
 
+    // initial_domain_separator to be set during initiailisation
     bytes32 internal initial_domain_separator;
 
+    // constant for the given struct type that do not need to be runtime computed. Required for EIP712-typed data
     bytes32 internal constant PERMIT_RENEWABLE_TYPEHASH =
         keccak256(
             "PermitRenewable(address owner,address spender,uint256 value,uint256 recoveryRate,uint256 nonce,uint256 deadline)"
         );
 
+    // constant for the given struct type that do not need to be runtime computed. Required for EIP712-typed data
     bytes32 internal constant PERMIT_TYPEHASH =
-        keccak256(
-            "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-        );
+        keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
+    /// @notice Called when the contract is being initialised.
+    /// @dev Sets the intial_chain_id and initial_domain_separator that might be used in future permit calls
     function initialize(address _token) external initializer {
         require(_token != address(0), "token address cannot be 0");
         _baseToken = IERC20(_token);
 
         initial_chain_id = block.chainid;
-
         initial_domain_separator = computeDomainSeparator();
     }
 
+    /// @dev Fallback function
+    /// implemented entirely in `_fallback`.
     fallback() external {
         _fallback(address(_baseToken));
     }
 
-    // View only fallback
+    /// @notice Fallback implementation
+    /// @dev Delegates execution to an implementation contract (i.e. base token)
+    /// This is a low level function that doesn't return to its internal call site.
+    /// It will return to the external caller whatever the implementation returns.
+    /// @param implementation Address to delegate.
     function _fallback(address implementation) internal virtual {
         assembly {
             // Copy msg.data. We take full control of memory in this inline assembly
@@ -119,9 +136,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
             nonce = _nonces[owner]++;
         }
 
-        bytes32 hashStruct = keccak256(
-            abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonce, deadline)
-        );
+        bytes32 hashStruct = keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonce, deadline));
 
         _verifySig(owner, hashStruct, v, r, s);
 
@@ -155,15 +170,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         }
 
         bytes32 hashStruct = keccak256(
-            abi.encode(
-                PERMIT_RENEWABLE_TYPEHASH,
-                owner,
-                spender,
-                value,
-                recoveryRate,
-                nonce,
-                deadline
-            )
+            abi.encode(PERMIT_RENEWABLE_TYPEHASH, owner, spender, value, recoveryRate, nonce, deadline)
         );
 
         _verifySig(owner, hashStruct, v, r, s);
@@ -199,11 +206,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     /// @param _owner The address of the owner
     /// @param _spender The address of the spender
     /// @return remaining The remaining allowance at the current point in time
-    function allowance(address _owner, address _spender)
-        external
-        view
-        returns (uint256 remaining)
-    {
+    function allowance(address _owner, address _spender) external view returns (uint256 remaining) {
         return _remainingAllowance(_owner, _spender);
     }
 
@@ -258,6 +261,10 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         return true;
     }
 
+    /// =================================================================
+    ///                 Getter Functions
+    /// =================================================================
+
     /// @notice fetch approved max amount and recovery rate
     /// @return amount initial and maximum allowance given to spender
     /// @return recoveryRate recovery amount per second
@@ -270,10 +277,15 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         return (a.maxAmount, a.recoveryRate);
     }
 
+    /// @notice Gets the address of the base token (i.e. the underlying ERC20 token)
     function baseToken() external view returns (address) {
         return address(_baseToken);
     }
 
+    /// @notice Query if a contract implements an interface
+    /// @param interfaceId The interface identifier, as specified in ERC-165
+    /// @dev Interface identification is specified in ERC-165. See https://eips.ethereum.org/EIPS/eip-165
+    /// @return `true` if the contract implements `interfaceID`
     function supportsInterface(bytes4 interfaceId) external pure virtual returns (bool) {
         return
             interfaceId == type(IERC5827).interfaceId ||
@@ -281,21 +293,23 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
             interfaceId == type(IERC5827Proxy).interfaceId;
     }
 
-    /// ERC20 functions
-    function balanceOf(address account) external view returns (uint256) {
+    /// @notice Retrieves the balance of a given user
+    /// @param account Address of the user
+    /// @return balance The balance of the user
+    function balanceOf(address account) external view returns (uint256 balance) {
         return _baseToken.balanceOf(account);
     }
 
+    /// @notice Returns the total supply of the token
     function totalSupply() external view returns (uint256) {
         return _baseToken.totalSupply();
     }
 
-    /// @dev Returns the name of the token or fallsback to token address if not found
+    /// @notice Gets the name of the token
+    /// @dev Fallback to token address if not found
     function name() public view returns (string memory) {
         string memory _name;
-        (bool success, bytes memory result) = address(_baseToken).staticcall(
-            abi.encodeWithSignature("name()")
-        );
+        (bool success, bytes memory result) = address(_baseToken).staticcall(abi.encodeWithSignature("name()"));
 
         if (success && result.length > 0) {
             _name = abi.decode(result, (string));
@@ -307,10 +321,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     }
 
     function DOMAIN_SEPARATOR() public view override returns (bytes32) {
-        return
-            block.chainid == initial_chain_id
-                ? initial_domain_separator
-                : computeDomainSeparator();
+        return block.chainid == initial_chain_id ? initial_domain_separator : computeDomainSeparator();
     }
 
     /// @notice transfers base token with renewable allowance logic applied
@@ -410,9 +421,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         return
             keccak256(
                 abi.encode(
-                    keccak256(
-                        "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-                    ),
+                    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
                     keccak256(bytes(name())),
                     keccak256("1"),
                     block.chainid,
@@ -431,14 +440,9 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
             revert("IERC5827Payable: approve a non contract address");
         }
 
-        try
-            IERC5827Spender(_spender).onRenewableApprovalReceived(
-                _msgSender(),
-                _value,
-                _recoveryRate,
-                data
-            )
-        returns (bytes4 retval) {
+        try IERC5827Spender(_spender).onRenewableApprovalReceived(_msgSender(), _value, _recoveryRate, data) returns (
+            bytes4 retval
+        ) {
             return retval == IERC5827Spender.onRenewableApprovalReceived.selector;
         } catch (bytes memory reason) {
             if (reason.length == 0) {
@@ -456,18 +460,12 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     /// @param _owner address of the owner
     /// @param _spender address of spender
     /// @return remaining allowance left
-    function _remainingAllowance(address _owner, address _spender)
-        private
-        view
-        returns (uint256)
-    {
+    function _remainingAllowance(address _owner, address _spender) private view returns (uint256) {
         RenewableAllowance memory a = rAllowance[_owner][_spender];
         uint256 baseAllowance = _baseToken.allowance(_owner, address(this));
         uint256 recovered = a.recoveryRate * uint64(block.timestamp - a.lastUpdated); // uint192 * uint64 = uint256
         uint256 remainingAllowance = saturatingAdd(a.remaining, recovered); // uint256 + uint256 potential overflow
-        uint256 currentAllowance = remainingAllowance > a.maxAmount
-            ? a.maxAmount
-            : remainingAllowance;
+        uint256 currentAllowance = remainingAllowance > a.maxAmount ? a.maxAmount : remainingAllowance;
         return currentAllowance > baseAllowance ? baseAllowance : currentAllowance;
     }
 }
