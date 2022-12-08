@@ -16,6 +16,9 @@ import { IERC5827Payable } from "./interfaces/IERC5827Payable.sol";
 import { MetaTxContext } from "./lib/MetaTxContext.sol";
 import { NativeMetaTransaction } from "./lib/NativeMetaTransaction.sol";
 
+/// @title Funnel contracts for ERC20
+/// @author zlace0x, zhongfu, edison0xyz
+/// @notice This contract is a funnel for ERC20 tokens. It enforces renewable allowances
 contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable {
     using SafeERC20 for IERC20;
 
@@ -39,9 +42,9 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     ///                        EIP-2612 STORAGE
     //////////////////////////////////////////////////////////////
 
-    uint256 internal INITIAL_CHAIN_ID;
+    uint256 internal initial_chain_id;
 
-    bytes32 internal INITIAL_DOMAIN_SEPARATOR;
+    bytes32 internal initial_domain_separator;
 
     bytes32 internal constant PERMIT_RENEWABLE_TYPEHASH =
         keccak256(
@@ -57,9 +60,9 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         require(_token != address(0), "token address cannot be 0");
         _baseToken = IERC20(_token);
 
-        INITIAL_CHAIN_ID = block.chainid;
+        initial_chain_id = block.chainid;
 
-        INITIAL_DOMAIN_SEPARATOR = computeDomainSeparator();
+        initial_domain_separator = computeDomainSeparator();
     }
 
     fallback() external {
@@ -92,6 +95,14 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         }
     }
 
+    /// @notice Sets fixed allowance with signed approval.
+    /// @dev The address cannot be zero
+    /// @param owner The address of the token owner
+    /// @param spender The address of the spender.
+    /// @param value fixed amount to approve
+    /// @param deadline deadline for the approvals in the future
+    /// @param v, r, s valid `secp256k1` signature from `owner` over the EIP712-formatted function arguments.
+
     function permit(
         address owner,
         address spender,
@@ -116,6 +127,15 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
 
         _approve(owner, spender, value, 0);
     }
+
+    /// @notice Sets renewable allowance with signed approval.
+    /// @dev The address cannot be zero
+    /// @param owner The address of the token owner
+    /// @param spender The address of the spender.
+    /// @param value fixed amount to approve
+    /// @param recoveryRate recovery rate for the renewable allowance
+    /// @param deadline deadline for the approvals in the future
+    /// @param v, r, s valid `secp256k1` signature from `owner` over the EIP712-formatted function arguments.
 
     function permitRenewable(
         address owner,
@@ -151,11 +171,21 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         _approve(owner, spender, value, recoveryRate);
     }
 
+    /// @notice Approves a spender to spend a fixed amount of token
+    /// @dev this sets an approval with no recovery rate, so the allowance do not get renewed
+    /// @param _spender The address of the spender
+    /// @param _value The amount of tokens that the spender can spend
+    /// @return success true if approval is successful, false otherwise
     function approve(address _spender, uint256 _value) external returns (bool success) {
         _approve(_msgSender(), _spender, _value, 0);
         return true;
     }
 
+    /// @notice approves renewable allowance
+    /// @param _spender The address of the spender
+    /// @param _value The amount of tokens that the spender can spend
+    /// @param _recoveryRate The rate at which the allowance is renewed
+    /// @return success true if the approval is successful. False if otherwise.
     function approveRenewable(
         address _spender,
         uint256 _value,
@@ -166,7 +196,9 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     }
 
     /// @notice fetch amounts spendable by _spender
-    /// @return remaining allowance at the current point in time
+    /// @param _owner The address of the owner
+    /// @param _spender The address of the spender
+    /// @return remaining The remaining allowance at the current point in time
     function allowance(address _owner, address _spender)
         external
         view
@@ -197,7 +229,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         return true;
     }
 
-    /// @dev Transfer tokens from one address to another and then call `onTransferReceived` on receiver
+    /// @notice Transfer tokens from one address to another and then call `onTransferReceived` on receiver
     /// @param from address The address which you want to send tokens from
     /// @param to address The address which you want to transfer to
     /// @param value uint256 The amount of tokens to be transferred
@@ -218,6 +250,9 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         return true;
     }
 
+    /// @notice Transfer tokens from the sender to the recipient
+    /// @param to The address of the recipient
+    /// @param amount uint256 The amount of tokens to be transferred
     function transfer(address to, uint256 amount) external returns (bool) {
         _baseToken.safeTransferFrom(_msgSender(), to, amount);
         return true;
@@ -255,8 +290,6 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         return _baseToken.totalSupply();
     }
 
-
-
     /// @dev Returns the name of the token or fallsback to token address if not found
     function name() public view returns (string memory) {
         string memory _name;
@@ -275,8 +308,8 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
 
     function DOMAIN_SEPARATOR() public view override returns (bytes32) {
         return
-            block.chainid == INITIAL_CHAIN_ID
-                ? INITIAL_DOMAIN_SEPARATOR
+            block.chainid == initial_chain_id
+                ? initial_domain_separator
                 : computeDomainSeparator();
     }
 
@@ -370,6 +403,9 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         }
     }
 
+    /// @notice compute the domain seperator that is required for the approve by signature functionality
+    /// Stops replay attacks from happening because of approvals on different contracts on different chains
+    /// @dev Reference https://eips.ethereum.org/EIPS/eip-712
     function computeDomainSeparator() internal view virtual returns (bytes32) {
         return
             keccak256(
@@ -417,6 +453,9 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     }
 
     /// @notice fetch remaining allowance between _owner and _spender while accounting for base token allowance.
+    /// @param _owner address of the owner
+    /// @param _spender address of spender
+    /// @return remaining allowance left
     function _remainingAllowance(address _owner, address _spender)
         private
         view

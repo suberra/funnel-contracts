@@ -6,21 +6,26 @@ import { IERC5827Proxy } from "./interfaces/IERC5827Proxy.sol";
 import { Funnel } from "./Funnel.sol";
 import { Clones } from "openzeppelin-contracts/proxy/Clones.sol";
 
+/// @title Factory for all the funnel contracts
+
+
 contract FunnelFactory is IFunnelFactory {
     using Clones for address;
 
-    // tokenAddress => funnelAddress
+    // Stores the mapping between tokenAddress => funnelAddress
     mapping(address => address) deployments;
 
-    address public funnelImplementation;
+    address immutable public funnelImplementation;
 
     constructor(address _funnelImplementation) {
         require(_funnelImplementation != address(0), "implementation cannot be zero");
         funnelImplementation = _funnelImplementation;
     }
 
-    /// @dev Deploys a new Funnel contract
-    /// Throws if `_tokenAddress` has already been deployed
+    /// @notice Deploys a new Funnel contract
+    /// @param _tokenAddress The address of the token
+    /// @return _funnelAddress The address of the deployed Funnel contract
+    /// @dev Throws if `_tokenAddress` has already been deployed
     function deployFunnelForToken(address _tokenAddress)
         external
         returns (address _funnelAddress)
@@ -42,7 +47,9 @@ contract FunnelFactory is IFunnelFactory {
         emit DeployedFunnel(_tokenAddress, _funnelAddress);
     }
 
-    /// @dev Returns true if contract address is a deployed Funnel contract
+    /// @notice Checks if a given address is a deployed Funnel contract
+    /// @param _funnelAddress The address that you want to query
+    /// @return true if contract address is a deployed Funnel contract
     function isFunnel(address _funnelAddress) external view returns (bool) {
         // Not a deployed contract
         if (_funnelAddress.code.length == 0) {
@@ -59,8 +66,9 @@ contract FunnelFactory is IFunnelFactory {
         }
     }
 
-    /// @dev Returns the Funnel contract address for a given token address
-    /// Reverts with FunnelNotDeployed if `_tokenAddress` has not been deployed
+    /// @notice Returns the Funnel contract address for a given token address
+    /// @param _tokenAddress The address of the token
+    /// @dev Reverts with FunnelNotDeployed if `_tokenAddress` has not been deployed
     function getFunnelForToken(address _tokenAddress)
         public
         view

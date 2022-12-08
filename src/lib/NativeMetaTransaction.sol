@@ -4,7 +4,6 @@ import { EIP712 } from "./EIP712.sol";
 import { Nonces } from "./Nonces.sol";
 
 abstract contract NativeMetaTransaction is EIP712, Nonces {
-    // keccak256("MetaTransaction(uint256 nonce,address from,bytes functionSignature)")
     bytes32 public constant META_TRANSACTION_TYPEHASH =
         0x23d10def3caacba2e4042e0c75d44a42d2558aabcf5ce951d0642a8032e1e653;
 
@@ -14,11 +13,9 @@ abstract contract NativeMetaTransaction is EIP712, Nonces {
         bytes functionSignature
     );
 
-    /*
-     * Meta transaction structure.
-     * No point of including value field here as if user is doing value transfer then he has the funds to pay for gas
-     * He should call the desired function directly in that case.
-     */
+    /// Meta transaction structure.
+    /// No point of including value field here as if user is doing value transfer then he has the funds to pay for gas
+    /// He should call the desired function directly in that case.
     struct MetaTransaction {
         uint256 nonce;
         address from;
