@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.15;
+pragma solidity 0.8.17;
 import { Context } from "openzeppelin-contracts/utils/Context.sol";
 
 abstract contract MetaTxContext is Context {

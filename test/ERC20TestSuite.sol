@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.15;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
 
 import { TestSetup } from "./TestSetup.sol";
 import { IERC20 } from "openzeppelin-contracts/interfaces/IERC20.sol";
