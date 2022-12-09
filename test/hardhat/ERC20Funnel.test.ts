@@ -1,5 +1,6 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import {
   generateErc20Permit,
@@ -105,48 +106,62 @@ describe("ERC20Funnel", function () {
       const hashStruct = ethers.utils._TypedDataEncoder.hashDomain(domain);
 
       expect(await token.DOMAIN_SEPARATOR()).to.equal(hashStruct);
-    }),
-      it("Should allow transferFrom after permits", async function () {
-        const { token, minter, user2, user3, funnel } = await loadFixture(
-          deployTokenFixture
-        );
+    });
 
-        const deadline =
-          (await ethers.provider.getBlock("latest")).timestamp + 60;
-        const nonce = await token.nonces(minter.address);
-        const name = await token.name();
+    it("should have the expected PoS DOMAIN_SEPARATOR", async function () {
+      const domain = {
+        name: "USD Coin (PoS)",
+        version: "1",
+        verifyingContract: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+        salt: ethers.utils.hexZeroPad(BigNumber.from(137).toHexString(), 32),
+      };
 
-        const data = generateErc20Permit(
-          await getChainId(),
-          token.address,
-          name,
-          minter.address, // owner
-          user2.address,
-          getTokenAmount(99), // value
-          nonce,
-          deadline
-        );
+      const hashStruct = ethers.utils._TypedDataEncoder.hashDomain(domain);
 
-        const { v, r, s } = await signPermit(data, minter);
+      expect(
+        "0x294369e003769a2d4d625e8a9ebebffa09ff70dd7c708497d8b56d2c2d199a19"
+      ).to.equal(hashStruct);
+    });
 
-        await token.permit(
-          minter.address,
-          user2.address,
-          getTokenAmount(99),
-          deadline,
-          v,
-          r,
-          s
-        );
+    it("Should allow transferFrom after permits", async function () {
+      const { token, minter, user2, user3, funnel } = await loadFixture(
+        deployTokenFixture
+      );
 
-        await token
-          .connect(user2)
-          .transferFrom(minter.address, user3.address, getTokenAmount(99));
+      const deadline =
+        (await ethers.provider.getBlock("latest")).timestamp + 60;
+      const nonce = await token.nonces(minter.address);
+      const name = await token.name();
 
-        expect(await token.balanceOf(user3.address)).to.equal(
-          getTokenAmount(99)
-        );
-      });
+      const data = generateErc20Permit(
+        await getChainId(),
+        token.address,
+        name,
+        minter.address, // owner
+        user2.address,
+        getTokenAmount(99), // value
+        nonce,
+        deadline
+      );
+
+      const { v, r, s } = await signPermit(data, minter);
+
+      await token.permit(
+        minter.address,
+        user2.address,
+        getTokenAmount(99),
+        deadline,
+        v,
+        r,
+        s
+      );
+
+      await token
+        .connect(user2)
+        .transferFrom(minter.address, user3.address, getTokenAmount(99));
+
+      expect(await token.balanceOf(user3.address)).to.equal(getTokenAmount(99));
+    });
 
     it("Should allow updates to existing allowance via permits", async function () {
       const { token, minter, user2, user3 } = await loadFixture(
