@@ -11,7 +11,7 @@ import { Context } from "openzeppelin-contracts/utils/Context.sol";
 abstract contract MetaTxContext is Context {
     /// @notice Allows the recipient contract to retrieve the original sender
     /// in the case of a meta-transaction sent by the relayer
-    /// @dev Required since the msg.sender in metatx will be a forwarder account
+    /// @dev Required since the msg.sender in metatx will be the relayer's address
     /// @return sender Address of the original sender
     function _msgSender() internal view virtual override returns (address sender) {
         if (msg.sender == address(this)) {

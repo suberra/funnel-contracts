@@ -4,7 +4,8 @@ import { EIP712 } from "./EIP712.sol";
 import { Nonces } from "./Nonces.sol";
 
 abstract contract NativeMetaTransaction is EIP712, Nonces {
-    /// constant TYPEHASH that is required under EIP712
+    /// Precomputed typeHash as defined in EIP712
+    /// keccak256("MetaTransaction(uint256 nonce,address from,bytes functionSignature)")
     bytes32 public constant META_TRANSACTION_TYPEHASH =
         0x23d10def3caacba2e4042e0c75d44a42d2558aabcf5ce951d0642a8032e1e653;
 
@@ -55,7 +56,7 @@ abstract contract NativeMetaTransaction is EIP712, Nonces {
         return returnData;
     }
 
-    /// @notice verify if the meta transaction is legit
+    /// @notice verify if the meta transaction is valid
     /// @dev Performs some validity check and checks if the signature matches the hash struct
     /// See EIP-712 for details about `_verifySig`
     /// @return isValid bool that is true if the signature is valid. False if otherwise

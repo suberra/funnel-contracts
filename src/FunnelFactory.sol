@@ -12,7 +12,7 @@ import { Clones } from "openzeppelin-contracts/proxy/Clones.sol";
 contract FunnelFactory is IFunnelFactory {
     using Clones for address;
 
-    // Stores the mapping between tokenAddress => funnelAddress
+    /// Stores the mapping between tokenAddress => funnelAddress
     mapping(address => address) deployments;
 
     /// address of the implementation. This is immutable due to security as implementation is not
