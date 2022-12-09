@@ -15,6 +15,7 @@ import { IERC5827Spender } from "./interfaces/IERC5827Spender.sol";
 import { IERC5827Payable } from "./interfaces/IERC5827Payable.sol";
 import { MetaTxContext } from "./lib/MetaTxContext.sol";
 import { NativeMetaTransaction } from "./lib/NativeMetaTransaction.sol";
+import { MathUtil } from "./lib/MathUtil.sol";
 
 /// @title Funnel contracts for ERC20
 /// @author Zac (zlace0x), zhongfu (zhongfu), Edison (edison0xyz)
@@ -367,15 +368,6 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         emit RenewableApproval(_owner, _spender, _value, _recoveryRate);
     }
 
-    // @dev returns the sum of two uint256 values, saturating at 2**256 - 1
-    function saturatingAdd(uint256 a, uint256 b) internal pure returns (uint256) {
-        unchecked {
-            uint256 c = a + b;
-            if (c < a) return type(uint256).max;
-            return c;
-        }
-    }
-
     /// @dev Internal function to invoke {IERC1363Receiver-onTransferReceived} on a target address
     /// The call is not executed if the target address is not a contract
     /// @param from address Representing the previous owner of the given token amount
@@ -463,8 +455,9 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     function _remainingAllowance(address _owner, address _spender) private view returns (uint256) {
         RenewableAllowance memory a = rAllowance[_owner][_spender];
         uint256 baseAllowance = _baseToken.allowance(_owner, address(this));
-        uint256 recovered = a.recoveryRate * uint64(block.timestamp - a.lastUpdated); // uint192 * uint64 = uint256
-        uint256 remainingAllowance = saturatingAdd(a.remaining, recovered); // uint256 + uint256 potential overflow
+        uint256 recovered = a.recoveryRate * uint64(block.timestamp - a.lastUpdated);
+        uint256 remainingAllowance = MathUtil.saturatingAdd(a.remaining, recovered);
+
         uint256 currentAllowance = remainingAllowance > a.maxAmount ? a.maxAmount : remainingAllowance;
         return currentAllowance > baseAllowance ? baseAllowance : currentAllowance;
     }
