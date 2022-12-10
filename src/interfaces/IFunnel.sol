@@ -8,6 +8,5 @@ import { IERC5827Proxy } from "./IERC5827Proxy.sol";
 /// @title Interface for Funnel contracts for ERC20
 /// @author Zac (zlace0x), zhongfu (zhongfu), Edison (edison0xyz)
 interface IFunnel is IERC5827, IERC5827Proxy, IERC5827Payable {
-    // Error thrown if the Recovery Rate exceeds the max allowance
-    error RecoveryRateExceeded();
+
 }

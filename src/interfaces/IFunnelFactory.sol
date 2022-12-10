@@ -4,15 +4,6 @@ pragma solidity 0.8.17;
 /// @title Interface for Funnel Factory
 /// @author Zac (zlace0x), zhongfu (zhongfu), Edison (edison0xyz)
 interface IFunnelFactory {
-    /// Error thrown when funnel is not deployed
-    error FunnelNotDeployed();
-
-    /// Error thrown when funnel is already deployed.
-    error FunnelAlreadyDeployed();
-
-    /// Error thrown when the token is invalid
-    error InvalidToken();
-
     /// @notice Event emitted when the funnel contract is deployed
     /// @param tokenAddress of the base token (indexed)
     /// @param funnelAddress of the deployed funnel contract (indexed)
