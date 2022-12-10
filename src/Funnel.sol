@@ -152,7 +152,6 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     /// @param recoveryRate recovery rate for the renewable allowance
     /// @param deadline deadline for the approvals in the future
     /// @param v, r, s valid `secp256k1` signature from `owner` over the EIP712-formatted function arguments.
-
     function permitRenewable(
         address owner,
         address spender,
@@ -233,12 +232,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         return true;
     }
 
-    /// @notice Transfer tokens from one address to another and then call `onTransferReceived` on receiver
-    /// @param from address The address which you want to send tokens from
-    /// @param to address The address which you want to transfer to
-    /// @param value uint256 The amount of tokens to be transferred
-    /// @param data bytes Additional data with no specified format, sent in call to `to`
-    /// @return true unless throwing
+    /// @inheritdoc IERC5827Payable
     function transferFromAndCall(
         address from,
         address to,

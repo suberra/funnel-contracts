@@ -58,7 +58,7 @@ abstract contract NativeMetaTransaction is EIP712, Nonces {
 
     /// @notice verify if the meta transaction is valid
     /// @dev Performs some validity check and checks if the signature matches the hash struct
-    /// See EIP-712 for details about `_verifySig`
+    /// See EIP712.sol for details about `_verifySig`
     /// @return isValid bool that is true if the signature is valid. False if otherwise
     function _verifyMetaTx(
         address signer,

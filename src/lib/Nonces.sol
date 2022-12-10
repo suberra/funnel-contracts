@@ -5,10 +5,10 @@ abstract contract Nonces {
     /// mapping between the user and the nonce of the account
     mapping(address => uint256) internal _nonces;
 
-    /// @notice Nonces for permit / meta-transactions
+    /// @notice Nonce for permit / meta-transactions
     /// @param owner Token owner's address
-    /// @return nextNonce Next nonce for the owner
-    function nonces(address owner) external view returns (uint256 nextNonce) {
+    /// @return nonce nonce of the owner
+    function nonces(address owner) external view returns (uint256 nonce) {
         return _nonces[owner];
     }
 }
