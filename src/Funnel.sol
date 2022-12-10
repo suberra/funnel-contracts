@@ -261,6 +261,8 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     /// =================================================================
 
     /// @notice fetch approved max amount and recovery rate
+    /// @param _owner The address of the owner
+    /// @param _spender The address of the spender
     /// @return amount initial and maximum allowance given to spender
     /// @return recoveryRate recovery amount per second
     function renewableAllowance(address _owner, address _spender)

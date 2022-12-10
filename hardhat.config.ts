@@ -2,7 +2,8 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 import fs from "fs";
-import { HardhatUserConfig } from "hardhat/config";
+import { extendConfig, HardhatUserConfig } from "hardhat/config";
+import "solidity-docgen";
 import "hardhat-preprocessor";
 import "@nomicfoundation/hardhat-toolbox";
 
@@ -62,6 +63,6 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
-  },
+  }
 };
 export default config;
