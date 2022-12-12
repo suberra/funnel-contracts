@@ -51,11 +51,13 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     ///                        EIP-2612 STORAGE
     //////////////////////////////////////////////////////////////
 
-    // initial_chain_id to be set during initiailisation
-    uint256 internal initial_chain_id;
+    /// INITIAL_CHAIN_ID to be set during initiailisation
+    /// @dev This value will not change
+    uint256 internal INITIAL_CHAIN_ID;
 
-    // initial_domain_separator to be set during initiailisation
-    bytes32 internal initial_domain_separator;
+    // INITIAL_DOMAIN_SEPARATOR to be set during initiailisation
+    /// @dev This value will not change
+    bytes32 internal INITIAL_DOMAIN_SEPARATOR;
 
     // constant for the given struct type that do not need to be runtime computed. Required for EIP712-typed data
     bytes32 internal constant PERMIT_RENEWABLE_TYPEHASH =
@@ -75,8 +77,8 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
         }
         _baseToken = IERC20(_token);
 
-        initial_chain_id = block.chainid;
-        initial_domain_separator = computeDomainSeparator();
+        INITIAL_CHAIN_ID = block.chainid;
+        INITIAL_DOMAIN_SEPARATOR = computeDomainSeparator();
     }
 
     /// @dev Fallback function
@@ -325,7 +327,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     }
 
     function DOMAIN_SEPARATOR() public view override returns (bytes32) {
-        return block.chainid == initial_chain_id ? initial_domain_separator : computeDomainSeparator();
+        return block.chainid == INITIAL_CHAIN_ID ? INITIAL_DOMAIN_SEPARATOR : computeDomainSeparator();
     }
 
     /// @notice transfers base token with renewable allowance logic applied
