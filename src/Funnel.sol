@@ -125,7 +125,6 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     /// @param value fixed amount to approve
     /// @param deadline deadline for the approvals in the future
     /// @param v, r, s valid `secp256k1` signature from `owner` over the EIP712-formatted function arguments.
-
     function permit(
         address owner,
         address spender,
