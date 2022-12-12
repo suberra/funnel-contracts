@@ -100,7 +100,7 @@ contract FunnelTest is ERC5827TestSuite {
         assertEq(funnel.allowance(user1, address(spender)), 0);
 
         vm.prank(user2);
-        vm.expectRevert();
+        vm.expectRevert("ERC20: insufficient allowance");
         funnel.transferFromAndCall(user1, address(spender), 10, "");
     }
 
