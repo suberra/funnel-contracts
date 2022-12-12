@@ -90,6 +90,50 @@ contract FunnelTest is ERC5827TestSuite {
         assertTrue(funnel.transferFromAndCall(user1, address(spender), 10, ""));
     }
 
+    function testMaxRecovery() public {
+        // approves MAX_UINT-1, recovery 1
+        vm.prank(user1);
+        funnel.approveRenewable(address(spender), type(uint256).max - 1, 1);
+
+        // same block transfer MAX_UINT-1
+        vm.prank(address(spender));
+        vm.expectEmit(true, false, false, true);
+        emit Transfer(user1, user2, type(uint256).max - 1);
+        assertTrue(funnel.transferFrom(user1, user2, type(uint256).max - 1));
+        assertEq(funnel.allowance(user1, address(spender)), 0);
+
+        vm.warp(2);
+        // next block allowance
+        assertEq(funnel.allowance(user1, address(spender)), 1);
+    }
+
+    function testTransferZeros() public {
+        // approves MAX_UINT-1, recovery 1
+        vm.prank(user1);
+        funnel.approveRenewable(address(spender), type(uint256).max - 1, 1);
+
+        vm.warp(2);
+        vm.prank(address(spender));
+        vm.expectEmit(true, false, false, true);
+        emit Transfer(user1, user2, 0);
+        assertTrue(funnel.transferFrom(user1, user2, 0));
+        assertEq(funnel.allowance(user1, address(spender)), type(uint256).max - 1);
+
+        vm.warp(3);
+        vm.prank(address(spender));
+        vm.expectEmit(true, false, false, true);
+        emit Transfer(user1, user2, type(uint256).max - 1);
+        assertTrue(funnel.transferFrom(user1, user2, type(uint256).max - 1));
+        assertEq(funnel.allowance(user1, address(spender)), 0);
+
+        vm.warp(4);
+        vm.prank(address(spender));
+        vm.expectEmit(true, false, false, true);
+        emit Transfer(user1, user2, 0);
+        assertTrue(funnel.transferFrom(user1, user2, 0));
+        assertEq(funnel.allowance(user1, address(spender)), 1);
+    }
+
     function testOverflow() public {
         vm.prank(user1);
         funnel.approveRenewable(address(user2), type(uint256).max - type(uint192).max + 1, type(uint192).max);
