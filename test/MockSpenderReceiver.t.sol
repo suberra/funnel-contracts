@@ -16,17 +16,11 @@ contract MockSpenderReceiverTest is Test {
     }
 
     function testSupportInterfaceReceiver() public {
-        assertTrue(
-            receiver.supportsInterface(IERC1363Receiver.onTransferReceived.selector)
-        );
+        assertTrue(receiver.supportsInterface(IERC1363Receiver.onTransferReceived.selector));
     }
 
     function testSupportInterfaceSpender() public {
         assertTrue(receiver.supportsInterface(0xb868618d));
-        assertTrue(
-            receiver.supportsInterface(
-                IERC5827Spender.onRenewableApprovalReceived.selector
-            )
-        );
+        assertTrue(receiver.supportsInterface(IERC5827Spender.onRenewableApprovalReceived.selector));
     }
 }
