@@ -29,8 +29,6 @@ contract MockSpenderReceiver is IERC1363Receiver, IERC5827Spender {
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
-        return
-            interfaceId == type(IERC1363Receiver).interfaceId ||
-            interfaceId == type(IERC5827Spender).interfaceId;
+        return interfaceId == type(IERC1363Receiver).interfaceId || interfaceId == type(IERC5827Spender).interfaceId;
     }
 }

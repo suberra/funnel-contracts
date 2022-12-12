@@ -4,34 +4,39 @@ import { EIP712 } from "./EIP712.sol";
 import { Nonces } from "./Nonces.sol";
 
 abstract contract NativeMetaTransaction is EIP712, Nonces {
-    // keccak256("MetaTransaction(uint256 nonce,address from,bytes functionSignature)")
+    /// Precomputed typeHash as defined in EIP712
+    /// keccak256("MetaTransaction(uint256 nonce,address from,bytes functionSignature)")
     bytes32 public constant META_TRANSACTION_TYPEHASH =
         0x23d10def3caacba2e4042e0c75d44a42d2558aabcf5ce951d0642a8032e1e653;
 
-    event MetaTransactionExecuted(
-        address indexed userAddress,
-        address payable relayerAddress,
-        bytes functionSignature
-    );
+    /// Event that is emited if a meta-transaction is emitted
+    /// @dev Useful for off-chain services to pick up these events
+    /// @param userAddress Address of the user that sent the meta-transaction
+    /// @param relayerAddress Address of the relayer that executed the meta-transaction
+    /// @param functionSignature Signature of the function
+    event MetaTransactionExecuted(address indexed userAddress, address payable relayerAddress, bytes functionSignature);
 
-    /*
-     * Meta transaction structure.
-     * No point of including value field here as if user is doing value transfer then he has the funds to pay for gas
-     * He should call the desired function directly in that case.
-     */
+    /// Meta transaction structure.
+    /// No point of including value field here as if user is doing value transfer then he has the funds to pay for gas
+    /// He should call the desired function directly in that case.
     struct MetaTransaction {
         uint256 nonce;
         address from;
         bytes functionSignature;
     }
 
+    /// @notice Executes a meta transaction in the context of the signer
+    /// Allows a relayer to send another user's transaction and pay the gas
+    /// @param userAddress Address of the user the sender is performing on behalf of
+    /// @param functionSignature The signature of the user
+    /// @return data encoded return data of the underlying function call
     function executeMetaTransaction(
         address userAddress,
         bytes memory functionSignature,
         bytes32 sigR,
         bytes32 sigS,
         uint8 sigV
-    ) external payable returns (bytes memory) {
+    ) external payable returns (bytes memory data) {
         MetaTransaction memory metaTx = MetaTransaction({
             nonce: _nonces[userAddress]++,
             from: userAddress,
@@ -42,9 +47,7 @@ abstract contract NativeMetaTransaction is EIP712, Nonces {
 
         // Appends userAddress at the end to extract it from calling context
         // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returnData) = address(this).call(
-            abi.encodePacked(functionSignature, userAddress)
-        );
+        (bool success, bytes memory returnData) = address(this).call(abi.encodePacked(functionSignature, userAddress));
 
         require(success, "Function call not successful");
 
@@ -53,22 +56,21 @@ abstract contract NativeMetaTransaction is EIP712, Nonces {
         return returnData;
     }
 
+    /// @notice verify if the meta transaction is valid
+    /// @dev Performs some validity check and checks if the signature matches the hash struct
+    /// See EIP712.sol for details about `_verifySig`
+    /// @return isValid bool that is true if the signature is valid. False if otherwise
     function _verifyMetaTx(
         address signer,
         MetaTransaction memory metaTx,
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) internal view returns (bool) {
+    ) internal view returns (bool isValid) {
         require(signer != address(0), "NativeMetaTransaction: INVALID_SIGNER");
 
         bytes32 hashStruct = keccak256(
-            abi.encode(
-                META_TRANSACTION_TYPEHASH,
-                metaTx.nonce,
-                metaTx.from,
-                keccak256(metaTx.functionSignature)
-            )
+            abi.encode(META_TRANSACTION_TYPEHASH, metaTx.nonce, metaTx.from, keccak256(metaTx.functionSignature))
         );
 
         return _verifySig(signer, hashStruct, v, r, s);

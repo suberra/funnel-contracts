@@ -11,7 +11,7 @@ Each funnel contract is a proxy/wrapper for an underlying ERC20 token, funneling
 By using this funnel contract, a sender can approve a spender a spending limit every periodic interval. For example, a subscriber can approve a merchant to deduct up to 100 USDC from his account every month.
 
 1. User first approves the funnel contract to spend using ERC20 approvals
-2. User can set renewable allowance on the funnel contract for a given period for an address (spender), approving up to a max limit with a recovery rate. 
+2. User can set renewable allowance on the funnel contract for a given period for an address (spender), approving up to a max limit with a recovery rate.
 3. The spender can then withdraw money out of the user's account up to the available allowance on the account.
 
 What is recovery rate? Recovery rate (amount per second) specifies the rate at which the allowance recovers over time. Once a spender spends the money, the available balance first decreases and slowly restores back to the max limit. Unlike conventional finance apps which performs discrete "resets" of spending limit, we implement renewable allowance using a continuous `recoveryRate` as it allows for more flexible usecases no bound by reset cycles and can be implemented more simply.
@@ -20,7 +20,7 @@ What is recovery rate? Recovery rate (amount per second) specifies the rate at w
 
 The funnel factory is a contract that deploys new funnel contracts, it is the only contract that can create new funnels.
 
-Goal is to deploy a factory onto all supported chains at the same address, and **every chain will produce the same funnel address for the same token address**. 
+Goal is to deploy a factory onto all supported chains at the same address, and **every chain will produce the same funnel address for the same token address**.
 
 ## Contracts
 
@@ -36,12 +36,11 @@ Goal is to deploy a factory onto all supported chains at the same address, and *
 
 `baseToken()` - Returns the address of the underlying token
 
-
 # Usage
 
 ## Testing
 
-Our tests consist of both Foundry tests and hardhat tests. 
+Our tests consist of both Foundry tests and hardhat tests.
 
 `forge test` - Runs the Foundry tests
 
@@ -62,9 +61,17 @@ Deploy to local fork
 
 Deploy factory to goerli
 
-`forge script script/FunnelFactoryDeployer.sol:FunnelFactoryDeployer --rpc-url $GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY`  
+`forge script script/FunnelFactoryDeployer.sol:FunnelFactoryDeployer --rpc-url $GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY`
 
 Note: Deployment addresses are dependent on deployer's private key, FunnelFactory bytecode and salt used. Multiple deployments will fail.
+
+## Misc
+
+Run prettier to format the code
+
+```sh
+npx prettier --write 'src/**/*.sol'
+```
 
 # Deployments
 
@@ -74,7 +81,6 @@ Note: Deployment addresses are dependent on deployer's private key, FunnelFactor
 | Goerli  | FunnelFactory | 0xDd3e9D430D0681Eaa833DbD6B186E7f031f71837 |
 | Goerli  | USDC (funnel) | 0x3d5499808F8082d239a62B5c4876B6ffD23526d5 |
 
-
-# License 
+# License
 
 MIT @ 2022 Suberra

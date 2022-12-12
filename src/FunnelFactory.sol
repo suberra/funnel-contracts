@@ -3,30 +3,35 @@ pragma solidity 0.8.17;
 
 import { IFunnelFactory } from "./interfaces/IFunnelFactory.sol";
 import { IERC5827Proxy } from "./interfaces/IERC5827Proxy.sol";
+import { IFunnelErrors } from "./interfaces/IFunnelErrors.sol";
 import { Funnel } from "./Funnel.sol";
 import { Clones } from "openzeppelin-contracts/proxy/Clones.sol";
 
-contract FunnelFactory is IFunnelFactory {
+/// @title Factory for all the funnel contracts
+/// @author Zac (zlace0x), zhongfu (zhongfu), Edison (edison0xyz)
+
+contract FunnelFactory is IFunnelFactory, IFunnelErrors {
     using Clones for address;
 
-    // tokenAddress => funnelAddress
+    /// Stores the mapping between tokenAddress => funnelAddress
     mapping(address => address) deployments;
 
-    address public funnelImplementation;
+    /// address of the implementation. This is immutable due to security as implementation is not
+    /// supposed to change after deployment
+    address public immutable funnelImplementation;
 
+    /// @notice Deploys the FunnelFactory contract
+    /// @dev requires a valid funnelImplementation address
+    /// @param _funnelImplementation The address of the implementation
     constructor(address _funnelImplementation) {
-        require(_funnelImplementation != address(0), "implementation cannot be zero");
+        if (_funnelImplementation == address(0)) {
+            revert InvalidAddress({ _input: _funnelImplementation });
+        }
         funnelImplementation = _funnelImplementation;
     }
 
-    /**
-     * @dev Deploys a new Funnel contract
-     * Throws if `_tokenAddress` has already been deployed
-     */
-    function deployFunnelForToken(address _tokenAddress)
-        external
-        returns (address _funnelAddress)
-    {
+    /// @inheritdoc IFunnelFactory
+    function deployFunnelForToken(address _tokenAddress) external returns (address _funnelAddress) {
         if (deployments[_tokenAddress] != address(0)) {
             revert FunnelAlreadyDeployed();
         }
@@ -35,24 +40,15 @@ contract FunnelFactory is IFunnelFactory {
             revert InvalidToken();
         }
 
-        _funnelAddress = funnelImplementation.cloneDeterministic(
-            bytes32(uint256(uint160(_tokenAddress)))
-        );
+        _funnelAddress = funnelImplementation.cloneDeterministic(bytes32(uint256(uint160(_tokenAddress))));
 
         deployments[_tokenAddress] = _funnelAddress;
         Funnel(_funnelAddress).initialize(_tokenAddress);
         emit DeployedFunnel(_tokenAddress, _funnelAddress);
     }
 
-    /**
-     * @dev Returns the Funnel contract address for a given token address
-     * Reverts with FunnelNotDeployed if `_tokenAddress` has not been deployed
-     */
-    function getFunnelForToken(address _tokenAddress)
-        public
-        view
-        returns (address _funnelAddress)
-    {
+    /// @inheritdoc IFunnelFactory
+    function getFunnelForToken(address _tokenAddress) public view returns (address _funnelAddress) {
         if (deployments[_tokenAddress] == address(0)) {
             revert FunnelNotDeployed();
         }
@@ -60,9 +56,7 @@ contract FunnelFactory is IFunnelFactory {
         return deployments[_tokenAddress];
     }
 
-    /**
-     * @dev Returns true if contract address is a deployed Funnel contract
-     */
+    /// @inheritdoc IFunnelFactory
     function isFunnel(address _funnelAddress) external view returns (bool) {
         // Not a deployed contract
         if (_funnelAddress.code.length == 0) {

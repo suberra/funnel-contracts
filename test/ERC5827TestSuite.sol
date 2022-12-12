@@ -7,12 +7,7 @@ import { IERC5827 } from "../src/interfaces/IERC5827.sol";
 abstract contract ERC5827TestSuite is TestSetup {
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 
-    event RenewableApproval(
-        address indexed _owner,
-        address indexed _spender,
-        uint256 _value,
-        uint256 _recoveryRate
-    );
+    event RenewableApproval(address indexed _owner, address indexed _spender, uint256 _value, uint256 _recoveryRate);
 
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
 
@@ -142,12 +137,7 @@ abstract contract ERC5827TestSuite is TestSetup {
 
     function testInsufficientAllowance() public {
         vm.prank(user1);
-        vm.expectRevert(
-            abi.encodePacked(
-                IERC5827.InsufficientRenewableAllowance.selector,
-                abi.encode(0)
-            )
-        );
+        vm.expectRevert(abi.encodePacked(IERC5827.InsufficientRenewableAllowance.selector, abi.encode(0)));
         renewableToken.transferFrom(user1, user3, 10);
     }
 
