@@ -70,7 +70,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
     /// @notice Called when the contract is being initialised.
-    /// @dev Sets the intial_chain_id and initial_domain_separator that might be used in future permit calls
+    /// @dev Sets the INITIAL_CHAIN_ID and INITIAL_DOMAIN_SEPARATOR that might be used in future permit calls
     function initialize(address _token) external initializer {
         if (_token == address(0)) {
             revert InvalidAddress({ _input: _token });
