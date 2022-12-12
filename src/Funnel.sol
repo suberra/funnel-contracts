@@ -178,21 +178,13 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         _approve(owner, spender, value, recoveryRate);
     }
 
-    /// @notice Approves a spender to spend a fixed amount of token
-    /// @dev this sets an approval with no recovery rate, so the allowance do not get renewed
-    /// @param _spender The address of the spender
-    /// @param _value The amount of tokens that the spender can spend
-    /// @return success true if approval is successful, false otherwise
+    /// @inheritdoc IERC5827
     function approve(address _spender, uint256 _value) external returns (bool success) {
         _approve(_msgSender(), _spender, _value, 0);
         return true;
     }
 
-    /// @notice approves renewable allowance
-    /// @param _spender The address of the spender
-    /// @param _value The amount of tokens that the spender can spend
-    /// @param _recoveryRate The rate at which the allowance is renewed
-    /// @return success true if the approval is successful. False if otherwise.
+    /// @inheritdoc IERC5827
     function approveRenewable(
         address _spender,
         uint256 _value,
@@ -202,20 +194,12 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         return true;
     }
 
-    /// @notice fetch amounts spendable by _spender
-    /// @param _owner The address of the owner
-    /// @param _spender The address of the spender
-    /// @return remaining The remaining allowance at the current point in time
+    /// @inheritdoc IERC5827
     function allowance(address _owner, address _spender) external view returns (uint256 remaining) {
         return _remainingAllowance(_owner, _spender);
     }
 
-    /// @notice Approve renewable allowance for spender and then call `onRenewableApprovalReceived` on IERC5827Spender
-    /// @param _spender address The address which will spend the funds
-    /// @param _value uint256 The amount of tokens to be spent
-    /// @param _recoveryRate period duration in minutes
-    /// @param data bytes Additional data with no specified format, sent in call to `spender`
-    /// @return true unless throwing
+    /// @inheritdoc IERC5827Payable
     function approveRenewableAndCall(
         address _spender,
         uint256 _value,
@@ -229,6 +213,26 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
             "IERC5827Payable: IERC5827Spender returned wrong data"
         );
 
+        return true;
+    }
+
+    /// @inheritdoc IERC5827
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) public returns (bool) {
+        uint256 remainingAllowance = _remainingAllowance(from, _msgSender());
+        if (remainingAllowance < amount) {
+            revert InsufficientRenewableAllowance({ available: remainingAllowance });
+        }
+
+        if (remainingAllowance != type(uint256).max) {
+            rAllowance[from][_msgSender()].remaining = remainingAllowance - amount;
+            rAllowance[from][_msgSender()].lastUpdated = uint64(block.timestamp);
+        }
+
+        _baseToken.safeTransferFrom(from, to, amount);
         return true;
     }
 
@@ -274,7 +278,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         return (a.maxAmount, a.recoveryRate);
     }
 
-    /// @notice Gets the address of the base token (i.e. the underlying ERC20 token)
+    /// @inheritdoc IERC5827Proxy
     function baseToken() external view returns (address) {
         return address(_baseToken);
     }
@@ -290,14 +294,12 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
             interfaceId == type(IERC5827Proxy).interfaceId;
     }
 
-    /// @notice Retrieves the balance of a given user
-    /// @param account Address of the user
-    /// @return balance The balance of the user
+    /// @inheritdoc IERC20
     function balanceOf(address account) external view returns (uint256 balance) {
         return _baseToken.balanceOf(account);
     }
 
-    /// @notice Returns the total supply of the token
+    /// @inheritdoc IERC20
     function totalSupply() external view returns (uint256) {
         return _baseToken.totalSupply();
     }
@@ -317,32 +319,17 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         return string.concat(_name, " (funnel)");
     }
 
+    /// @notice Gets the domain seperator
+    /// @dev DOMAIN_SEPARATOR should be unique to the contract and chain to prevent replay attacks from
+    /// other domains, and satisfy the requirements of EIP-712
+    /// @return bytes32 the domain separator
     function DOMAIN_SEPARATOR() public view override returns (bytes32) {
         return block.chainid == initial_chain_id ? initial_domain_separator : computeDomainSeparator();
     }
 
-    /// @notice transfers base token with renewable allowance logic applied
-    /// @param from owner of base token
-    /// @param to recipient of base token
-    /// @param amount amount to transfer
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) public returns (bool) {
-        uint256 remainingAllowance = _remainingAllowance(from, _msgSender());
-        if (remainingAllowance < amount) {
-            revert InsufficientRenewableAllowance({ available: remainingAllowance });
-        }
-
-        if (remainingAllowance != type(uint256).max) {
-            rAllowance[from][_msgSender()].remaining = remainingAllowance - amount;
-            rAllowance[from][_msgSender()].lastUpdated = uint64(block.timestamp);
-        }
-
-        _baseToken.safeTransferFrom(from, to, amount);
-        return true;
-    }
+    /// =================================================================
+    ///                 Internal Functions
+    /// =================================================================
 
     function _approve(
         address _owner,

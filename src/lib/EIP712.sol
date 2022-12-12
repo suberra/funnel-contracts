@@ -3,8 +3,10 @@ pragma solidity 0.8.17;
 import { IERC1271 } from "openzeppelin-contracts/interfaces/IERC1271.sol";
 
 abstract contract EIP712 {
-    /// DOMAIN_SEPARATOR should be unique to the contract and chain to prevent replay attacks from
+    /// @notice Gets the domain seperator
+    /// @dev DOMAIN_SEPARATOR should be unique to the contract and chain to prevent replay attacks from
     /// other domains, and satisfy the requirements of EIP-712
+    /// @return bytes32 the domain separator
     function DOMAIN_SEPARATOR() public view virtual returns (bytes32);
 
     /// @notice Checks if signer's signature matches the data

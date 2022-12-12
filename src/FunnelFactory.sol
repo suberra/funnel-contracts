@@ -27,10 +27,7 @@ contract FunnelFactory is IFunnelFactory {
         funnelImplementation = _funnelImplementation;
     }
 
-    /// @notice Deploys a new Funnel contract
-    /// @param _tokenAddress The address of the token
-    /// @return _funnelAddress The address of the deployed Funnel contract
-    /// @dev Throws if `_tokenAddress` has already been deployed
+    /// @inheritdoc IFunnelFactory
     function deployFunnelForToken(address _tokenAddress) external returns (address _funnelAddress) {
         if (deployments[_tokenAddress] != address(0)) {
             revert FunnelAlreadyDeployed();
@@ -47,9 +44,16 @@ contract FunnelFactory is IFunnelFactory {
         emit DeployedFunnel(_tokenAddress, _funnelAddress);
     }
 
-    /// @notice Checks if a given address is a deployed Funnel contract
-    /// @param _funnelAddress The address that you want to query
-    /// @return true if contract address is a deployed Funnel contract
+    /// @inheritdoc IFunnelFactory
+    function getFunnelForToken(address _tokenAddress) public view returns (address _funnelAddress) {
+        if (deployments[_tokenAddress] == address(0)) {
+            revert FunnelNotDeployed();
+        }
+
+        return deployments[_tokenAddress];
+    }
+
+    /// @inheritdoc IFunnelFactory
     function isFunnel(address _funnelAddress) external view returns (bool) {
         // Not a deployed contract
         if (_funnelAddress.code.length == 0) {
@@ -64,17 +68,5 @@ contract FunnelFactory is IFunnelFactory {
         } catch {
             return false;
         }
-    }
-
-    /// @notice Retrieves the Funnel contract address for a given token address
-    /// @param _tokenAddress The address of the token
-    /// @return _funnelAddress The address of the deployed Funnel contract
-    /// @dev Reverts with FunnelNotDeployed if `_tokenAddress` has not been deployed
-    function getFunnelForToken(address _tokenAddress) public view returns (address _funnelAddress) {
-        if (deployments[_tokenAddress] == address(0)) {
-            revert FunnelNotDeployed();
-        }
-
-        return deployments[_tokenAddress];
     }
 }
