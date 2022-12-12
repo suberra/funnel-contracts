@@ -421,7 +421,7 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
                 )
             )
         );
-        snapStart("exeecuteMetaTransactionApproveRenewable");
+        snapStart("executeMetaTransactionApproveRenewable");
 
         funnel.executeMetaTransaction(owner, functionSignature, r, s, v);
         snapEnd();
@@ -445,7 +445,7 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
             )
         );
 
-        snapStart("exeecuteMetaTransactionTransfer");
+        snapStart("executeMetaTransactionTransfer");
         funnel.executeMetaTransaction(user1, functionSignature, r, s, v);
         snapEnd();
 
