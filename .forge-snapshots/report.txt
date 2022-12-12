@@ -3,7 +3,9 @@ No files changed, compilation skipped
 Running 2 tests for test/MockSpenderReceiver.t.sol:MockSpenderReceiverTest
 [32m[PASS][0m testSupportInterfaceReceiver() (gas: 5598)
 [32m[PASS][0m testSupportInterfaceSpender() (gas: 6567)
+
 Test result: [32mok[0m. 2 passed; 0 failed; finished in 2.29ms
+
 
 Running 11 tests for test/FunnelFactory.t.sol:FunnelFactoryTest
 [32m[PASS][0m testDeployFunnelForDifferentTokens() (gas: 298301)
@@ -17,6 +19,7 @@ Running 11 tests for test/FunnelFactory.t.sol:FunnelFactoryTest
 [32m[PASS][0m testIsFunnelTrueForDeployedFunnel() (gas: 155345)
 [32m[PASS][0m testNoCodeTokenReverts() (gas: 15454)
 [32m[PASS][0m testTransferFromFunnel() (gas: 294476)
+
 Test result: [32mok[0m. 11 passed; 0 failed; finished in 9.01ms
 
 Running 44 tests for test/Funnel.t.sol:FunnelTest
@@ -31,6 +34,7 @@ Running 44 tests for test/Funnel.t.sol:FunnelTest
 [32m[PASS][0m testClearRenewableAllowanceOnNormalApprove() (gas: 146049)
 [32m[PASS][0m testExecuteMetaTransactionApproveRenewable() (gas: 211566)
 [32m[PASS][0m testExecuteMetaTransactionTransfer() (gas: 127678)
+
 [32m[PASS][0m testFailExecuteMetaTransactionBadNonce() (gas: 47539)
 [32m[PASS][0m testFailExecuteMetaTransactionReplayProtection() (gas: 143216)
 [32m[PASS][0m testFailPermitBadDeadline() (gas: 46617)
@@ -44,6 +48,7 @@ Running 44 tests for test/Funnel.t.sol:FunnelTest
 [32m[PASS][0m testFallbackToBaseToken() (gas: 25635)
 [32m[PASS][0m testInfiniteApproveTransferFrom() (gas: 134109)
 [32m[PASS][0m testInsufficientAllowance() (gas: 29359)
+
 [32m[PASS][0m testOverflow() (gas: 116604)
 [32m[PASS][0m testOverflow2() (gas: 116501)
 [32m[PASS][0m testOverflow3() (gas: 129967)
@@ -53,7 +58,9 @@ Running 44 tests for test/Funnel.t.sol:FunnelTest
 [32m[PASS][0m testRecoveryRateCasting() (gas: 85917)
 [32m[PASS][0m testRecoveryRateExceeded() (gas: 13408)
 [32m[PASS][0m testRecoveryRateExceeded2() (gas: 13447)
+
 [32m[PASS][0m testRenewableAllowanceTransferFrom() (gas: 155288)
+
 [32m[PASS][0m testRenewableMaxAllowance() (gas: 98381)
 [32m[PASS][0m testSupportInterface() (gas: 5766)
 [32m[PASS][0m testSupportsInterfacePayable() (gas: 5814)
@@ -64,6 +71,7 @@ Running 44 tests for test/Funnel.t.sol:FunnelTest
 [32m[PASS][0m testTransferFromAndCallRevertNonReceiver() (gas: 111819)
 [32m[PASS][0m testTransferFromAndCallWithGasSnapshot() (gas: 174098)
 [32m[PASS][0m testTransferFromWithSnapshot() (gas: 156685)
+
 Test result: [32mok[0m. 44 passed; 0 failed; finished in 14.08ms
 
 Running 18 tests for test/FunnelERC20.t.sol:FunnelERC20Test
@@ -86,6 +94,7 @@ Running 18 tests for test/FunnelERC20.t.sol:FunnelERC20Test
 [32m[PASS][0m testTransferOneToken() (gas: 64089)
 [32m[PASS][0m testTransferZeroTokens() (gas: 41433)
 Test result: [32mok[0m. 18 passed; 0 failed; finished in 48.81ms
+
 ╭────────────────────────────────┬─────────────────┬───────┬────────┬────────┬─────────╮
 │ src/Funnel.sol:Funnel contract ┆                 ┆       ┆        ┆        ┆         │
 ╞════════════════════════════════╪═════════════════╪═══════╪════════╪════════╪═════════╡
