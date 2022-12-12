@@ -115,6 +115,20 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         assertTrue(funnel.transferFromAndCall(user1, address(spender), 10, ""));
         snapEnd();
     }
+    
+    function testInsufficientBaseAllowance() public {
+        vm.prank(user1);
+        token.approve(address(funnel), 0);
+
+        vm.prank(user1);
+        funnel.approveRenewable(user2, 1337, 1);
+
+        assertEq(funnel.allowance(user1, address(spender)), 0);
+
+        vm.prank(user2);
+        vm.expectRevert("ERC20: insufficient allowance");
+        funnel.transferFromAndCall(user1, address(spender), 10, "");
+    }
 
     function testOverflow() public {
         vm.prank(user1);

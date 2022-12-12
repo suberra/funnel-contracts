@@ -203,7 +203,9 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
 
     /// @inheritdoc IERC5827
     function allowance(address _owner, address _spender) external view returns (uint256 remaining) {
-        return _remainingAllowance(_owner, _spender);
+        uint256 _baseAllowance = _baseToken.allowance(_owner, address(this));
+        uint256 _renewableAllowance = _remainingAllowance(_owner, _spender);
+        return _baseAllowance < _renewableAllowance ? _baseAllowance : _renewableAllowance;
     }
 
     /// @inheritdoc IERC5827Payable
@@ -444,11 +446,10 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     /// @return remaining allowance left
     function _remainingAllowance(address _owner, address _spender) private view returns (uint256) {
         RenewableAllowance memory a = rAllowance[_owner][_spender];
-        uint256 baseAllowance = _baseToken.allowance(_owner, address(this));
+
         uint256 recovered = a.recoveryRate * uint64(block.timestamp - a.lastUpdated);
         uint256 remainingAllowance = MathUtil.saturatingAdd(a.remaining, recovered);
 
-        uint256 currentAllowance = remainingAllowance > a.maxAmount ? a.maxAmount : remainingAllowance;
-        return currentAllowance > baseAllowance ? baseAllowance : currentAllowance;
+        return remainingAllowance > a.maxAmount ? a.maxAmount : remainingAllowance;
     }
 }
