@@ -28,7 +28,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     ///                      EIP-5827 STORAGE
     //////////////////////////////////////////////////////////////
 
-    // address of the base token (e.g. USDC, DAI, WETH)
+    /// address of the base token (e.g. USDC, DAI, WETH)
     IERC20 private _baseToken;
 
     /// @notice RenewableAllowance struct that is stored on the contract
@@ -56,17 +56,17 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     /// @dev This value will not change
     uint256 internal INITIAL_CHAIN_ID;
 
-    // INITIAL_DOMAIN_SEPARATOR to be set during initiailisation
+    /// INITIAL_DOMAIN_SEPARATOR to be set during initiailisation
     /// @dev This value will not change
     bytes32 internal INITIAL_DOMAIN_SEPARATOR;
 
-    // constant for the given struct type that do not need to be runtime computed. Required for EIP712-typed data
+    /// constant for the given struct type that do not need to be runtime computed. Required for EIP712-typed data
     bytes32 internal constant PERMIT_RENEWABLE_TYPEHASH =
         keccak256(
             "PermitRenewable(address owner,address spender,uint256 value,uint256 recoveryRate,uint256 nonce,uint256 deadline)"
         );
 
-    // constant for the given struct type that do not need to be runtime computed. Required for EIP712-typed data
+    /// constant for the given struct type that do not need to be runtime computed. Required for EIP712-typed data
     bytes32 internal constant PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
