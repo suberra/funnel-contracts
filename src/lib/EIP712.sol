@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
+
 import { IERC1271 } from "openzeppelin-contracts/interfaces/IERC1271.sol";
 
 abstract contract EIP712 {

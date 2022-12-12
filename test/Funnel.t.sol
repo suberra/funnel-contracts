@@ -7,8 +7,9 @@ import { IERC20Metadata } from "openzeppelin-contracts/interfaces/IERC20Metadata
 import { Funnel, IFunnel, IFunnelErrors } from "../src/Funnel.sol";
 import { ERC5827TestSuite } from "./ERC5827TestSuite.sol";
 import { MockSpenderReceiver } from "../src/mocks/MockSpenderReceiver.sol";
+import { GasSnapshot } from "forge-gas-snapshot/GasSnapshot.sol";
 
-contract FunnelTest is ERC5827TestSuite {
+contract FunnelTest is ERC5827TestSuite, GasSnapshot {
     event TransferReceived(address operator, address from, uint256 value);
     event RenewableApprovalReceived(address owner, uint256 value, uint256 recoveryRate);
 
@@ -68,6 +69,14 @@ contract FunnelTest is ERC5827TestSuite {
         assertEq(funnel.allowance(user1, address(spender)), 100); // reflects base token allowance
     }
 
+    function testTransferFromWithSnapshot() public {
+        vm.prank(user1);
+        funnel.approve(address(this), type(uint256).max);
+        snapStart("transferFrom");
+        funnel.transferFrom(user1, user2, 13370);
+        snapEnd();
+    }
+
     function testInfiniteApproveTransferFrom() public {
         vm.prank(user1);
         funnel.approve(address(this), type(uint256).max);
@@ -82,12 +91,29 @@ contract FunnelTest is ERC5827TestSuite {
 
     function testTransferFromAndCall() public {
         vm.prank(user1);
+
         funnel.approveRenewable(user2, 1337, 1);
 
         vm.prank(user2);
         vm.expectEmit(true, false, false, true);
         emit TransferReceived(user2, user1, 10);
         assertTrue(funnel.transferFromAndCall(user1, address(spender), 10, ""));
+    }
+
+    function testTransferFromAndCallWithGasSnapshot() public {
+        vm.prank(user1);
+
+        snapStart("approveRenewable");
+        funnel.approveRenewable(user2, 1337, 1);
+        snapEnd();
+
+        vm.prank(user2);
+        vm.expectEmit(true, false, false, true);
+        emit TransferReceived(user2, user1, 10);
+
+        snapStart("transferFromAndCall");
+        assertTrue(funnel.transferFromAndCall(user1, address(spender), 10, ""));
+        snapEnd();
     }
 
     function testOverflow() public {
@@ -158,6 +184,13 @@ contract FunnelTest is ERC5827TestSuite {
         assertTrue(funnel.approveRenewableAndCall(address(spender), 1337, 1, ""));
     }
 
+    function testApproveRenewableAndCallWithGasSnapshot() public {
+        vm.prank(user1);
+        snapStart("approveRenewableAndCall");
+        funnel.approveRenewableAndCall(address(spender), 1337, 1, "");
+        snapEnd();
+    }
+
     function testApproveRenewableAndCallRevertNonContract() public {
         vm.expectRevert(IFunnelErrors.NotContractError.selector);
         funnel.approveRenewableAndCall(address(user3), 1337, 1, "");
@@ -184,7 +217,9 @@ contract FunnelTest is ERC5827TestSuite {
             )
         );
 
+        snapStart("permit");
         funnel.permit(owner, user2, 1e18, block.timestamp, v, r, s);
+        snapEnd();
 
         assertEq(funnel.allowance(owner, user2), 1e18);
         assertEq(funnel.nonces(owner), 1);
@@ -386,8 +421,10 @@ contract FunnelTest is ERC5827TestSuite {
                 )
             )
         );
+        snapStart("exeecuteMetaTransactionApproveRenewable");
 
         funnel.executeMetaTransaction(owner, functionSignature, r, s, v);
+        snapEnd();
 
         assertEq(funnel.allowance(owner, user2), 1e18);
         assertEq(funnel.nonces(owner), 1);
@@ -408,7 +445,9 @@ contract FunnelTest is ERC5827TestSuite {
             )
         );
 
+        snapStart("exeecuteMetaTransactionTransfer");
         funnel.executeMetaTransaction(user1, functionSignature, r, s, v);
+        snapEnd();
 
         assertEq(funnel.balanceOf(user2), 1337);
         assertEq(funnel.nonces(user1), 1);

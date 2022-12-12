@@ -40,9 +40,9 @@ Goal is to deploy a factory onto all supported chains at the same address, and *
 
 ## Testing
 
-Our tests consist of both Foundry tests and hardhat tests.
+Our tests consist of both Foundry tests and hardhat tests. 
 
-`forge test` - Runs the Foundry tests
+`forge test` - Runs the Foundry tests. Forge gas snapshots will be captured under `.forge-snapshots`
 
 `npx hardhat test` - Runs hardhat tests
 

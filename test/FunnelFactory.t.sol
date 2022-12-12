@@ -8,8 +8,9 @@ import { FunnelFactory, IFunnelErrors } from "../src/FunnelFactory.sol";
 import { Funnel } from "../src/Funnel.sol";
 import { IFunnelFactory } from "../src/interfaces/IFunnelFactory.sol";
 import { Clones } from "openzeppelin-contracts/proxy/Clones.sol";
+import { GasSnapshot } from "forge-gas-snapshot/GasSnapshot.sol";
 
-contract FunnelFactoryTest is Test {
+contract FunnelFactoryTest is Test, GasSnapshot {
     FunnelFactory funnelFactory;
     address tokenAddress1;
     address tokenAddress2;
@@ -51,7 +52,9 @@ contract FunnelFactoryTest is Test {
     }
 
     function testDeployFunnelForToken() public {
+        snapStart("deployFunnelForToken");
         address funnelAddress = funnelFactory.deployFunnelForToken(address(token));
+        snapEnd();
 
         assertEq(funnelFactory.getFunnelForToken(address(token)), funnelAddress);
 
