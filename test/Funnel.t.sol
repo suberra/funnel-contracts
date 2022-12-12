@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 import "forge-std/Test.sol";
 import { ERC20PresetFixedSupply, ERC20 } from "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 import { IERC20Metadata } from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
-import { Funnel, IFunnel } from "../src/Funnel.sol";
+import { Funnel, IFunnel, IFunnelErrors } from "../src/Funnel.sol";
 import { ERC5827TestSuite } from "./ERC5827TestSuite.sol";
 import { MockSpenderReceiver } from "../src/mocks/MockSpenderReceiver.sol";
 
@@ -20,18 +20,15 @@ contract FunnelTest is ERC5827TestSuite {
     // keccak256(
     //     "PermitRenewable(address owner,address spender,uint256 value,uint256 recoveryRate,uint256 nonce,uint256 deadline)"
     // )
-    bytes32 internal PERMIT_RENEWABLE_TYPEHASH =
-        0x4c7980a0d4b6c380a9911208fee8e0a4cec3c9be70b18695b1089dde159ff934;
+    bytes32 internal PERMIT_RENEWABLE_TYPEHASH = 0x4c7980a0d4b6c380a9911208fee8e0a4cec3c9be70b18695b1089dde159ff934;
 
     // keccak256(
     //     "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
     // )
-    bytes32 constant PERMIT_TYPEHASH =
-        0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
+    bytes32 constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
 
     // keccak256("MetaTransaction(uint256 nonce,address from,bytes functionSignature)")
-    bytes32 constant META_TRANSACTION_TYPEHASH =
-        0x23d10def3caacba2e4042e0c75d44a42d2558aabcf5ce951d0642a8032e1e653;
+    bytes32 constant META_TRANSACTION_TYPEHASH = 0x23d10def3caacba2e4042e0c75d44a42d2558aabcf5ce951d0642a8032e1e653;
 
     function setUp() public override {
         uint256 privateKey = 0xBEEF;
@@ -39,7 +36,7 @@ contract FunnelTest is ERC5827TestSuite {
         user2 = address(0xCAFE);
         user3 = address(0xDEAD);
 
-        token = new ERC20PresetFixedSupply("Existing USDC token", "USDC", 13370, user1);
+        token = new ERC20PresetFixedSupply("Existing USDC token", "USDC", type(uint256).max, user1);
 
         funnel = new Funnel();
         funnel.initialize(address(token));
@@ -62,6 +59,15 @@ contract FunnelTest is ERC5827TestSuite {
         funnel.approveRenewable(user2, 100, 101);
     }
 
+    function testBaseTokenAllowance() public {
+        vm.startPrank(user1);
+        token.approve(address(funnel), 100);
+        assertEq(token.allowance(user1, address(funnel)), 100);
+
+        funnel.approveRenewable(address(spender), type(uint256).max, 1);
+        assertEq(funnel.allowance(user1, address(spender)), 100); // reflects base token allowance
+    }
+
     function testInfiniteApproveTransferFrom() public {
         vm.prank(user1);
         funnel.approve(address(this), type(uint256).max);
@@ -70,7 +76,7 @@ contract FunnelTest is ERC5827TestSuite {
 
         assertEq(funnel.allowance(user1, address(this)), type(uint256).max);
 
-        assertEq(funnel.balanceOf(user1), 0);
+        assertEq(funnel.balanceOf(user1), type(uint256).max - 13370);
         assertEq(funnel.balanceOf(user2), 13370);
     }
 
@@ -84,11 +90,54 @@ contract FunnelTest is ERC5827TestSuite {
         assertTrue(funnel.transferFromAndCall(user1, address(spender), 10, ""));
     }
 
+    function testOverflow() public {
+        vm.prank(user1);
+        funnel.approveRenewable(address(user2), type(uint256).max - type(uint192).max + 1, type(uint192).max);
+        vm.warp(2);
+        vm.prank(user2);
+        vm.expectEmit(true, false, false, true);
+        emit Transfer(user1, user2, type(uint256).max - type(uint192).max + 1);
+        assertTrue(funnel.transferFrom(user1, user3, type(uint256).max - type(uint192).max + 1));
+        assertEq(token.balanceOf(user3), type(uint256).max - type(uint192).max + 1);
+    }
+
+    function testOverflow2() public {
+        vm.prank(user1);
+        funnel.approveRenewable(user2, type(uint256).max - type(uint64).max + 1, type(uint64).max);
+        vm.warp(2);
+        vm.prank(user2);
+        vm.expectEmit(true, false, false, true);
+        emit Transfer(user1, user2, type(uint256).max - type(uint64).max + 1);
+        assertTrue(funnel.transferFrom(user1, user3, type(uint256).max - type(uint64).max + 1));
+        assertEq(token.balanceOf(user3), type(uint256).max - type(uint64).max + 1);
+    }
+
+    function testOverflow3() public {
+        vm.prank(user1);
+        funnel.approveRenewable(user2, type(uint256).max, type(uint64).max);
+        vm.warp(2);
+        vm.prank(user2);
+        vm.expectEmit(true, false, false, true);
+        emit Transfer(user1, user2, type(uint256).max);
+        assertTrue(funnel.transferFrom(user1, user3, type(uint256).max));
+        assertEq(token.balanceOf(user3), type(uint256).max);
+    }
+
+    function testRecoveryRateCasting() public {
+        vm.prank(user1);
+        funnel.approveRenewable(user2, type(uint256).max, type(uint256).max);
+
+        (uint256 initial, uint256 recoveryRate) = funnel.renewableAllowance(user1, user2);
+
+        assertEq(initial, type(uint256).max);
+        assertEq(recoveryRate, type(uint192).max);
+    }
+
     function testTransferFromAndCallRevertNonContract() public {
         vm.prank(user1);
         funnel.approveRenewable(user2, 1337, 1);
         vm.prank(user2);
-        vm.expectRevert("IERC5827Payable: transfer to non contract address");
+        vm.expectRevert(IFunnelErrors.NotContractError.selector);
         funnel.transferFromAndCall(user1, address(user3), 1337, "");
     }
 
@@ -97,7 +146,8 @@ contract FunnelTest is ERC5827TestSuite {
         funnel.approveRenewable(user2, 1337, 1);
 
         vm.prank(user2);
-        vm.expectRevert("IERC5827Payable: transfer to non IERC1363Receiver implementer");
+        // Attempting to transfer to a non IERC1363Receiver
+        vm.expectRevert(IFunnel.NotIERC1363Receiver.selector);
         funnel.transferFromAndCall(user1, address(token), 1337, "");
     }
 
@@ -109,12 +159,13 @@ contract FunnelTest is ERC5827TestSuite {
     }
 
     function testApproveRenewableAndCallRevertNonContract() public {
-        vm.expectRevert("IERC5827Payable: approve a non contract address");
+        vm.expectRevert(IFunnelErrors.NotContractError.selector);
         funnel.approveRenewableAndCall(address(user3), 1337, 1, "");
     }
 
     function testApproveRenewableAndCallRevertNonReceiver() public {
-        vm.expectRevert("IERC5827Payable: approve a non IERC5827Spender implementer");
+        // attempting to approve a non IERC5827Spender
+        vm.expectRevert(IFunnel.NotIERC5827Spender.selector);
         funnel.approveRenewableAndCall(address(token), 1337, 1, "");
     }
 
@@ -128,16 +179,7 @@ contract FunnelTest is ERC5827TestSuite {
                 abi.encodePacked(
                     "\x19\x01",
                     funnel.DOMAIN_SEPARATOR(),
-                    keccak256(
-                        abi.encode(
-                            PERMIT_TYPEHASH,
-                            owner,
-                            user2,
-                            1e18,
-                            0,
-                            block.timestamp
-                        )
-                    )
+                    keccak256(abi.encode(PERMIT_TYPEHASH, owner, user2, 1e18, 0, block.timestamp))
                 )
             )
         );
@@ -158,16 +200,7 @@ contract FunnelTest is ERC5827TestSuite {
                 abi.encodePacked(
                     "\x19\x01",
                     funnel.DOMAIN_SEPARATOR(),
-                    keccak256(
-                        abi.encode(
-                            PERMIT_TYPEHASH,
-                            owner,
-                            user2,
-                            1e18,
-                            1,
-                            block.timestamp
-                        )
-                    )
+                    keccak256(abi.encode(PERMIT_TYPEHASH, owner, user2, 1e18, 1, block.timestamp))
                 )
             )
         );
@@ -185,16 +218,7 @@ contract FunnelTest is ERC5827TestSuite {
                 abi.encodePacked(
                     "\x19\x01",
                     funnel.DOMAIN_SEPARATOR(),
-                    keccak256(
-                        abi.encode(
-                            PERMIT_TYPEHASH,
-                            owner,
-                            user2,
-                            1e18,
-                            0,
-                            block.timestamp
-                        )
-                    )
+                    keccak256(abi.encode(PERMIT_TYPEHASH, owner, user2, 1e18, 0, block.timestamp))
                 )
             )
         );
@@ -213,16 +237,7 @@ contract FunnelTest is ERC5827TestSuite {
                 abi.encodePacked(
                     "\x19\x01",
                     funnel.DOMAIN_SEPARATOR(),
-                    keccak256(
-                        abi.encode(
-                            PERMIT_TYPEHASH,
-                            owner,
-                            address(0xCAFE),
-                            1e18,
-                            0,
-                            oldTimestamp
-                        )
-                    )
+                    keccak256(abi.encode(PERMIT_TYPEHASH, owner, address(0xCAFE), 1e18, 0, oldTimestamp))
                 )
             )
         );
@@ -243,9 +258,7 @@ contract FunnelTest is ERC5827TestSuite {
                 abi.encodePacked(
                     "\x19\x01",
                     funnel.DOMAIN_SEPARATOR(),
-                    keccak256(
-                        abi.encode(PERMIT_TYPEHASH, owner, user2, 1e18, 0, timestamp)
-                    )
+                    keccak256(abi.encode(PERMIT_TYPEHASH, owner, user2, 1e18, 0, timestamp))
                 )
             )
         );
@@ -264,17 +277,7 @@ contract FunnelTest is ERC5827TestSuite {
                 abi.encodePacked(
                     "\x19\x01",
                     funnel.DOMAIN_SEPARATOR(),
-                    keccak256(
-                        abi.encode(
-                            PERMIT_RENEWABLE_TYPEHASH,
-                            owner,
-                            user2,
-                            1e18,
-                            1,
-                            0,
-                            block.timestamp
-                        )
-                    )
+                    keccak256(abi.encode(PERMIT_RENEWABLE_TYPEHASH, owner, user2, 1e18, 1, 0, block.timestamp))
                 )
             )
         );
@@ -295,17 +298,7 @@ contract FunnelTest is ERC5827TestSuite {
                 abi.encodePacked(
                     "\x19\x01",
                     funnel.DOMAIN_SEPARATOR(),
-                    keccak256(
-                        abi.encode(
-                            PERMIT_RENEWABLE_TYPEHASH,
-                            owner,
-                            user2,
-                            1e18,
-                            1,
-                            1,
-                            block.timestamp
-                        )
-                    )
+                    keccak256(abi.encode(PERMIT_RENEWABLE_TYPEHASH, owner, user2, 1e18, 1, 1, block.timestamp))
                 )
             )
         );
@@ -323,17 +316,7 @@ contract FunnelTest is ERC5827TestSuite {
                 abi.encodePacked(
                     "\x19\x01",
                     funnel.DOMAIN_SEPARATOR(),
-                    keccak256(
-                        abi.encode(
-                            PERMIT_RENEWABLE_TYPEHASH,
-                            owner,
-                            user2,
-                            1e18,
-                            1,
-                            0,
-                            block.timestamp
-                        )
-                    )
+                    keccak256(abi.encode(PERMIT_RENEWABLE_TYPEHASH, owner, user2, 1e18, 1, 0, block.timestamp))
                 )
             )
         );
@@ -352,17 +335,7 @@ contract FunnelTest is ERC5827TestSuite {
                 abi.encodePacked(
                     "\x19\x01",
                     funnel.DOMAIN_SEPARATOR(),
-                    keccak256(
-                        abi.encode(
-                            PERMIT_RENEWABLE_TYPEHASH,
-                            owner,
-                            user2,
-                            1e18,
-                            1,
-                            0,
-                            oldTimestamp
-                        )
-                    )
+                    keccak256(abi.encode(PERMIT_RENEWABLE_TYPEHASH, owner, user2, 1e18, 1, 0, oldTimestamp))
                 )
             )
         );
@@ -384,17 +357,7 @@ contract FunnelTest is ERC5827TestSuite {
                 abi.encodePacked(
                     "\x19\x01",
                     funnel.DOMAIN_SEPARATOR(),
-                    keccak256(
-                        abi.encode(
-                            PERMIT_RENEWABLE_TYPEHASH,
-                            owner,
-                            user2,
-                            1e18,
-                            1,
-                            0,
-                            timestamp
-                        )
-                    )
+                    keccak256(abi.encode(PERMIT_RENEWABLE_TYPEHASH, owner, user2, 1e18, 1, 0, timestamp))
                 )
             )
         );
@@ -419,14 +382,7 @@ contract FunnelTest is ERC5827TestSuite {
                 abi.encodePacked(
                     "\x19\x01",
                     funnel.DOMAIN_SEPARATOR(),
-                    keccak256(
-                        abi.encode(
-                            META_TRANSACTION_TYPEHASH,
-                            0,
-                            owner,
-                            keccak256(functionSignature)
-                        )
-                    )
+                    keccak256(abi.encode(META_TRANSACTION_TYPEHASH, 0, owner, keccak256(functionSignature)))
                 )
             )
         );
@@ -440,25 +396,14 @@ contract FunnelTest is ERC5827TestSuite {
     function testExecuteMetaTransactionTransfer() public {
         uint256 privateKey = 0xBEEF;
 
-        bytes memory functionSignature = abi.encodeWithSignature(
-            "transfer(address,uint256)",
-            user2,
-            1337
-        );
+        bytes memory functionSignature = abi.encodeWithSignature("transfer(address,uint256)", user2, 1337);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
             privateKey,
             keccak256(
                 abi.encodePacked(
                     "\x19\x01",
                     funnel.DOMAIN_SEPARATOR(),
-                    keccak256(
-                        abi.encode(
-                            META_TRANSACTION_TYPEHASH,
-                            0,
-                            user1,
-                            keccak256(functionSignature)
-                        )
-                    )
+                    keccak256(abi.encode(META_TRANSACTION_TYPEHASH, 0, user1, keccak256(functionSignature)))
                 )
             )
         );
@@ -486,14 +431,7 @@ contract FunnelTest is ERC5827TestSuite {
                 abi.encodePacked(
                     "\x19\x01",
                     funnel.DOMAIN_SEPARATOR(),
-                    keccak256(
-                        abi.encode(
-                            META_TRANSACTION_TYPEHASH,
-                            1,
-                            owner,
-                            keccak256(functionSignature)
-                        )
-                    )
+                    keccak256(abi.encode(META_TRANSACTION_TYPEHASH, 1, owner, keccak256(functionSignature)))
                 )
             )
         );
@@ -518,14 +456,7 @@ contract FunnelTest is ERC5827TestSuite {
                 abi.encodePacked(
                     "\x19\x01",
                     funnel.DOMAIN_SEPARATOR(),
-                    keccak256(
-                        abi.encode(
-                            META_TRANSACTION_TYPEHASH,
-                            0,
-                            owner,
-                            keccak256(functionSignature)
-                        )
-                    )
+                    keccak256(abi.encode(META_TRANSACTION_TYPEHASH, 0, owner, keccak256(functionSignature)))
                 )
             )
         );
@@ -545,10 +476,7 @@ contract FunnelTest is ERC5827TestSuite {
     }
 
     function testOverriddenName() public {
-        assertEq(
-            IERC20Metadata(address(funnel)).name(),
-            string.concat(token.name(), " (funnel)")
-        );
+        assertEq(IERC20Metadata(address(funnel)).name(), string.concat(token.name(), " (funnel)"));
     }
 
     function testFallbackToBaseToken() public {
