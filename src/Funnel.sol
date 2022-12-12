@@ -13,6 +13,7 @@ import { IERC5827 } from "./interfaces/IERC5827.sol";
 import { IERC5827Proxy } from "./interfaces/IERC5827Proxy.sol";
 import { IERC5827Spender } from "./interfaces/IERC5827Spender.sol";
 import { IERC5827Payable } from "./interfaces/IERC5827Payable.sol";
+import { IFunnelErrors } from "./interfaces/IFunnelErrors.sol";
 import { MetaTxContext } from "./lib/MetaTxContext.sol";
 import { NativeMetaTransaction } from "./lib/NativeMetaTransaction.sol";
 import { MathUtil } from "./lib/MathUtil.sol";
@@ -20,7 +21,7 @@ import { MathUtil } from "./lib/MathUtil.sol";
 /// @title Funnel contracts for ERC20
 /// @author Zac (zlace0x), zhongfu (zhongfu), Edison (edison0xyz)
 /// @notice This contract is a funnel for ERC20 tokens. It enforces renewable allowances
-contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable {
+contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable, IFunnelErrors {
     using SafeERC20 for IERC20;
 
     //////////////////////////////////////////////////////////////
@@ -51,11 +52,13 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     ///                        EIP-2612 STORAGE
     //////////////////////////////////////////////////////////////
 
-    // initial_chain_id to be set during initiailisation
-    uint256 internal initial_chain_id;
+    /// INITIAL_CHAIN_ID to be set during initiailisation
+    /// @dev This value will not change
+    uint256 internal INITIAL_CHAIN_ID;
 
-    // initial_domain_separator to be set during initiailisation
-    bytes32 internal initial_domain_separator;
+    // INITIAL_DOMAIN_SEPARATOR to be set during initiailisation
+    /// @dev This value will not change
+    bytes32 internal INITIAL_DOMAIN_SEPARATOR;
 
     // constant for the given struct type that do not need to be runtime computed. Required for EIP712-typed data
     bytes32 internal constant PERMIT_RENEWABLE_TYPEHASH =
@@ -68,13 +71,15 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
     /// @notice Called when the contract is being initialised.
-    /// @dev Sets the intial_chain_id and initial_domain_separator that might be used in future permit calls
+    /// @dev Sets the INITIAL_CHAIN_ID and INITIAL_DOMAIN_SEPARATOR that might be used in future permit calls
     function initialize(address _token) external initializer {
-        require(_token != address(0), "token address cannot be 0");
+        if (_token == address(0)) {
+            revert InvalidAddress({ _input: _token });
+        }
         _baseToken = IERC20(_token);
 
-        initial_chain_id = block.chainid;
-        initial_domain_separator = computeDomainSeparator();
+        INITIAL_CHAIN_ID = block.chainid;
+        INITIAL_DOMAIN_SEPARATOR = computeDomainSeparator();
     }
 
     /// @dev Fallback function
@@ -130,7 +135,9 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         bytes32 r,
         bytes32 s
     ) external {
-        require(deadline >= block.timestamp, "PERMIT_DEADLINE_EXPIRED");
+        if (deadline < block.timestamp) {
+            revert PermitExpired();
+        }
 
         uint256 nonce;
         unchecked {
@@ -162,8 +169,9 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         bytes32 r,
         bytes32 s
     ) external {
-        require(deadline >= block.timestamp, "PERMIT_DEADLINE_EXPIRED");
-
+        if (deadline < block.timestamp) {
+            revert PermitExpired();
+        }
         uint256 nonce;
         unchecked {
             nonce = _nonces[owner]++;
@@ -208,10 +216,9 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     ) external returns (bool) {
         _approve(_msgSender(), _spender, _value, _recoveryRate);
 
-        require(
-            _checkOnApprovalReceived(_spender, _value, _recoveryRate, data),
-            "IERC5827Payable: IERC5827Spender returned wrong data"
-        );
+        if (!_checkOnApprovalReceived(_spender, _value, _recoveryRate, data)) {
+            revert WrongDataReceivedIERC5827Spender();
+        }
 
         return true;
     }
@@ -245,10 +252,9 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     ) external returns (bool) {
         transferFrom(from, to, value);
 
-        require(
-            _checkOnTransferReceived(from, to, value, data),
-            "IERC5827Payable: IERC1363Receiver returned wrong data"
-        );
+        if (!_checkOnTransferReceived(from, to, value, data)) {
+            revert WrongDataReceivedIERC1363Receiver();
+        }
         return true;
     }
 
@@ -324,7 +330,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
     /// other domains, and satisfy the requirements of EIP-712
     /// @return bytes32 the domain separator
     function DOMAIN_SEPARATOR() public view override returns (bytes32) {
-        return block.chainid == initial_chain_id ? initial_domain_separator : computeDomainSeparator();
+        return block.chainid == INITIAL_CHAIN_ID ? INITIAL_DOMAIN_SEPARATOR : computeDomainSeparator();
     }
 
     /// =================================================================
@@ -365,7 +371,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         bytes memory data
     ) internal returns (bool) {
         if (!Address.isContract(recipient)) {
-            revert("IERC5827Payable: transfer to non contract address");
+            revert NotContractError();
         }
 
         try
@@ -379,7 +385,8 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
             return retval == IERC1363Receiver.onTransferReceived.selector;
         } catch (bytes memory reason) {
             if (reason.length == 0) {
-                revert("IERC5827Payable: transfer to non IERC1363Receiver implementer");
+                // Attempted to transfer to a non-IERC1363Receiver implementer
+                revert NotIERC1363Receiver();
             } else {
                 /// @solidity memory-safe-assembly
                 assembly {
@@ -412,7 +419,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
         bytes memory data
     ) internal returns (bool) {
         if (!Address.isContract(_spender)) {
-            revert("IERC5827Payable: approve a non contract address");
+            revert NotContractError();
         }
 
         try IERC5827Spender(_spender).onRenewableApprovalReceived(_msgSender(), _value, _recoveryRate, data) returns (
@@ -421,7 +428,8 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable 
             return retval == IERC5827Spender.onRenewableApprovalReceived.selector;
         } catch (bytes memory reason) {
             if (reason.length == 0) {
-                revert("IERC5827Payable: approve a non IERC5827Spender implementer");
+                // attempting to approve a non IERC5827Spender implementer
+                revert NotIERC5827Spender();
             } else {
                 /// @solidity memory-safe-assembly
                 assembly {

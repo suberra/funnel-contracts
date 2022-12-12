@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 import "forge-std/Test.sol";
 import { ERC20PresetFixedSupply, ERC20 } from "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 import { IERC20Metadata } from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
-import { Funnel, IFunnel } from "../src/Funnel.sol";
+import { Funnel, IFunnel, IFunnelErrors } from "../src/Funnel.sol";
 import { ERC5827TestSuite } from "./ERC5827TestSuite.sol";
 import { MockSpenderReceiver } from "../src/mocks/MockSpenderReceiver.sol";
 
@@ -137,7 +137,7 @@ contract FunnelTest is ERC5827TestSuite {
         vm.prank(user1);
         funnel.approveRenewable(user2, 1337, 1);
         vm.prank(user2);
-        vm.expectRevert("IERC5827Payable: transfer to non contract address");
+        vm.expectRevert(IFunnelErrors.NotContractError.selector);
         funnel.transferFromAndCall(user1, address(user3), 1337, "");
     }
 
@@ -146,7 +146,8 @@ contract FunnelTest is ERC5827TestSuite {
         funnel.approveRenewable(user2, 1337, 1);
 
         vm.prank(user2);
-        vm.expectRevert("IERC5827Payable: transfer to non IERC1363Receiver implementer");
+        // Attempting to transfer to a non IERC1363Receiver
+        vm.expectRevert(IFunnel.NotIERC1363Receiver.selector);
         funnel.transferFromAndCall(user1, address(token), 1337, "");
     }
 
@@ -158,12 +159,13 @@ contract FunnelTest is ERC5827TestSuite {
     }
 
     function testApproveRenewableAndCallRevertNonContract() public {
-        vm.expectRevert("IERC5827Payable: approve a non contract address");
+        vm.expectRevert(IFunnelErrors.NotContractError.selector);
         funnel.approveRenewableAndCall(address(user3), 1337, 1, "");
     }
 
     function testApproveRenewableAndCallRevertNonReceiver() public {
-        vm.expectRevert("IERC5827Payable: approve a non IERC5827Spender implementer");
+        // attempting to approve a non IERC5827Spender
+        vm.expectRevert(IFunnel.NotIERC5827Spender.selector);
         funnel.approveRenewableAndCall(address(token), 1337, 1, "");
     }
 
