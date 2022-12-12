@@ -13,14 +13,14 @@ import { IERC5827 } from "./interfaces/IERC5827.sol";
 import { IERC5827Proxy } from "./interfaces/IERC5827Proxy.sol";
 import { IERC5827Spender } from "./interfaces/IERC5827Spender.sol";
 import { IERC5827Payable } from "./interfaces/IERC5827Payable.sol";
-import { FunnelErrors } from "./interfaces/FunnelErrors.sol";
+import { IFunnelErrors } from "./interfaces/IFunnelErrors.sol";
 import { MetaTxContext } from "./lib/MetaTxContext.sol";
 import { NativeMetaTransaction } from "./lib/NativeMetaTransaction.sol";
 
 /// @title Funnel contracts for ERC20
 /// @author Zac (zlace0x), zhongfu (zhongfu), Edison (edison0xyz)
 /// @notice This contract is a funnel for ERC20 tokens. It enforces renewable allowances
-contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable, FunnelErrors {
+contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable, IFunnelErrors {
     using SafeERC20 for IERC20;
 
     //////////////////////////////////////////////////////////////
@@ -231,7 +231,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
         _approve(_msgSender(), _spender, _value, _recoveryRate);
 
         if (!_checkOnApprovalReceived(_spender, _value, _recoveryRate, data)) {
-            revert WrongDatareceivedIERC5827Spender();
+            revert WrongDataReceivedIERC5827Spender();
         }
 
         return true;
@@ -408,8 +408,8 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
             return retval == IERC1363Receiver.onTransferReceived.selector;
         } catch (bytes memory reason) {
             if (reason.length == 0) {
-                // transfer to non IERC1363Receiver implementer
-                revert InvalidData();
+                // Attempted to transfer to a non-IERC1363Receiver implementer
+                revert NotIERC1363Receiver();
             } else {
                 /// @solidity memory-safe-assembly
                 assembly {
@@ -452,7 +452,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
         } catch (bytes memory reason) {
             if (reason.length == 0) {
                 // attempting to approve a non IERC5827Spender implementer
-                revert InvalidData();
+                revert NotIERC5827Spender();
             } else {
                 /// @solidity memory-safe-assembly
                 assembly {

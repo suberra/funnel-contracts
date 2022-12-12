@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 import "forge-std/Test.sol";
 import { ERC20PresetFixedSupply, ERC20 } from "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 import { IERC20Metadata } from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
-import { Funnel, IFunnel, FunnelErrors } from "../src/Funnel.sol";
+import { Funnel, IFunnel, IFunnelErrors } from "../src/Funnel.sol";
 import { ERC5827TestSuite } from "./ERC5827TestSuite.sol";
 import { MockSpenderReceiver } from "../src/mocks/MockSpenderReceiver.sol";
 
@@ -55,7 +55,7 @@ contract FunnelTest is ERC5827TestSuite {
 
     function testRecoveryRateExceeded2() public {
         vm.prank(user1);
-        vm.expectRevert(FunnelErrors.RecoveryRateExceeded.selector);
+        vm.expectRevert(IFunnel.RecoveryRateExceeded.selector);
         funnel.approveRenewable(user2, 100, 101);
     }
 
@@ -137,7 +137,7 @@ contract FunnelTest is ERC5827TestSuite {
         vm.prank(user1);
         funnel.approveRenewable(user2, 1337, 1);
         vm.prank(user2);
-        vm.expectRevert(FunnelErrors.NotContractError.selector);
+        vm.expectRevert(IFunnelErrors.NotContractError.selector);
         funnel.transferFromAndCall(user1, address(user3), 1337, "");
     }
 
@@ -147,7 +147,7 @@ contract FunnelTest is ERC5827TestSuite {
 
         vm.prank(user2);
         // Attempting to transfer to a non IERC1363Receiver
-        vm.expectRevert(FunnelErrors.InvalidData.selector);
+        vm.expectRevert(IFunnel.NotIERC1363Receiver.selector);
         funnel.transferFromAndCall(user1, address(token), 1337, "");
     }
 
@@ -159,13 +159,13 @@ contract FunnelTest is ERC5827TestSuite {
     }
 
     function testApproveRenewableAndCallRevertNonContract() public {
-        vm.expectRevert(FunnelErrors.NotContractError.selector);
+        vm.expectRevert(IFunnelErrors.NotContractError.selector);
         funnel.approveRenewableAndCall(address(user3), 1337, 1, "");
     }
 
     function testApproveRenewableAndCallRevertNonReceiver() public {
         // attempting to approve a non IERC5827Spender
-        vm.expectRevert(FunnelErrors.InvalidData.selector);
+        vm.expectRevert(IFunnel.NotIERC5827Spender.selector);
         funnel.approveRenewableAndCall(address(token), 1337, 1, "");
     }
 

@@ -3,14 +3,14 @@ pragma solidity 0.8.17;
 
 import { IFunnelFactory } from "./interfaces/IFunnelFactory.sol";
 import { IERC5827Proxy } from "./interfaces/IERC5827Proxy.sol";
-import { FunnelErrors } from "./interfaces/FunnelErrors.sol";
+import { IFunnelErrors } from "./interfaces/IFunnelErrors.sol";
 import { Funnel } from "./Funnel.sol";
 import { Clones } from "openzeppelin-contracts/proxy/Clones.sol";
 
 /// @title Factory for all the funnel contracts
 /// @author Zac (zlace0x), zhongfu (zhongfu), Edison (edison0xyz)
 
-contract FunnelFactory is IFunnelFactory, FunnelErrors {
+contract FunnelFactory is IFunnelFactory, IFunnelErrors {
     using Clones for address;
 
     // Stores the mapping between tokenAddress => funnelAddress

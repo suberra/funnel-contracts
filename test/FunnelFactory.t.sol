@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 import { console } from "forge-std/console.sol";
 import "forge-std/Test.sol";
 import { ERC20PresetFixedSupply, ERC20 } from "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
-import { FunnelFactory, FunnelErrors } from "../src/FunnelFactory.sol";
+import { FunnelFactory, IFunnelErrors } from "../src/FunnelFactory.sol";
 import { Funnel } from "../src/Funnel.sol";
 import { IFunnelFactory } from "../src/interfaces/IFunnelFactory.sol";
 import { Clones } from "openzeppelin-contracts/proxy/Clones.sol";
@@ -77,17 +77,17 @@ contract FunnelFactoryTest is Test {
     function testDeployFunnelForTokenRevertsIfAlreadyDeployed() public {
         funnelFactory.deployFunnelForToken(tokenAddress2);
 
-        vm.expectRevert(FunnelErrors.FunnelAlreadyDeployed.selector);
+        vm.expectRevert(IFunnelFactory.FunnelAlreadyDeployed.selector);
         funnelFactory.deployFunnelForToken(tokenAddress2);
     }
 
     function testGetFunnelForTokenRevertsIfNotDeployed() public {
-        vm.expectRevert(FunnelErrors.FunnelNotDeployed.selector);
+        vm.expectRevert(IFunnelFactory.FunnelNotDeployed.selector);
         funnelFactory.getFunnelForToken(tokenAddress2);
     }
 
     function testNoCodeTokenReverts() public {
-        vm.expectRevert(FunnelErrors.InvalidToken.selector);
+        vm.expectRevert(IFunnelErrors.InvalidToken.selector);
         funnelFactory.deployFunnelForToken(tokenAddress3);
     }
 
