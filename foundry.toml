@@ -5,6 +5,7 @@ fs_permissions = [{access = "read-write", path = ".forge-snapshots/"}]
 gas_reports = ["Funnel", "FunnelFactory"]
 libs = ['lib']
 out = 'out'
+solc = "0.8.17"
 src = 'src'
 
 [rpc_endpoints]
