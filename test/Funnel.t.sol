@@ -90,6 +90,20 @@ contract FunnelTest is ERC5827TestSuite {
         assertTrue(funnel.transferFromAndCall(user1, address(spender), 10, ""));
     }
 
+    function testInsufficientBaseAllowance() public {
+        vm.prank(user1);
+        token.approve(address(funnel), 0);
+
+        vm.prank(user1);
+        funnel.approveRenewable(user2, 1337, 1);
+
+        assertEq(funnel.allowance(user1, address(spender)), 0);
+
+        vm.prank(user2);
+        vm.expectRevert();
+        funnel.transferFromAndCall(user1, address(spender), 10, "");
+    }
+
     function testOverflow() public {
         vm.prank(user1);
         funnel.approveRenewable(address(user2), type(uint256).max - type(uint192).max + 1, type(uint192).max);
