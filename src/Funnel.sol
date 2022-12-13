@@ -79,7 +79,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
         _baseToken = IERC20(_token);
 
         INITIAL_CHAIN_ID = block.chainid;
-        INITIAL_DOMAIN_SEPARATOR = computeDomainSeparator();
+        INITIAL_DOMAIN_SEPARATOR = _computeDomainSeparator();
     }
 
     /// @dev Fallback function
@@ -217,10 +217,8 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     ) external returns (bool) {
         _approve(_msgSender(), _spender, _value, _recoveryRate);
 
-        if (!_checkOnApprovalReceived(_spender, _value, _recoveryRate, data)) {
-            revert WrongDataReceivedIERC5827Spender();
-        }
-
+        // if there is an issue in the checks, it should revert within the function
+        _checkOnApprovalReceived(_spender, _value, _recoveryRate, data);
         return true;
     }
 
@@ -252,10 +250,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
         bytes memory data
     ) external returns (bool) {
         transferFrom(from, to, value);
-
-        if (!_checkOnTransferReceived(from, to, value, data)) {
-            revert WrongDataReceivedIERC1363Receiver();
-        }
+        _checkOnTransferReceived(from, to, value, data);
         return true;
     }
 
@@ -331,7 +326,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     /// other domains, and satisfy the requirements of EIP-712
     /// @return bytes32 the domain separator
     function DOMAIN_SEPARATOR() public view override returns (bytes32) {
-        return block.chainid == INITIAL_CHAIN_ID ? INITIAL_DOMAIN_SEPARATOR : computeDomainSeparator();
+        return block.chainid == INITIAL_CHAIN_ID ? INITIAL_DOMAIN_SEPARATOR : _computeDomainSeparator();
     }
 
     /// =================================================================
@@ -364,13 +359,12 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     /// @param recipient address Target address that will receive the tokens
     /// @param value uint256 The amount tokens to be transferred
     /// @param data bytes Optional data to send along with the call
-    /// @return whether the call correctly returned the expected magic value
     function _checkOnTransferReceived(
         address from,
         address recipient,
         uint256 value,
         bytes memory data
-    ) internal returns (bool) {
+    ) internal {
         if (!Address.isContract(recipient)) {
             revert NotContractError();
         }
@@ -382,8 +376,10 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
                 value,
                 data
             )
-        returns (bytes4 retval) {
-            return retval == IERC1363Receiver.onTransferReceived.selector;
+        returns (bytes4 retVal) {
+            if (retVal != IERC1363Receiver.onTransferReceived.selector) {
+                revert InvalidReturnSelector();
+            }
         } catch (bytes memory reason) {
             if (reason.length == 0) {
                 // Attempted to transfer to a non-IERC1363Receiver implementer
@@ -397,36 +393,22 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
         }
     }
 
-    /// @notice compute the domain seperator that is required for the approve by signature functionality
-    /// Stops replay attacks from happening because of approvals on different contracts on different chains
-    /// @dev Reference https://eips.ethereum.org/EIPS/eip-712
-    function computeDomainSeparator() internal view virtual returns (bytes32) {
-        return
-            keccak256(
-                abi.encode(
-                    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-                    keccak256(bytes(name())),
-                    keccak256("1"),
-                    block.chainid,
-                    address(this)
-                )
-            );
-    }
-
     function _checkOnApprovalReceived(
         address _spender,
         uint256 _value,
         uint256 _recoveryRate,
         bytes memory data
-    ) internal returns (bool) {
+    ) internal {
         if (!Address.isContract(_spender)) {
             revert NotContractError();
         }
 
         try IERC5827Spender(_spender).onRenewableApprovalReceived(_msgSender(), _value, _recoveryRate, data) returns (
-            bytes4 retval
+            bytes4 retVal
         ) {
-            return retval == IERC5827Spender.onRenewableApprovalReceived.selector;
+            if (retVal != IERC5827Spender.onRenewableApprovalReceived.selector) {
+                revert InvalidReturnSelector();
+            }
         } catch (bytes memory reason) {
             if (reason.length == 0) {
                 // attempting to approve a non IERC5827Spender implementer
@@ -451,5 +433,21 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
         uint256 remainingAllowance = MathUtil.saturatingAdd(a.remaining, recovered);
 
         return remainingAllowance > a.maxAmount ? a.maxAmount : remainingAllowance;
+    }
+
+    /// @notice compute the domain seperator that is required for the approve by signature functionality
+    /// Stops replay attacks from happening because of approvals on different contracts on different chains
+    /// @dev Reference https://eips.ethereum.org/EIPS/eip-712
+    function _computeDomainSeparator() internal view virtual returns (bytes32) {
+        return
+            keccak256(
+                abi.encode(
+                    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                    keccak256(bytes(name())),
+                    keccak256("1"),
+                    block.chainid,
+                    address(this)
+                )
+            );
     }
 }

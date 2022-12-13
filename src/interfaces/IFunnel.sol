@@ -8,14 +8,11 @@ import { IERC5827Proxy } from "./IERC5827Proxy.sol";
 /// @title Interface for Funnel contracts for ERC20
 /// @author Zac (zlace0x), zhongfu (zhongfu), Edison (edison0xyz)
 interface IFunnel is IERC5827, IERC5827Proxy, IERC5827Payable {
-    /// @dev Wrong data received from IERC1363 Receiver
-    error WrongDataReceivedIERC1363Receiver();
+    /// @dev Invalid selector returned
+    error InvalidReturnSelector();
 
     /// @dev Error thrown when attempting to transfer to a non IERC1363Receiver
     error NotIERC1363Receiver();
-
-    /// @dev Wrong data received from IERC5827Spender
-    error WrongDataReceivedIERC5827Spender();
 
     /// @dev Error thrown when attempting to transfer to a non IERC5827Spender
     error NotIERC5827Spender();

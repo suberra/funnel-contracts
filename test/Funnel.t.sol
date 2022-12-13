@@ -5,8 +5,12 @@ import "forge-std/Test.sol";
 import { ERC20PresetFixedSupply, ERC20 } from "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 import { IERC20Metadata } from "openzeppelin-contracts/interfaces/IERC20Metadata.sol";
 import { Funnel, IFunnel, IFunnelErrors } from "../src/Funnel.sol";
+import { EIP712 } from "../src/lib/EIP712.sol";
+import { NativeMetaTransaction } from "../src/lib/NativeMetaTransaction.sol";
 import { ERC5827TestSuite } from "./ERC5827TestSuite.sol";
 import { MockSpenderReceiver } from "../src/mocks/MockSpenderReceiver.sol";
+import { MockERC1271 } from "../src/mocks/MockERC1271.sol";
+import { NoNameERC20 } from "../src/mocks/TestERC20TokenNoName.sol";
 import { GasSnapshot } from "forge-gas-snapshot/GasSnapshot.sol";
 
 contract FunnelTest is ERC5827TestSuite, GasSnapshot {
@@ -15,6 +19,8 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
 
     ERC20 token;
     Funnel funnel;
+
+    MockERC1271 contractWallet;
 
     MockSpenderReceiver spender;
 
@@ -46,8 +52,17 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         spender = new MockSpenderReceiver();
 
         vm.prank(user1);
+        contractWallet = new MockERC1271(); // contract wallet owned by user1
+
+        vm.prank(user1);
         // approves proxy contract to handle allowance
         token.approve(address(funnel), type(uint256).max);
+    }
+
+    function testZeroAddressInitialise() public {
+        funnel = new Funnel();
+        vm.expectRevert(abi.encodeWithSelector(IFunnelErrors.InvalidAddress.selector, address(0)));
+        funnel.initialize(address(0));
     }
 
     function testBaseToken() public {
@@ -115,7 +130,7 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         assertTrue(funnel.transferFromAndCall(user1, address(spender), 10, ""));
         snapEnd();
     }
-    
+
     function testInsufficientBaseAllowance() public {
         vm.prank(user1);
         token.approve(address(funnel), 0);
@@ -239,7 +254,7 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         assertEq(funnel.nonces(owner), 1);
     }
 
-    function testFailPermitBadNonce() public {
+    function testRevertPermitBadNonce() public {
         uint256 privateKey = 0xBEEF;
         address owner = vm.addr(privateKey);
 
@@ -253,11 +268,11 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
                 )
             )
         );
-
+        vm.expectRevert(EIP712.InvalidSignature.selector);
         funnel.permit(owner, user2, 1e18, block.timestamp, v, r, s);
     }
 
-    function testFailPermitBadDeadline() public {
+    function testRevertPermitBadDeadline() public {
         uint256 privateKey = 0xBEEF;
         address owner = vm.addr(privateKey);
 
@@ -271,11 +286,11 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
                 )
             )
         );
-
+        vm.expectRevert(EIP712.InvalidSignature.selector);
         funnel.permit(owner, user2, 1e18, block.timestamp + 1, v, r, s);
     }
 
-    function testFailPermitPastDeadline() public {
+    function testRevertPermitPastDeadline() public {
         uint256 oldTimestamp = block.timestamp;
         uint256 privateKey = 0xBEEF;
         address owner = vm.addr(privateKey);
@@ -292,10 +307,11 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         );
 
         vm.warp(block.timestamp + 1);
+        vm.expectRevert(IFunnelErrors.PermitExpired.selector);
         funnel.permit(owner, address(0xCAFE), 1e18, oldTimestamp, v, r, s);
     }
 
-    function testFailPermitReplay() public {
+    function testRevertPermitReplay() public {
         uint256 privateKey = 0xBEEF;
         address owner = vm.addr(privateKey);
 
@@ -313,6 +329,7 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         );
 
         funnel.permit(owner, user2, 1e18, timestamp, v, r, s);
+        vm.expectRevert(EIP712.InvalidSignature.selector);
         funnel.permit(owner, user2, 1e18, timestamp, v, r, s);
     }
 
@@ -337,7 +354,65 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         assertEq(funnel.nonces(owner), 1);
     }
 
-    function testFailPermitRenewableBadNonce() public {
+    function testPermitRenewableContractWallet() public {
+        uint256 privateKey = 0xBEEF; // user1
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    funnel.DOMAIN_SEPARATOR(),
+                    keccak256(
+                        abi.encode(
+                            PERMIT_RENEWABLE_TYPEHASH,
+                            address(contractWallet),
+                            user2,
+                            1e18,
+                            1,
+                            0,
+                            block.timestamp
+                        )
+                    )
+                )
+            )
+        );
+
+        funnel.permitRenewable(address(contractWallet), user2, 1e18, 1, block.timestamp, v, r, s);
+        (uint256 maxAmount, uint256 recoveryRate) = funnel.renewableAllowance(address(contractWallet), user2);
+        assertEq(maxAmount, 1e18);
+        assertEq(recoveryRate, 1);
+        assertEq(funnel.nonces(address(contractWallet)), 1);
+    }
+
+    function testRevertPermitRenewableContractWalletBadSigner() public {
+        uint256 privateKey = 0xBADBEEF; // invalid signer
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    funnel.DOMAIN_SEPARATOR(),
+                    keccak256(
+                        abi.encode(
+                            PERMIT_RENEWABLE_TYPEHASH,
+                            address(contractWallet),
+                            user2,
+                            1e18,
+                            1,
+                            0,
+                            block.timestamp
+                        )
+                    )
+                )
+            )
+        );
+        vm.expectRevert(EIP712.IERC1271InvalidSignature.selector);
+        funnel.permitRenewable(address(contractWallet), user2, 1e18, 1, block.timestamp, v, r, s);
+    }
+
+    function testRevertPermitRenewableBadNonce() public {
         uint256 privateKey = 0xBEEF;
         address owner = vm.addr(privateKey);
 
@@ -352,10 +427,11 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
             )
         );
 
+        vm.expectRevert(EIP712.InvalidSignature.selector);
         funnel.permitRenewable(owner, user2, 1e18, 1, block.timestamp, v, r, s);
     }
 
-    function testFailPermitRenewableBadDeadline() public {
+    function testRevertPermitRenewableBadDeadline() public {
         uint256 privateKey = 0xBEEF;
         address owner = vm.addr(privateKey);
 
@@ -370,10 +446,11 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
             )
         );
 
+        vm.expectRevert(EIP712.InvalidSignature.selector);
         funnel.permitRenewable(owner, user2, 1e18, 1, block.timestamp + 1, v, r, s);
     }
 
-    function testFailPermitRenewablePastDeadline() public {
+    function testRevertPermitRenewablePastDeadline() public {
         uint256 oldTimestamp = block.timestamp;
         uint256 privateKey = 0xBEEF;
         address owner = vm.addr(privateKey);
@@ -390,11 +467,11 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         );
 
         vm.warp(oldTimestamp + 1);
-
+        vm.expectRevert(IFunnelErrors.PermitExpired.selector);
         funnel.permitRenewable(owner, user2, 1e18, 1, oldTimestamp, v, r, s);
     }
 
-    function testFailPermitRenewableReplay() public {
+    function testRevertPermitRenewableReplay() public {
         uint256 privateKey = 0xBEEF;
         address owner = vm.addr(privateKey);
 
@@ -412,6 +489,7 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         );
 
         funnel.permitRenewable(owner, user2, 1e18, 1, timestamp, v, r, s);
+        vm.expectRevert(EIP712.InvalidSignature.selector);
         funnel.permitRenewable(owner, user2, 1e18, 1, timestamp, v, r, s);
     }
 
@@ -467,7 +545,57 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         assertEq(funnel.nonces(user1), 1);
     }
 
-    function testFailExecuteMetaTransactionBadNonce() public {
+    function testRevertExecuteMetaTransactionCallFailed() public {
+        uint256 privateKey = 0xBEEF;
+        address owner = vm.addr(privateKey);
+        bytes memory functionSignature = abi.encodeWithSignature(
+            "approveRenewableBad(address,uint256,uint256)",
+            user2,
+            1e18,
+            1
+        );
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    funnel.DOMAIN_SEPARATOR(),
+                    keccak256(abi.encode(META_TRANSACTION_TYPEHASH, 0, owner, keccak256(functionSignature)))
+                )
+            )
+        );
+
+        vm.expectRevert(NativeMetaTransaction.FunctionCallError.selector);
+        funnel.executeMetaTransaction(owner, functionSignature, r, s, v);
+    }
+
+    function testRevertExecuteMetaTransactionInvalidSigner() public {
+        uint256 privateKey = 0xBEEF;
+
+        bytes memory functionSignature = abi.encodeWithSignature(
+            "approveRenewable(address,uint256,uint256)",
+            user2,
+            1e18,
+            1
+        );
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    funnel.DOMAIN_SEPARATOR(),
+                    keccak256(abi.encode(META_TRANSACTION_TYPEHASH, 0, address(0), keccak256(functionSignature)))
+                )
+            )
+        );
+
+        vm.expectRevert(NativeMetaTransaction.InvalidSigner.selector);
+        funnel.executeMetaTransaction(address(0), functionSignature, r, s, v);
+    }
+
+    function testRevertExecuteMetaTransactionBadNonce() public {
         uint256 privateKey = 0xBEEF;
         address owner = vm.addr(privateKey);
 
@@ -488,11 +616,11 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
                 )
             )
         );
-
+        vm.expectRevert(EIP712.InvalidSignature.selector);
         funnel.executeMetaTransaction(owner, functionSignature, r, s, v);
     }
 
-    function testFailExecuteMetaTransactionReplayProtection() public {
+    function testRevertExecuteMetaTransactionReplayProtection() public {
         uint256 privateKey = 0xBEEF;
         address owner = vm.addr(privateKey);
 
@@ -517,6 +645,7 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         funnel.executeMetaTransaction(owner, functionSignature, r, s, v);
         assertEq(funnel.allowance(owner, user2), 1e18);
         assertEq(funnel.nonces(owner), 1);
+        vm.expectRevert(EIP712.InvalidSignature.selector);
         funnel.executeMetaTransaction(owner, functionSignature, r, s, v);
     }
 
@@ -532,9 +661,36 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         assertEq(IERC20Metadata(address(funnel)).name(), string.concat(token.name(), " (funnel)"));
     }
 
+    function testOverriddenNameWithNoName() public {
+        // instantiate token with noname
+        NoNameERC20 tokenNoName = new NoNameERC20("NONAME");
+
+        funnel = new Funnel();
+        funnel.initialize(address(tokenNoName));
+
+        assertEq(
+            IERC20Metadata(address(funnel)).name(),
+            string.concat(toString(abi.encodePacked(address(tokenNoName))), " (funnel)")
+        );
+    }
+
     function testFallbackToBaseToken() public {
         assertEq(IERC20Metadata(address(funnel)).symbol(), token.symbol());
         assertEq(IERC20Metadata(address(funnel)).decimals(), token.decimals());
         assertEq(IERC20Metadata(address(funnel)).totalSupply(), token.totalSupply());
+    }
+
+    // helper function
+    function toString(bytes memory data) public pure returns (string memory) {
+        bytes memory alphabet = "0123456789abcdef";
+
+        bytes memory str = new bytes(2 + data.length * 2);
+        str[0] = "0";
+        str[1] = "x";
+        for (uint256 i = 0; i < data.length; i++) {
+            str[2 + i * 2] = alphabet[uint256(uint8(data[i] >> 4))];
+            str[3 + i * 2] = alphabet[uint256(uint8(data[i] & 0x0f))];
+        }
+        return string(str);
     }
 }
