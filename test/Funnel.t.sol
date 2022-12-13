@@ -19,8 +19,6 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
     ERC20 token;
     Funnel funnel;
 
-    address userZero;
-
     MockERC1271 contractWallet;
 
     MockSpenderReceiver spender;
@@ -43,7 +41,6 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         user1 = vm.addr(privateKey);
         user2 = address(0xCAFE);
         user3 = address(0xDEAD);
-        userZero = address(0x0000);
 
         token = new ERC20PresetFixedSupply("Existing USDC token", "USDC", type(uint256).max, user1);
 
@@ -588,13 +585,13 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
                 abi.encodePacked(
                     "\x19\x01",
                     funnel.DOMAIN_SEPARATOR(),
-                    keccak256(abi.encode(META_TRANSACTION_TYPEHASH, 0, userZero, keccak256(functionSignature)))
+                    keccak256(abi.encode(META_TRANSACTION_TYPEHASH, 0, address(0), keccak256(functionSignature)))
                 )
             )
         );
 
         vm.expectRevert(NativeMetaTransaction.InvalidSigner.selector);
-        funnel.executeMetaTransaction(userZero, functionSignature, r, s, v);
+        funnel.executeMetaTransaction(address(0), functionSignature, r, s, v);
     }
 
     function testRevertExecuteMetaTransactionBadNonce() public {
