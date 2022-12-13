@@ -7,6 +7,7 @@ import { IERC20Metadata } from "openzeppelin-contracts/interfaces/IERC20Metadata
 import { Funnel, IFunnel, IFunnelErrors } from "../src/Funnel.sol";
 import { ERC5827TestSuite } from "./ERC5827TestSuite.sol";
 import { MockSpenderReceiver } from "../src/mocks/MockSpenderReceiver.sol";
+import { NoNameERC20 } from "../src/mocks/TestERC20TokenNoName.sol";
 import { GasSnapshot } from "forge-gas-snapshot/GasSnapshot.sol";
 
 contract FunnelTest is ERC5827TestSuite, GasSnapshot {
@@ -538,9 +539,36 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         assertEq(IERC20Metadata(address(funnel)).name(), string.concat(token.name(), " (funnel)"));
     }
 
+    function testOverriddenNameWithNoName() public {
+        // instantiate token with noname
+        NoNameERC20 tokenNoName = new NoNameERC20("NONAME");
+
+        funnel = new Funnel();
+        funnel.initialize(address(tokenNoName));
+
+        assertEq(
+            IERC20Metadata(address(funnel)).name(),
+            string.concat(toString(abi.encodePacked(address(tokenNoName))), " (funnel)")
+        );
+    }
+
     function testFallbackToBaseToken() public {
         assertEq(IERC20Metadata(address(funnel)).symbol(), token.symbol());
         assertEq(IERC20Metadata(address(funnel)).decimals(), token.decimals());
         assertEq(IERC20Metadata(address(funnel)).totalSupply(), token.totalSupply());
+    }
+
+    // helper function
+    function toString(bytes memory data) public pure returns (string memory) {
+        bytes memory alphabet = "0123456789abcdef";
+
+        bytes memory str = new bytes(2 + data.length * 2);
+        str[0] = "0";
+        str[1] = "x";
+        for (uint256 i = 0; i < data.length; i++) {
+            str[2 + i * 2] = alphabet[uint256(uint8(data[i] >> 4))];
+            str[3 + i * 2] = alphabet[uint256(uint8(data[i] & 0x0f))];
+        }
+        return string(str);
     }
 }
