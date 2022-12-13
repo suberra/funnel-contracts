@@ -3,6 +3,9 @@ pragma solidity 0.8.17;
 
 import { IERC1271 } from "openzeppelin-contracts/interfaces/IERC1271.sol";
 
+/// @title EIP712
+/// @author Zac (zlace0x), zhongfu (zhongfu), Edison (edison0xyz)
+/// @notice https://eips.ethereum.org/EIPS/eip-712
 abstract contract EIP712 {
     /// @dev Invalid signature
     error InvalidSignature();
@@ -19,6 +22,9 @@ abstract contract EIP712 {
     /// @notice Checks if signer's signature matches the data
     /// @param signer address of the signer
     /// @param hashStruct hash of the typehash & abi encoded data, see https://eips.ethereum.org/EIPS/eip-712#definition-of-hashstruct[hashed struct]
+    /// @param v recovery identifier
+    /// @param r signature parameter
+    /// @param s signature parameter
     /// @return bool true if the signature is valid, false otherwise
     function _verifySig(
         address signer,

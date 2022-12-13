@@ -3,6 +3,8 @@ pragma solidity 0.8.17;
 
 import "openzeppelin-contracts/interfaces/IERC165.sol";
 
+/// @title IERC5827Payable interface
+/// @author Zac (zlace0x), zhongfu (zhongfu), Edison (edison0xyz)
 interface IERC5827Payable is IERC165 {
     /// Note: the ERC-165 identifier for this interface is 0x3717806a
     /// 0x3717806a ===

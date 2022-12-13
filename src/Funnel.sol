@@ -88,36 +88,6 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
         _fallback(address(_baseToken));
     }
 
-    /// @notice Fallback implementation
-    /// @dev Delegates execution to an implementation contract (i.e. base token)
-    /// This is a low level function that doesn't return to its internal call site.
-    /// It will return to the external caller whatever the implementation returns.
-    /// @param implementation Address to delegate.
-    function _fallback(address implementation) internal virtual {
-        assembly {
-            // Copy msg.data. We take full control of memory in this inline assembly
-            // block because it will not return to Solidity code. We overwrite the
-            // Solidity scratch pad at memory position 0.
-            calldatacopy(0, 0, calldatasize())
-
-            // Call the implementation.
-            // out and outsize are 0 because we don't know the size yet.
-            let result := staticcall(gas(), implementation, 0, calldatasize(), 0, 0)
-
-            // Copy the returned data.
-            returndatacopy(0, 0, returndatasize())
-
-            switch result
-            // delegatecall returns 0 on error.
-            case 0 {
-                revert(0, returndatasize())
-            }
-            default {
-                return(0, returndatasize())
-            }
-        }
-    }
-
     /// @notice Sets fixed allowance with signed approval.
     /// @dev The address cannot be zero
     /// @param owner The address of the token owner
@@ -285,17 +255,6 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
         return address(_baseToken);
     }
 
-    /// @notice Query if a contract implements an interface
-    /// @param interfaceId The interface identifier, as specified in ERC-165
-    /// @dev Interface identification is specified in ERC-165. See https://eips.ethereum.org/EIPS/eip-165
-    /// @return `true` if the contract implements `interfaceID`
-    function supportsInterface(bytes4 interfaceId) external pure virtual returns (bool) {
-        return
-            interfaceId == type(IERC5827).interfaceId ||
-            interfaceId == type(IERC5827Payable).interfaceId ||
-            interfaceId == type(IERC5827Proxy).interfaceId;
-    }
-
     /// @inheritdoc IERC20
     function balanceOf(address account) external view returns (uint256 balance) {
         return _baseToken.balanceOf(account);
@@ -329,10 +288,58 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
         return block.chainid == INITIAL_CHAIN_ID ? INITIAL_DOMAIN_SEPARATOR : _computeDomainSeparator();
     }
 
+    /// @notice Query if a contract implements an interface
+    /// @param interfaceId The interface identifier, as specified in ERC-165
+    /// @dev Interface identification is specified in ERC-165. See https://eips.ethereum.org/EIPS/eip-165
+    /// @return `true` if the contract implements `interfaceID`
+    function supportsInterface(bytes4 interfaceId) external pure virtual returns (bool) {
+        return
+            interfaceId == type(IERC5827).interfaceId ||
+            interfaceId == type(IERC5827Payable).interfaceId ||
+            interfaceId == type(IERC5827Proxy).interfaceId;
+    }
+
     /// =================================================================
     ///                 Internal Functions
     /// =================================================================
 
+    /// @notice Fallback implementation
+    /// @dev Delegates execution to an implementation contract (i.e. base token)
+    /// This is a low level function that doesn't return to its internal call site.
+    /// It will return to the external caller whatever the implementation returns.
+    /// @param implementation Address to delegate.
+    function _fallback(address implementation) internal virtual {
+        assembly {
+            // Copy msg.data. We take full control of memory in this inline assembly
+            // block because it will not return to Solidity code. We overwrite the
+            // Solidity scratch pad at memory position 0.
+            calldatacopy(0, 0, calldatasize())
+
+            // Call the implementation.
+            // out and outsize are 0 because we don't know the size yet.
+            let result := staticcall(gas(), implementation, 0, calldatasize(), 0, 0)
+
+            // Copy the returned data.
+            returndatacopy(0, 0, returndatasize())
+
+            switch result
+            // delegatecall returns 0 on error.
+            case 0 {
+                revert(0, returndatasize())
+            }
+            default {
+                return(0, returndatasize())
+            }
+        }
+    }
+
+    /// @notice Internal function to process the approve
+    /// Updates the mapping of `RenewableAllowance`
+    /// @dev recoveryRate must be lesser than the value
+    /// @param _owner The address of the owner
+    /// @param _spender The address of the spender
+    /// @param _value The amount of tokens to be approved
+    /// @param _recoveryRate The amount of tokens to be recovered per second
     function _approve(
         address _owner,
         address _spender,
@@ -353,7 +360,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
         emit RenewableApproval(_owner, _spender, _value, _recoveryRate);
     }
 
-    /// @dev Internal function to invoke {IERC1363Receiver-onTransferReceived} on a target address
+    /// @notice Internal function to invoke {IERC1363Receiver-onTransferReceived} on a target address
     /// The call is not executed if the target address is not a contract
     /// @param from address Representing the previous owner of the given token amount
     /// @param recipient address Target address that will receive the tokens
@@ -393,6 +400,12 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
         }
     }
 
+    /// @notice Internal functionn that is called after `approve` function.
+    /// `onRenewableApprovalReceived` may revert. Function also checks if the address called is a IERC5827Spender
+    /// @param _spender The address which will spend the funds
+    /// @param _value The amount of tokens to be spent
+    /// @param _recoveryRate The amount of tokens to be recovered per second
+    /// @param data bytes Additional data with no specified format
     function _checkOnApprovalReceived(
         address _spender,
         uint256 _value,
