@@ -1,8 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
+
 import { IERC1271 } from "openzeppelin-contracts/interfaces/IERC1271.sol";
 
 abstract contract EIP712 {
+    /// @dev Invalid signature
+    error InvalidSignature();
+
+    /// @dev Signature is invalid (IERC1271)
+    error IERC1271InvalidSignature();
+
     /// @notice Gets the domain seperator
     /// @dev DOMAIN_SEPARATOR should be unique to the contract and chain to prevent replay attacks from
     /// other domains, and satisfy the requirements of EIP-712
@@ -29,16 +36,19 @@ abstract contract EIP712 {
 
         if (size > 0) {
             // signer is a contract
-            require(
-                IERC1271(signer).isValidSignature(digest, abi.encodePacked(r, s, v)) ==
-                    IERC1271(signer).isValidSignature.selector,
-                "IERC1271: invalid signature"
-            );
+            if (
+                IERC1271(signer).isValidSignature(digest, abi.encodePacked(r, s, v)) !=
+                IERC1271(signer).isValidSignature.selector
+            ) {
+                revert IERC1271InvalidSignature();
+            }
         } else {
             // EOA signer
             address recoveredAddress = ecrecover(digest, v, r, s);
 
-            require(recoveredAddress != address(0) && recoveredAddress == signer, "EIP712: invalid signature");
+            if (recoveredAddress == address(0) || recoveredAddress != signer) {
+                revert InvalidSignature();
+            }
         }
 
         return true;

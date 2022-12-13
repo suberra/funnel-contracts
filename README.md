@@ -40,9 +40,9 @@ Goal is to deploy a factory onto all supported chains at the same address, and *
 
 ## Testing
 
-Our tests consist of both Foundry tests and hardhat tests.
+Our tests consist of both Foundry tests and hardhat tests. 
 
-`forge test` - Runs the Foundry tests
+`forge test` - Runs the Foundry tests. Forge gas snapshots will be captured under `.forge-snapshots`
 
 `npx hardhat test` - Runs hardhat tests
 
@@ -71,6 +71,14 @@ Run prettier to format the code
 
 ```sh
 npx prettier --write 'src/**/*.sol'
+```
+
+### Gas Report
+
+Forge snapshot automatically captures selected function calls on `.forge-snapshots`. To generate a more comprehensive report, run:
+
+```sh
+forge test --gas-report >> .forge-snapshots/report.txt   
 ```
 
 # Deployments

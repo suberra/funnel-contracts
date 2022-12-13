@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
+
 import { EIP712 } from "./EIP712.sol";
 import { Nonces } from "./Nonces.sol";
 
@@ -15,6 +16,12 @@ abstract contract NativeMetaTransaction is EIP712, Nonces {
     /// @param relayerAddress Address of the relayer that executed the meta-transaction
     /// @param functionSignature Signature of the function
     event MetaTransactionExecuted(address indexed userAddress, address payable relayerAddress, bytes functionSignature);
+
+    /// @dev Function call is not successful
+    error FunctionCallError();
+
+    /// @dev Error thrown when invalid signer
+    error InvalidSigner();
 
     /// Meta transaction structure.
     /// No point of including value field here as if user is doing value transfer then he has the funds to pay for gas
@@ -47,9 +54,13 @@ abstract contract NativeMetaTransaction is EIP712, Nonces {
 
         // Appends userAddress at the end to extract it from calling context
         // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returnData) = address(this).call(abi.encodePacked(functionSignature, userAddress));
+        (bool isSuccess, bytes memory returnData) = address(this).call(
+            abi.encodePacked(functionSignature, userAddress)
+        );
 
-        require(success, "Function call not successful");
+        if (!isSuccess) {
+            revert FunctionCallError();
+        }
 
         emit MetaTransactionExecuted(userAddress, payable(msg.sender), functionSignature);
 
@@ -67,7 +78,9 @@ abstract contract NativeMetaTransaction is EIP712, Nonces {
         bytes32 r,
         bytes32 s
     ) internal view returns (bool isValid) {
-        require(signer != address(0), "NativeMetaTransaction: INVALID_SIGNER");
+        if (signer == address(0)) {
+            revert InvalidSigner();
+        }
 
         bytes32 hashStruct = keccak256(
             abi.encode(META_TRANSACTION_TYPEHASH, metaTx.nonce, metaTx.from, keccak256(metaTx.functionSignature))
