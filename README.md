@@ -73,6 +73,14 @@ Run prettier to format the code
 npx prettier --write 'src/**/*.sol'
 ```
 
+### Gas Report
+
+Forge snapshot automatically captures selected function calls on `.forge-snapshots`. To generate a more comprehensive report, run:
+
+```sh
+forge test --gas-report >> .forge-snapshots/report.txt   
+```
+
 # Deployments
 
 | Network | Contract      | Address                                    |

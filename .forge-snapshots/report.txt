@@ -3,7 +3,9 @@ No files changed, compilation skipped
 Running 2 tests for test/MockSpenderReceiver.t.sol:MockSpenderReceiverTest
 [32m[PASS][0m testSupportInterfaceReceiver() (gas: 5598)
 [32m[PASS][0m testSupportInterfaceSpender() (gas: 6567)
-Test result: [32mok[0m. 2 passed; 0 failed; finished in 528.50µs
+
+Test result: [32mok[0m. 2 passed; 0 failed; finished in 2.29ms
+
 
 Running 11 tests for test/FunnelFactory.t.sol:FunnelFactoryTest
 [32m[PASS][0m testDeployFunnelForDifferentTokens() (gas: 298301)
@@ -17,7 +19,8 @@ Running 11 tests for test/FunnelFactory.t.sol:FunnelFactoryTest
 [32m[PASS][0m testIsFunnelTrueForDeployedFunnel() (gas: 155345)
 [32m[PASS][0m testNoCodeTokenReverts() (gas: 15454)
 [32m[PASS][0m testTransferFromFunnel() (gas: 294476)
-Test result: [32mok[0m. 11 passed; 0 failed; finished in 9.83ms
+
+Test result: [32mok[0m. 11 passed; 0 failed; finished in 9.01ms
 
 Running 44 tests for test/Funnel.t.sol:FunnelTest
 [32m[PASS][0m testApprove() (gas: 144763)
@@ -31,19 +34,21 @@ Running 44 tests for test/Funnel.t.sol:FunnelTest
 [32m[PASS][0m testClearRenewableAllowanceOnNormalApprove() (gas: 146049)
 [32m[PASS][0m testExecuteMetaTransactionApproveRenewable() (gas: 211566)
 [32m[PASS][0m testExecuteMetaTransactionTransfer() (gas: 127678)
-[32m[PASS][0m testFailExecuteMetaTransactionBadNonce() (gas: 47605)
-[32m[PASS][0m testFailExecuteMetaTransactionReplayProtection() (gas: 143282)
-[32m[PASS][0m testFailPermitBadDeadline() (gas: 46683)
-[32m[PASS][0m testFailPermitBadNonce() (gas: 46673)
+
+[32m[PASS][0m testFailExecuteMetaTransactionBadNonce() (gas: 47539)
+[32m[PASS][0m testFailExecuteMetaTransactionReplayProtection() (gas: 143216)
+[32m[PASS][0m testFailPermitBadDeadline() (gas: 46617)
+[32m[PASS][0m testFailPermitBadNonce() (gas: 46607)
 [32m[PASS][0m testFailPermitPastDeadline() (gas: 15794)
-[32m[PASS][0m testFailPermitRenewableBadDeadline() (gas: 48784)
-[32m[PASS][0m testFailPermitRenewableBadNonce() (gas: 48754)
+[32m[PASS][0m testFailPermitRenewableBadDeadline() (gas: 48718)
+[32m[PASS][0m testFailPermitRenewableBadNonce() (gas: 48688)
 [32m[PASS][0m testFailPermitRenewablePastDeadline() (gas: 20042)
-[32m[PASS][0m testFailPermitRenewableReplay() (gas: 125663)
-[32m[PASS][0m testFailPermitReplay() (gas: 123538)
+[32m[PASS][0m testFailPermitRenewableReplay() (gas: 125597)
+[32m[PASS][0m testFailPermitReplay() (gas: 123472)
 [32m[PASS][0m testFallbackToBaseToken() (gas: 25635)
 [32m[PASS][0m testInfiniteApproveTransferFrom() (gas: 134109)
-[32m[PASS][0m testInsufficientAllowance() (gas: 29370)
+[32m[PASS][0m testInsufficientAllowance() (gas: 29359)
+
 [32m[PASS][0m testOverflow() (gas: 116604)
 [32m[PASS][0m testOverflow2() (gas: 116501)
 [32m[PASS][0m testOverflow3() (gas: 129967)
@@ -53,7 +58,9 @@ Running 44 tests for test/Funnel.t.sol:FunnelTest
 [32m[PASS][0m testRecoveryRateCasting() (gas: 85917)
 [32m[PASS][0m testRecoveryRateExceeded() (gas: 13408)
 [32m[PASS][0m testRecoveryRateExceeded2() (gas: 13447)
-[32m[PASS][0m testRenewableAllowanceTransferFrom() (gas: 155299)
+
+[32m[PASS][0m testRenewableAllowanceTransferFrom() (gas: 155288)
+
 [32m[PASS][0m testRenewableMaxAllowance() (gas: 98381)
 [32m[PASS][0m testSupportInterface() (gas: 5766)
 [32m[PASS][0m testSupportsInterfacePayable() (gas: 5814)
@@ -64,34 +71,36 @@ Running 44 tests for test/Funnel.t.sol:FunnelTest
 [32m[PASS][0m testTransferFromAndCallRevertNonReceiver() (gas: 111819)
 [32m[PASS][0m testTransferFromAndCallWithGasSnapshot() (gas: 174098)
 [32m[PASS][0m testTransferFromWithSnapshot() (gas: 156685)
-Test result: [32mok[0m. 44 passed; 0 failed; finished in 14.38ms
+
+Test result: [32mok[0m. 44 passed; 0 failed; finished in 14.08ms
 
 Running 18 tests for test/FunnelERC20.t.sol:FunnelERC20Test
-[32m[PASS][0m testApproveFuzzing(uint256) (runs: 256, μ: 118647, ~: 119891)
+[32m[PASS][0m testApproveFuzzing(uint256) (runs: 256, μ: 118491, ~: 119891)
 [32m[PASS][0m testApproveMaxWithTransfer() (gas: 138686)
-[32m[PASS][0m testApproveWithTransferFuzzing(uint256,uint256) (runs: 256, μ: 148286, ~: 150398)
-[32m[PASS][0m testBalanceOfOnMint(uint256) (runs: 256, μ: 65951, ~: 67015)
+[32m[PASS][0m testApproveWithTransferFuzzing(uint256,uint256) (runs: 256, μ: 148358, ~: 150398)
+[32m[PASS][0m testBalanceOfOnMint(uint256) (runs: 256, μ: 66051, ~: 67015)
 [32m[PASS][0m testBalanceOfOnMintLargeAmount() (gas: 66981)
-[32m[PASS][0m testBalanceOfOnTransfer(uint256,uint256) (runs: 256, μ: 105102, ~: 107372)
+[32m[PASS][0m testBalanceOfOnTransfer(uint256,uint256) (runs: 256, μ: 103797, ~: 107372)
 [32m[PASS][0m testBalanceOfOnTransferLargeAmount() (gas: 87476)
 [32m[PASS][0m testBalanceOfReflectsSlot(uint256) (runs: 256, μ: 322, ~: 322)
-[32m[PASS][0m testFailApproveWithTransferInsufficientApproval() (gas: 100475)
+[32m[PASS][0m testFailApproveWithTransferInsufficientApproval() (gas: 100464)
 [32m[PASS][0m testFailApprovewithTransferInsufficientBalance() (gas: 108378)
-[32m[PASS][0m testFailTransferExceedsBalance(uint256) (runs: 256, μ: 40573, ~: 40682)
+[32m[PASS][0m testFailTransferExceedsBalance(uint256) (runs: 256, μ: 40598, ~: 40682)
 [32m[PASS][0m testInitialAllowance() (gas: 25026)
-[32m[PASS][0m testTotalSupply(uint256) (runs: 256, μ: 42746, ~: 42933)
+[32m[PASS][0m testTotalSupply(uint256) (runs: 256, μ: 42740, ~: 42933)
 [32m[PASS][0m testTransferFullBalance() (gas: 61369)
-[32m[PASS][0m testTransferFuzzing(uint256) (runs: 256, μ: 68979, ~: 69678)
+[32m[PASS][0m testTransferFuzzing(uint256) (runs: 256, μ: 68628, ~: 69678)
 [32m[PASS][0m testTransferHalfBalance() (gas: 66255)
 [32m[PASS][0m testTransferOneToken() (gas: 64089)
 [32m[PASS][0m testTransferZeroTokens() (gas: 41433)
-Test result: [32mok[0m. 18 passed; 0 failed; finished in 41.50ms
+Test result: [32mok[0m. 18 passed; 0 failed; finished in 48.81ms
+
 ╭────────────────────────────────┬─────────────────┬───────┬────────┬────────┬─────────╮
 │ src/Funnel.sol:Funnel contract ┆                 ┆       ┆        ┆        ┆         │
 ╞════════════════════════════════╪═════════════════╪═══════╪════════╪════════╪═════════╡
 │ Deployment Cost                ┆ Deployment Size ┆       ┆        ┆        ┆         │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ 1766055                        ┆ 8853            ┆       ┆        ┆        ┆         │
+│ 1725613                        ┆ 8651            ┆       ┆        ┆        ┆         │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
 │ Function Name                  ┆ min             ┆ avg   ┆ median ┆ max    ┆ # calls │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
@@ -111,7 +120,7 @@ Test result: [32mok[0m. 18 passed; 0 failed; finished in 41.50ms
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
 │ decimals                       ┆ 829             ┆ 829   ┆ 829    ┆ 829    ┆ 1       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ executeMetaTransaction         ┆ 6029            ┆ 64937 ┆ 74151  ┆ 107040 ┆ 5       │
+│ executeMetaTransaction         ┆ 5972            ┆ 64915 ┆ 74151  ┆ 107040 ┆ 5       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
 │ initialize                     ┆ 72081           ┆ 72324 ┆ 72081  ┆ 74081  ┆ 72      │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
@@ -119,9 +128,9 @@ Test result: [32mok[0m. 18 passed; 0 failed; finished in 41.50ms
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
 │ nonces                         ┆ 629             ┆ 629   ┆ 629    ┆ 629    ┆ 5       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ permit                         ┆ 760             ┆ 44506 ┆ 29853  ┆ 100560 ┆ 6       │
+│ permit                         ┆ 760             ┆ 44478 ┆ 29796  ┆ 100560 ┆ 6       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ permitRenewable                ┆ 694             ┆ 44464 ┆ 29814  ┆ 100524 ┆ 6       │
+│ permitRenewable                ┆ 694             ┆ 44435 ┆ 29757  ┆ 100524 ┆ 6       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
 │ renewableAllowance             ┆ 1237            ┆ 1237  ┆ 1237   ┆ 1237   ┆ 1       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
@@ -133,7 +142,7 @@ Test result: [32mok[0m. 18 passed; 0 failed; finished in 41.50ms
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
 │ transfer                       ┆ 4728            ┆ 25032 ┆ 27780  ┆ 39083  ┆ 11      │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ transferFrom                   ┆ 3121            ┆ 24791 ┆ 34082  ┆ 41552  ┆ 19      │
+│ transferFrom                   ┆ 3110            ┆ 24789 ┆ 34082  ┆ 41552  ┆ 19      │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
 │ transferFromAndCall            ┆ 35334           ┆ 42629 ┆ 42949  ┆ 49283  ┆ 4       │
 ╰────────────────────────────────┴─────────────────┴───────┴────────┴────────┴─────────╯
