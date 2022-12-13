@@ -281,7 +281,7 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         funnel.permit(owner, user2, 1e18, block.timestamp + 1, v, r, s);
     }
 
-    function testFailPermitPastDeadline() public {
+    function testRevertPermitPastDeadline() public {
         uint256 oldTimestamp = block.timestamp;
         uint256 privateKey = 0xBEEF;
         address owner = vm.addr(privateKey);
@@ -298,6 +298,7 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         );
 
         vm.warp(block.timestamp + 1);
+        vm.expectRevert(IFunnelErrors.PermitExpired.selector);
         funnel.permit(owner, address(0xCAFE), 1e18, oldTimestamp, v, r, s);
     }
 
@@ -379,7 +380,7 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         funnel.permitRenewable(owner, user2, 1e18, 1, block.timestamp + 1, v, r, s);
     }
 
-    function testFailPermitRenewablePastDeadline() public {
+    function testRevertPermitRenewablePastDeadline() public {
         uint256 oldTimestamp = block.timestamp;
         uint256 privateKey = 0xBEEF;
         address owner = vm.addr(privateKey);
@@ -396,7 +397,7 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         );
 
         vm.warp(oldTimestamp + 1);
-
+        vm.expectRevert(IFunnelErrors.PermitExpired.selector);
         funnel.permitRenewable(owner, user2, 1e18, 1, oldTimestamp, v, r, s);
     }
 
