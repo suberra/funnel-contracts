@@ -50,6 +50,12 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         token.approve(address(funnel), type(uint256).max);
     }
 
+    function testZeroAddressInitialise() public {
+        funnel = new Funnel();
+        vm.expectRevert(abi.encodeWithSelector(IFunnelErrors.InvalidAddress.selector, address(0)));
+        funnel.initialize(address(0));
+    }
+
     function testBaseToken() public {
         assertEq(funnel.baseToken(), address(token));
     }
@@ -115,7 +121,7 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         assertTrue(funnel.transferFromAndCall(user1, address(spender), 10, ""));
         snapEnd();
     }
-    
+
     function testInsufficientBaseAllowance() public {
         vm.prank(user1);
         token.approve(address(funnel), 0);

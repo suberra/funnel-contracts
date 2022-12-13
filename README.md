@@ -81,6 +81,13 @@ Forge snapshot automatically captures selected function calls on `.forge-snapsho
 forge test --gas-report >> .forge-snapshots/report.txt   
 ```
 
+### Test Coverage
+
+```sh
+forge coverage --report lcov   
+genhtml lcov.info -o report --branch-coverage 
+```
+
 # Deployments
 
 | Network | Contract      | Address                                    |
