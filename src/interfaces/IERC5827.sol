@@ -1,9 +1,12 @@
-// SPDX-License-Identifier: CC0-1.0
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
 import "openzeppelin-contracts/interfaces/IERC20.sol";
 import "openzeppelin-contracts/interfaces/IERC165.sol";
 
+/// @title Interface for IERC5827 contracts
+/// @notice Please see https://eips.ethereum.org/EIPS/eip-5827 for more details on the goals of this interface
+/// @author Zac (zlace0x), zhongfu (zhongfu), Edison (edison0xyz)
 interface IERC5827 is IERC20, IERC165 {
     /// Note: the ERC-165 identifier for this interface is 0x93cd7af6.
     /// 0x93cd7af6 ===

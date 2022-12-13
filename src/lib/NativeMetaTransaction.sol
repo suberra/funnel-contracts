@@ -4,6 +4,9 @@ pragma solidity 0.8.17;
 import { EIP712 } from "./EIP712.sol";
 import { Nonces } from "./Nonces.sol";
 
+/// @title NativeMetaTransaction
+/// @notice Functions that enables meta transactions
+/// @author Zac (zlace0x), zhongfu (zhongfu), Edison (edison0xyz)
 abstract contract NativeMetaTransaction is EIP712, Nonces {
     /// Precomputed typeHash as defined in EIP712
     /// keccak256("MetaTransaction(uint256 nonce,address from,bytes functionSignature)")
@@ -36,6 +39,9 @@ abstract contract NativeMetaTransaction is EIP712, Nonces {
     /// Allows a relayer to send another user's transaction and pay the gas
     /// @param userAddress Address of the user the sender is performing on behalf of
     /// @param functionSignature The signature of the user
+    /// @param sigR Output of the ECDSA signature
+    /// @param sigS Output of the ECDSA signature
+    /// @param sigV recovery identifier
     /// @return data encoded return data of the underlying function call
     function executeMetaTransaction(
         address userAddress,

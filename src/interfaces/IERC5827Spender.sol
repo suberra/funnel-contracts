@@ -3,6 +3,7 @@ pragma solidity 0.8.17;
 
 /// @title IERC5827Spender defines a callback function that is called when renewable allowance is approved
 /// @author Zlace
+/// @notice This interface must be implemented if the spender contract wants to react to an renewable approval
 /// @dev Allow transfer/approval call chaining inspired by https://eips.ethereum.org/EIPS/eip-1363
 interface IERC5827Spender {
     /// Note: the ERC-165 identifier for this interface is 0xb868618d.

@@ -9,7 +9,6 @@ import { Clones } from "openzeppelin-contracts/proxy/Clones.sol";
 
 /// @title Factory for all the funnel contracts
 /// @author Zac (zlace0x), zhongfu (zhongfu), Edison (edison0xyz)
-
 contract FunnelFactory is IFunnelFactory, IFunnelErrors {
     using Clones for address;
 
