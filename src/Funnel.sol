@@ -217,10 +217,8 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     ) external returns (bool) {
         _approve(_msgSender(), _spender, _value, _recoveryRate);
 
-        if (!_checkOnApprovalReceived(_spender, _value, _recoveryRate, data)) {
-            revert WrongDataReceivedIERC5827Spender();
-        }
-
+        // if there is an issue in the checks, it should revert within the function
+        _checkOnApprovalReceived(_spender, _value, _recoveryRate, data);
         return true;
     }
 
@@ -252,10 +250,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
         bytes memory data
     ) external returns (bool) {
         transferFrom(from, to, value);
-
-        if (!_checkOnTransferReceived(from, to, value, data)) {
-            revert WrongDataReceivedIERC1363Receiver();
-        }
+        _checkOnTransferReceived(from, to, value, data);
         return true;
     }
 

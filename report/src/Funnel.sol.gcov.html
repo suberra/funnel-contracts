@@ -32,12 +32,12 @@
             <td></td>
             <td class="headerItem">Lines:</td>
             <td class="headerCovTableEntry">69</td>
-            <td class="headerCovTableEntry">74</td>
-            <td class="headerCovTableEntryHi">93.2 %</td>
+            <td class="headerCovTableEntry">72</td>
+            <td class="headerCovTableEntryHi">95.8 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-12-13 16:16:44</td>
+            <td class="headerValue">2022-12-13 16:41:56</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">24</td>
@@ -49,9 +49,9 @@
             <td></td>
             <td></td>
             <td class="headerItem">Branches:</td>
-            <td class="headerCovTableEntry">17</td>
-            <td class="headerCovTableEntry">22</td>
-            <td class="headerCovTableEntryMed">77.3 %</td>
+            <td class="headerCovTableEntry">15</td>
+            <td class="headerCovTableEntry">18</td>
+            <td class="headerCovTableEntryMed">83.3 %</td>
           </tr>
           <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
         </table>
@@ -288,242 +288,237 @@
 <a name="217"><span class="lineNum">     217 </span>                :            :     ) external returns (bool) {</a>
 <a name="218"><span class="lineNum">     218 </span>                :<span class="lineCov">          4 :         _approve(_msgSender(), _spender, _value, _recoveryRate);</span></a>
 <a name="219"><span class="lineNum">     219 </span>                :            : </a>
-<a name="220"><span class="lineNum">     220 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchCov" title="Branch 1 was taken 2 times"> + </span>]:<span class="lineCov">          4 :         if (!_checkOnApprovalReceived(_spender, _value, _recoveryRate, data)) {</span></a>
-<a name="221"><span class="lineNum">     221 </span>                :<span class="lineNoCov">          0 :             revert WrongDataReceivedIERC5827Spender();</span></a>
-<a name="222"><span class="lineNum">     222 </span>                :            :         }</a>
-<a name="223"><span class="lineNum">     223 </span>                :            : </a>
-<a name="224"><span class="lineNum">     224 </span>                :<span class="lineCov">          2 :         return true;</span></a>
-<a name="225"><span class="lineNum">     225 </span>                :            :     }</a>
-<a name="226"><span class="lineNum">     226 </span>                :            : </a>
-<a name="227"><span class="lineNum">     227 </span>                :            :     /// @inheritdoc IERC5827</a>
-<a name="228"><span class="lineNum">     228 </span>                :            :     function transferFrom(</a>
-<a name="229"><span class="lineNum">     229 </span>                :            :         address from,</a>
-<a name="230"><span class="lineNum">     230 </span>                :            :         address to,</a>
-<a name="231"><span class="lineNum">     231 </span>                :            :         uint256 amount</a>
-<a name="232"><span class="lineNum">     232 </span>                :            :     ) public returns (bool) {</a>
-<a name="233"><span class="lineNum">     233 </span>                :<span class="lineCov">        277 :         uint256 remainingAllowance = _remainingAllowance(from, _msgSender());</span></a>
-<a name="234"><span class="lineNum">     234 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 275 times"> + </span>]:<span class="lineCov">        277 :         if (remainingAllowance &lt; amount) {</span></a>
-<a name="235"><span class="lineNum">     235 </span>                :<span class="lineCov">          2 :             revert InsufficientRenewableAllowance({ available: remainingAllowance });</span></a>
-<a name="236"><span class="lineNum">     236 </span>                :            :         }</a>
-<a name="237"><span class="lineNum">     237 </span>                :            : </a>
-<a name="238"><span class="lineNum">     238 </span>        [<span class="branchCov" title="Branch 0 was taken 271 times"> + </span><span class="branchCov" title="Branch 1 was taken 275 times"> + </span>]:<span class="lineCov">        275 :         if (remainingAllowance != type(uint256).max) {</span></a>
-<a name="239"><span class="lineNum">     239 </span>                :<span class="lineCov">        271 :             rAllowance[from][_msgSender()].remaining = remainingAllowance - amount;</span></a>
-<a name="240"><span class="lineNum">     240 </span>                :<span class="lineCov">        271 :             rAllowance[from][_msgSender()].lastUpdated = uint64(block.timestamp);</span></a>
-<a name="241"><span class="lineNum">     241 </span>                :            :         }</a>
-<a name="242"><span class="lineNum">     242 </span>                :            : </a>
-<a name="243"><span class="lineNum">     243 </span>                :<span class="lineCov">        275 :         _baseToken.safeTransferFrom(from, to, amount);</span></a>
-<a name="244"><span class="lineNum">     244 </span>                :<span class="lineCov">        274 :         return true;</span></a>
-<a name="245"><span class="lineNum">     245 </span>                :            :     }</a>
-<a name="246"><span class="lineNum">     246 </span>                :            : </a>
-<a name="247"><span class="lineNum">     247 </span>                :            :     /// @inheritdoc IERC5827Payable</a>
-<a name="248"><span class="lineNum">     248 </span>                :            :     function transferFromAndCall(</a>
-<a name="249"><span class="lineNum">     249 </span>                :            :         address from,</a>
-<a name="250"><span class="lineNum">     250 </span>                :            :         address to,</a>
-<a name="251"><span class="lineNum">     251 </span>                :            :         uint256 value,</a>
-<a name="252"><span class="lineNum">     252 </span>                :            :         bytes memory data</a>
-<a name="253"><span class="lineNum">     253 </span>                :            :     ) external returns (bool) {</a>
-<a name="254"><span class="lineNum">     254 </span>                :<span class="lineCov">          5 :         transferFrom(from, to, value);</span></a>
-<a name="255"><span class="lineNum">     255 </span>                :            : </a>
-<a name="256"><span class="lineNum">     256 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchCov" title="Branch 1 was taken 2 times"> + </span>]:<span class="lineCov">          4 :         if (!_checkOnTransferReceived(from, to, value, data)) {</span></a>
-<a name="257"><span class="lineNum">     257 </span>                :<span class="lineNoCov">          0 :             revert WrongDataReceivedIERC1363Receiver();</span></a>
-<a name="258"><span class="lineNum">     258 </span>                :            :         }</a>
-<a name="259"><span class="lineNum">     259 </span>                :<span class="lineCov">          2 :         return true;</span></a>
-<a name="260"><span class="lineNum">     260 </span>                :            :     }</a>
-<a name="261"><span class="lineNum">     261 </span>                :            : </a>
-<a name="262"><span class="lineNum">     262 </span>                :            :     /// @notice Transfer tokens from the sender to the recipient</a>
-<a name="263"><span class="lineNum">     263 </span>                :            :     /// @param to The address of the recipient</a>
-<a name="264"><span class="lineNum">     264 </span>                :            :     /// @param amount uint256 The amount of tokens to be transferred</a>
-<a name="265"><span class="lineNum">     265 </span>                :            :     function transfer(address to, uint256 amount) external returns (bool) {</a>
-<a name="266"><span class="lineNum">     266 </span>                :<span class="lineCov">        776 :         _baseToken.safeTransferFrom(_msgSender(), to, amount);</span></a>
-<a name="267"><span class="lineNum">     267 </span>                :<span class="lineCov">        519 :         return true;</span></a>
-<a name="268"><span class="lineNum">     268 </span>                :            :     }</a>
-<a name="269"><span class="lineNum">     269 </span>                :            : </a>
-<a name="270"><span class="lineNum">     270 </span>                :            :     /// =================================================================</a>
-<a name="271"><span class="lineNum">     271 </span>                :            :     ///                 Getter Functions</a>
-<a name="272"><span class="lineNum">     272 </span>                :            :     /// =================================================================</a>
-<a name="273"><span class="lineNum">     273 </span>                :            : </a>
-<a name="274"><span class="lineNum">     274 </span>                :            :     /// @notice fetch approved max amount and recovery rate</a>
-<a name="275"><span class="lineNum">     275 </span>                :            :     /// @param _owner The address of the owner</a>
-<a name="276"><span class="lineNum">     276 </span>                :            :     /// @param _spender The address of the spender</a>
-<a name="277"><span class="lineNum">     277 </span>                :            :     /// @return amount initial and maximum allowance given to spender</a>
-<a name="278"><span class="lineNum">     278 </span>                :            :     /// @return recoveryRate recovery amount per second</a>
-<a name="279"><span class="lineNum">     279 </span>                :            :     function renewableAllowance(address _owner, address _spender)</a>
-<a name="280"><span class="lineNum">     280 </span>                :            :         external</a>
-<a name="281"><span class="lineNum">     281 </span>                :            :         view</a>
-<a name="282"><span class="lineNum">     282 </span>                :            :         returns (uint256 amount, uint256 recoveryRate)</a>
-<a name="283"><span class="lineNum">     283 </span>                :            :     {</a>
-<a name="284"><span class="lineNum">     284 </span>                :<span class="lineCov">          1 :         RenewableAllowance memory a = rAllowance[_owner][_spender];</span></a>
-<a name="285"><span class="lineNum">     285 </span>                :<span class="lineCov">          1 :         return (a.maxAmount, a.recoveryRate);</span></a>
+<a name="220"><span class="lineNum">     220 </span>                :            :         // if there is an issue in the checks, it should revert within the function</a>
+<a name="221"><span class="lineNum">     221 </span>                :<span class="lineCov">          4 :         _checkOnApprovalReceived(_spender, _value, _recoveryRate, data);</span></a>
+<a name="222"><span class="lineNum">     222 </span>                :<span class="lineCov">          2 :         return true;</span></a>
+<a name="223"><span class="lineNum">     223 </span>                :            :     }</a>
+<a name="224"><span class="lineNum">     224 </span>                :            : </a>
+<a name="225"><span class="lineNum">     225 </span>                :            :     /// @inheritdoc IERC5827</a>
+<a name="226"><span class="lineNum">     226 </span>                :            :     function transferFrom(</a>
+<a name="227"><span class="lineNum">     227 </span>                :            :         address from,</a>
+<a name="228"><span class="lineNum">     228 </span>                :            :         address to,</a>
+<a name="229"><span class="lineNum">     229 </span>                :            :         uint256 amount</a>
+<a name="230"><span class="lineNum">     230 </span>                :            :     ) public returns (bool) {</a>
+<a name="231"><span class="lineNum">     231 </span>                :<span class="lineCov">        277 :         uint256 remainingAllowance = _remainingAllowance(from, _msgSender());</span></a>
+<a name="232"><span class="lineNum">     232 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 275 times"> + </span>]:<span class="lineCov">        277 :         if (remainingAllowance &lt; amount) {</span></a>
+<a name="233"><span class="lineNum">     233 </span>                :<span class="lineCov">          2 :             revert InsufficientRenewableAllowance({ available: remainingAllowance });</span></a>
+<a name="234"><span class="lineNum">     234 </span>                :            :         }</a>
+<a name="235"><span class="lineNum">     235 </span>                :            : </a>
+<a name="236"><span class="lineNum">     236 </span>        [<span class="branchCov" title="Branch 0 was taken 271 times"> + </span><span class="branchCov" title="Branch 1 was taken 275 times"> + </span>]:<span class="lineCov">        275 :         if (remainingAllowance != type(uint256).max) {</span></a>
+<a name="237"><span class="lineNum">     237 </span>                :<span class="lineCov">        271 :             rAllowance[from][_msgSender()].remaining = remainingAllowance - amount;</span></a>
+<a name="238"><span class="lineNum">     238 </span>                :<span class="lineCov">        271 :             rAllowance[from][_msgSender()].lastUpdated = uint64(block.timestamp);</span></a>
+<a name="239"><span class="lineNum">     239 </span>                :            :         }</a>
+<a name="240"><span class="lineNum">     240 </span>                :            : </a>
+<a name="241"><span class="lineNum">     241 </span>                :<span class="lineCov">        275 :         _baseToken.safeTransferFrom(from, to, amount);</span></a>
+<a name="242"><span class="lineNum">     242 </span>                :<span class="lineCov">        274 :         return true;</span></a>
+<a name="243"><span class="lineNum">     243 </span>                :            :     }</a>
+<a name="244"><span class="lineNum">     244 </span>                :            : </a>
+<a name="245"><span class="lineNum">     245 </span>                :            :     /// @inheritdoc IERC5827Payable</a>
+<a name="246"><span class="lineNum">     246 </span>                :            :     function transferFromAndCall(</a>
+<a name="247"><span class="lineNum">     247 </span>                :            :         address from,</a>
+<a name="248"><span class="lineNum">     248 </span>                :            :         address to,</a>
+<a name="249"><span class="lineNum">     249 </span>                :            :         uint256 value,</a>
+<a name="250"><span class="lineNum">     250 </span>                :            :         bytes memory data</a>
+<a name="251"><span class="lineNum">     251 </span>                :            :     ) external returns (bool) {</a>
+<a name="252"><span class="lineNum">     252 </span>                :<span class="lineCov">          5 :         transferFrom(from, to, value);</span></a>
+<a name="253"><span class="lineNum">     253 </span>                :<span class="lineCov">          4 :         _checkOnTransferReceived(from, to, value, data);</span></a>
+<a name="254"><span class="lineNum">     254 </span>                :<span class="lineCov">          2 :         return true;</span></a>
+<a name="255"><span class="lineNum">     255 </span>                :            :     }</a>
+<a name="256"><span class="lineNum">     256 </span>                :            : </a>
+<a name="257"><span class="lineNum">     257 </span>                :            :     /// @notice Transfer tokens from the sender to the recipient</a>
+<a name="258"><span class="lineNum">     258 </span>                :            :     /// @param to The address of the recipient</a>
+<a name="259"><span class="lineNum">     259 </span>                :            :     /// @param amount uint256 The amount of tokens to be transferred</a>
+<a name="260"><span class="lineNum">     260 </span>                :            :     function transfer(address to, uint256 amount) external returns (bool) {</a>
+<a name="261"><span class="lineNum">     261 </span>                :<span class="lineCov">        776 :         _baseToken.safeTransferFrom(_msgSender(), to, amount);</span></a>
+<a name="262"><span class="lineNum">     262 </span>                :<span class="lineCov">        519 :         return true;</span></a>
+<a name="263"><span class="lineNum">     263 </span>                :            :     }</a>
+<a name="264"><span class="lineNum">     264 </span>                :            : </a>
+<a name="265"><span class="lineNum">     265 </span>                :            :     /// =================================================================</a>
+<a name="266"><span class="lineNum">     266 </span>                :            :     ///                 Getter Functions</a>
+<a name="267"><span class="lineNum">     267 </span>                :            :     /// =================================================================</a>
+<a name="268"><span class="lineNum">     268 </span>                :            : </a>
+<a name="269"><span class="lineNum">     269 </span>                :            :     /// @notice fetch approved max amount and recovery rate</a>
+<a name="270"><span class="lineNum">     270 </span>                :            :     /// @param _owner The address of the owner</a>
+<a name="271"><span class="lineNum">     271 </span>                :            :     /// @param _spender The address of the spender</a>
+<a name="272"><span class="lineNum">     272 </span>                :            :     /// @return amount initial and maximum allowance given to spender</a>
+<a name="273"><span class="lineNum">     273 </span>                :            :     /// @return recoveryRate recovery amount per second</a>
+<a name="274"><span class="lineNum">     274 </span>                :            :     function renewableAllowance(address _owner, address _spender)</a>
+<a name="275"><span class="lineNum">     275 </span>                :            :         external</a>
+<a name="276"><span class="lineNum">     276 </span>                :            :         view</a>
+<a name="277"><span class="lineNum">     277 </span>                :            :         returns (uint256 amount, uint256 recoveryRate)</a>
+<a name="278"><span class="lineNum">     278 </span>                :            :     {</a>
+<a name="279"><span class="lineNum">     279 </span>                :<span class="lineCov">          1 :         RenewableAllowance memory a = rAllowance[_owner][_spender];</span></a>
+<a name="280"><span class="lineNum">     280 </span>                :<span class="lineCov">          1 :         return (a.maxAmount, a.recoveryRate);</span></a>
+<a name="281"><span class="lineNum">     281 </span>                :            :     }</a>
+<a name="282"><span class="lineNum">     282 </span>                :            : </a>
+<a name="283"><span class="lineNum">     283 </span>                :            :     /// @inheritdoc IERC5827Proxy</a>
+<a name="284"><span class="lineNum">     284 </span>                :            :     function baseToken() external view returns (address) {</a>
+<a name="285"><span class="lineNum">     285 </span>                :<span class="lineCov">          4 :         return address(_baseToken);</span></a>
 <a name="286"><span class="lineNum">     286 </span>                :            :     }</a>
 <a name="287"><span class="lineNum">     287 </span>                :            : </a>
-<a name="288"><span class="lineNum">     288 </span>                :            :     /// @inheritdoc IERC5827Proxy</a>
-<a name="289"><span class="lineNum">     289 </span>                :            :     function baseToken() external view returns (address) {</a>
-<a name="290"><span class="lineNum">     290 </span>                :<span class="lineCov">          4 :         return address(_baseToken);</span></a>
-<a name="291"><span class="lineNum">     291 </span>                :            :     }</a>
-<a name="292"><span class="lineNum">     292 </span>                :            : </a>
-<a name="293"><span class="lineNum">     293 </span>                :            :     /// @notice Query if a contract implements an interface</a>
-<a name="294"><span class="lineNum">     294 </span>                :            :     /// @param interfaceId The interface identifier, as specified in ERC-165</a>
-<a name="295"><span class="lineNum">     295 </span>                :            :     /// @dev Interface identification is specified in ERC-165. See https://eips.ethereum.org/EIPS/eip-165</a>
-<a name="296"><span class="lineNum">     296 </span>                :            :     /// @return `true` if the contract implements `interfaceID`</a>
-<a name="297"><span class="lineNum">     297 </span>                :            :     function supportsInterface(bytes4 interfaceId) external pure virtual returns (bool) {</a>
-<a name="298"><span class="lineNum">     298 </span>                :<span class="lineCov">          3 :         return</span></a>
-<a name="299"><span class="lineNum">     299 </span>                :            :             interfaceId == type(IERC5827).interfaceId ||</a>
-<a name="300"><span class="lineNum">     300 </span>                :            :             interfaceId == type(IERC5827Payable).interfaceId ||</a>
-<a name="301"><span class="lineNum">     301 </span>                :            :             interfaceId == type(IERC5827Proxy).interfaceId;</a>
+<a name="288"><span class="lineNum">     288 </span>                :            :     /// @notice Query if a contract implements an interface</a>
+<a name="289"><span class="lineNum">     289 </span>                :            :     /// @param interfaceId The interface identifier, as specified in ERC-165</a>
+<a name="290"><span class="lineNum">     290 </span>                :            :     /// @dev Interface identification is specified in ERC-165. See https://eips.ethereum.org/EIPS/eip-165</a>
+<a name="291"><span class="lineNum">     291 </span>                :            :     /// @return `true` if the contract implements `interfaceID`</a>
+<a name="292"><span class="lineNum">     292 </span>                :            :     function supportsInterface(bytes4 interfaceId) external pure virtual returns (bool) {</a>
+<a name="293"><span class="lineNum">     293 </span>                :<span class="lineCov">          3 :         return</span></a>
+<a name="294"><span class="lineNum">     294 </span>                :            :             interfaceId == type(IERC5827).interfaceId ||</a>
+<a name="295"><span class="lineNum">     295 </span>                :            :             interfaceId == type(IERC5827Payable).interfaceId ||</a>
+<a name="296"><span class="lineNum">     296 </span>                :            :             interfaceId == type(IERC5827Proxy).interfaceId;</a>
+<a name="297"><span class="lineNum">     297 </span>                :            :     }</a>
+<a name="298"><span class="lineNum">     298 </span>                :            : </a>
+<a name="299"><span class="lineNum">     299 </span>                :            :     /// @inheritdoc IERC20</a>
+<a name="300"><span class="lineNum">     300 </span>                :            :     function balanceOf(address account) external view returns (uint256 balance) {</a>
+<a name="301"><span class="lineNum">     301 </span>                :<span class="lineCov">       3868 :         return _baseToken.balanceOf(account);</span></a>
 <a name="302"><span class="lineNum">     302 </span>                :            :     }</a>
 <a name="303"><span class="lineNum">     303 </span>                :            : </a>
 <a name="304"><span class="lineNum">     304 </span>                :            :     /// @inheritdoc IERC20</a>
-<a name="305"><span class="lineNum">     305 </span>                :            :     function balanceOf(address account) external view returns (uint256 balance) {</a>
-<a name="306"><span class="lineNum">     306 </span>                :<span class="lineCov">       3868 :         return _baseToken.balanceOf(account);</span></a>
+<a name="305"><span class="lineNum">     305 </span>                :            :     function totalSupply() external view returns (uint256) {</a>
+<a name="306"><span class="lineNum">     306 </span>                :<span class="lineCov">        513 :         return _baseToken.totalSupply();</span></a>
 <a name="307"><span class="lineNum">     307 </span>                :            :     }</a>
 <a name="308"><span class="lineNum">     308 </span>                :            : </a>
-<a name="309"><span class="lineNum">     309 </span>                :            :     /// @inheritdoc IERC20</a>
-<a name="310"><span class="lineNum">     310 </span>                :            :     function totalSupply() external view returns (uint256) {</a>
-<a name="311"><span class="lineNum">     311 </span>                :<span class="lineCov">        513 :         return _baseToken.totalSupply();</span></a>
-<a name="312"><span class="lineNum">     312 </span>                :            :     }</a>
-<a name="313"><span class="lineNum">     313 </span>                :            : </a>
-<a name="314"><span class="lineNum">     314 </span>                :            :     /// @notice Gets the name of the token</a>
-<a name="315"><span class="lineNum">     315 </span>                :            :     /// @dev Fallback to token address if not found</a>
-<a name="316"><span class="lineNum">     316 </span>                :            :     function name() public view returns (string memory) {</a>
-<a name="317"><span class="lineNum">     317 </span>                :<span class="lineCov">         11 :         string memory _name;</span></a>
-<a name="318"><span class="lineNum">     318 </span>                :<span class="lineCov">         11 :         (bool success, bytes memory result) = address(_baseToken).staticcall(abi.encodeWithSignature(&quot;name()&quot;));</span></a>
-<a name="319"><span class="lineNum">     319 </span>                :            : </a>
-<a name="320"><span class="lineNum">     320 </span>        [<span class="branchCov" title="Branch 0 was taken 11 times"> + </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineCov">         11 :         if (success &amp;&amp; result.length &gt; 0) {</span></a>
-<a name="321"><span class="lineNum">     321 </span>                :<span class="lineCov">         11 :             _name = abi.decode(result, (string));</span></a>
-<a name="322"><span class="lineNum">     322 </span>                :            :         } else {</a>
-<a name="323"><span class="lineNum">     323 </span>                :<span class="lineNoCov">          0 :             _name = Strings.toHexString(uint160(address(_baseToken)), 20);</span></a>
-<a name="324"><span class="lineNum">     324 </span>                :            :         }</a>
-<a name="325"><span class="lineNum">     325 </span>                :            : </a>
-<a name="326"><span class="lineNum">     326 </span>                :<span class="lineCov">         11 :         return string.concat(_name, &quot; (funnel)&quot;);</span></a>
-<a name="327"><span class="lineNum">     327 </span>                :            :     }</a>
-<a name="328"><span class="lineNum">     328 </span>                :            : </a>
-<a name="329"><span class="lineNum">     329 </span>                :            :     /// @notice Gets the domain seperator</a>
-<a name="330"><span class="lineNum">     330 </span>                :            :     /// @dev DOMAIN_SEPARATOR should be unique to the contract and chain to prevent replay attacks from</a>
-<a name="331"><span class="lineNum">     331 </span>                :            :     /// other domains, and satisfy the requirements of EIP-712</a>
-<a name="332"><span class="lineNum">     332 </span>                :            :     /// @return bytes32 the domain separator</a>
-<a name="333"><span class="lineNum">     333 </span>                :            :     function DOMAIN_SEPARATOR() public view override returns (bytes32) {</a>
-<a name="334"><span class="lineNum">     334 </span>                :<span class="lineCov">          8 :         return block.chainid == INITIAL_CHAIN_ID ? INITIAL_DOMAIN_SEPARATOR : computeDomainSeparator();</span></a>
-<a name="335"><span class="lineNum">     335 </span>                :            :     }</a>
-<a name="336"><span class="lineNum">     336 </span>                :            : </a>
-<a name="337"><span class="lineNum">     337 </span>                :            :     /// =================================================================</a>
-<a name="338"><span class="lineNum">     338 </span>                :            :     ///                 Internal Functions</a>
-<a name="339"><span class="lineNum">     339 </span>                :            :     /// =================================================================</a>
-<a name="340"><span class="lineNum">     340 </span>                :            : </a>
-<a name="341"><span class="lineNum">     341 </span>                :            :     function _approve(</a>
-<a name="342"><span class="lineNum">     342 </span>                :            :         address _owner,</a>
-<a name="343"><span class="lineNum">     343 </span>                :            :         address _spender,</a>
-<a name="344"><span class="lineNum">     344 </span>                :            :         uint256 _value,</a>
-<a name="345"><span class="lineNum">     345 </span>                :            :         uint256 _recoveryRate</a>
-<a name="346"><span class="lineNum">     346 </span>                :            :     ) internal {</a>
-<a name="347"><span class="lineNum">     347 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 541 times"> + </span>]:<span class="lineCov">        543 :         if (_recoveryRate &gt; _value) {</span></a>
-<a name="348"><span class="lineNum">     348 </span>                :<span class="lineCov">          2 :             revert RecoveryRateExceeded();</span></a>
-<a name="349"><span class="lineNum">     349 </span>                :            :         }</a>
-<a name="350"><span class="lineNum">     350 </span>                :            : </a>
-<a name="351"><span class="lineNum">     351 </span>                :<span class="lineCov">        541 :         rAllowance[_owner][_spender] = RenewableAllowance({</span></a>
-<a name="352"><span class="lineNum">     352 </span>                :            :             maxAmount: _value,</a>
-<a name="353"><span class="lineNum">     353 </span>                :            :             remaining: _value,</a>
-<a name="354"><span class="lineNum">     354 </span>                :            :             recoveryRate: uint192(_recoveryRate),</a>
-<a name="355"><span class="lineNum">     355 </span>                :            :             lastUpdated: uint64(block.timestamp)</a>
-<a name="356"><span class="lineNum">     356 </span>                :            :         });</a>
-<a name="357"><span class="lineNum">     357 </span>                :<span class="lineCov">        541 :         emit Approval(_owner, _spender, _value);</span></a>
-<a name="358"><span class="lineNum">     358 </span>                :<span class="lineCov">        541 :         emit RenewableApproval(_owner, _spender, _value, _recoveryRate);</span></a>
-<a name="359"><span class="lineNum">     359 </span>                :            :     }</a>
-<a name="360"><span class="lineNum">     360 </span>                :            : </a>
-<a name="361"><span class="lineNum">     361 </span>                :            :     /// @dev Internal function to invoke {IERC1363Receiver-onTransferReceived} on a target address</a>
-<a name="362"><span class="lineNum">     362 </span>                :            :     /// The call is not executed if the target address is not a contract</a>
-<a name="363"><span class="lineNum">     363 </span>                :            :     /// @param from address Representing the previous owner of the given token amount</a>
-<a name="364"><span class="lineNum">     364 </span>                :            :     /// @param recipient address Target address that will receive the tokens</a>
-<a name="365"><span class="lineNum">     365 </span>                :            :     /// @param value uint256 The amount tokens to be transferred</a>
-<a name="366"><span class="lineNum">     366 </span>                :            :     /// @param data bytes Optional data to send along with the call</a>
-<a name="367"><span class="lineNum">     367 </span>                :            :     /// @return whether the call correctly returned the expected magic value</a>
-<a name="368"><span class="lineNum">     368 </span>                :            :     function _checkOnTransferReceived(</a>
-<a name="369"><span class="lineNum">     369 </span>                :            :         address from,</a>
-<a name="370"><span class="lineNum">     370 </span>                :            :         address recipient,</a>
-<a name="371"><span class="lineNum">     371 </span>                :            :         uint256 value,</a>
-<a name="372"><span class="lineNum">     372 </span>                :            :         bytes memory data</a>
-<a name="373"><span class="lineNum">     373 </span>                :            :     ) internal returns (bool) {</a>
-<a name="374"><span class="lineNum">     374 </span>        [<span class="branchCov" title="Branch 0 was taken 1 time"> + </span><span class="branchCov" title="Branch 1 was taken 3 times"> + </span>]:<span class="lineCov">          4 :         if (!Address.isContract(recipient)) {</span></a>
-<a name="375"><span class="lineNum">     375 </span>                :<span class="lineCov">          1 :             revert NotContractError();</span></a>
-<a name="376"><span class="lineNum">     376 </span>                :            :         }</a>
-<a name="377"><span class="lineNum">     377 </span>                :            : </a>
-<a name="378"><span class="lineNum">     378 </span>                :            :         try</a>
-<a name="379"><span class="lineNum">     379 </span>                :<span class="lineCov">          3 :             IERC1363Receiver(recipient).onTransferReceived(</span></a>
-<a name="380"><span class="lineNum">     380 </span>                :            :                 _msgSender(), // operator</a>
-<a name="381"><span class="lineNum">     381 </span>                :            :                 from,</a>
-<a name="382"><span class="lineNum">     382 </span>                :            :                 value,</a>
-<a name="383"><span class="lineNum">     383 </span>                :            :                 data</a>
-<a name="384"><span class="lineNum">     384 </span>                :            :             )</a>
-<a name="385"><span class="lineNum">     385 </span>                :            :         returns (bytes4 retval) {</a>
-<a name="386"><span class="lineNum">     386 </span>                :            :             return retval == IERC1363Receiver.onTransferReceived.selector;</a>
-<a name="387"><span class="lineNum">     387 </span>                :            :         } catch (bytes memory reason) {</a>
-<a name="388"><span class="lineNum">     388 </span>                :            :             if (reason.length == 0) {</a>
-<a name="389"><span class="lineNum">     389 </span>                :            :                 // Attempted to transfer to a non-IERC1363Receiver implementer</a>
-<a name="390"><span class="lineNum">     390 </span>                :            :                 revert NotIERC1363Receiver();</a>
-<a name="391"><span class="lineNum">     391 </span>                :            :             } else {</a>
-<a name="392"><span class="lineNum">     392 </span>                :            :                 /// @solidity memory-safe-assembly</a>
-<a name="393"><span class="lineNum">     393 </span>                :            :                 assembly {</a>
-<a name="394"><span class="lineNum">     394 </span>                :            :                     revert(add(32, reason), mload(reason))</a>
-<a name="395"><span class="lineNum">     395 </span>                :            :                 }</a>
-<a name="396"><span class="lineNum">     396 </span>                :            :             }</a>
-<a name="397"><span class="lineNum">     397 </span>                :            :         }</a>
-<a name="398"><span class="lineNum">     398 </span>                :            :     }</a>
-<a name="399"><span class="lineNum">     399 </span>                :            : </a>
-<a name="400"><span class="lineNum">     400 </span>                :            :     /// @notice compute the domain seperator that is required for the approve by signature functionality</a>
-<a name="401"><span class="lineNum">     401 </span>                :            :     /// Stops replay attacks from happening because of approvals on different contracts on different chains</a>
-<a name="402"><span class="lineNum">     402 </span>                :            :     /// @dev Reference https://eips.ethereum.org/EIPS/eip-712</a>
-<a name="403"><span class="lineNum">     403 </span>                :            :     function computeDomainSeparator() internal view virtual returns (bytes32) {</a>
-<a name="404"><span class="lineNum">     404 </span>                :<span class="lineCov">         10 :         return</span></a>
-<a name="405"><span class="lineNum">     405 </span>                :            :             keccak256(</a>
-<a name="406"><span class="lineNum">     406 </span>                :            :                 abi.encode(</a>
-<a name="407"><span class="lineNum">     407 </span>                :            :                     keccak256(&quot;EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)&quot;),</a>
-<a name="408"><span class="lineNum">     408 </span>                :            :                     keccak256(bytes(name())),</a>
-<a name="409"><span class="lineNum">     409 </span>                :            :                     keccak256(&quot;1&quot;),</a>
-<a name="410"><span class="lineNum">     410 </span>                :            :                     block.chainid,</a>
-<a name="411"><span class="lineNum">     411 </span>                :            :                     address(this)</a>
-<a name="412"><span class="lineNum">     412 </span>                :            :                 )</a>
-<a name="413"><span class="lineNum">     413 </span>                :            :             );</a>
-<a name="414"><span class="lineNum">     414 </span>                :            :     }</a>
-<a name="415"><span class="lineNum">     415 </span>                :            : </a>
-<a name="416"><span class="lineNum">     416 </span>                :            :     function _checkOnApprovalReceived(</a>
-<a name="417"><span class="lineNum">     417 </span>                :            :         address _spender,</a>
-<a name="418"><span class="lineNum">     418 </span>                :            :         uint256 _value,</a>
-<a name="419"><span class="lineNum">     419 </span>                :            :         uint256 _recoveryRate,</a>
-<a name="420"><span class="lineNum">     420 </span>                :            :         bytes memory data</a>
-<a name="421"><span class="lineNum">     421 </span>                :            :     ) internal returns (bool) {</a>
-<a name="422"><span class="lineNum">     422 </span>        [<span class="branchCov" title="Branch 0 was taken 1 time"> + </span><span class="branchCov" title="Branch 1 was taken 3 times"> + </span>]:<span class="lineCov">          4 :         if (!Address.isContract(_spender)) {</span></a>
-<a name="423"><span class="lineNum">     423 </span>                :<span class="lineCov">          1 :             revert NotContractError();</span></a>
-<a name="424"><span class="lineNum">     424 </span>                :            :         }</a>
-<a name="425"><span class="lineNum">     425 </span>                :            : </a>
-<a name="426"><span class="lineNum">     426 </span>                :<span class="lineCov">          3 :         try IERC5827Spender(_spender).onRenewableApprovalReceived(_msgSender(), _value, _recoveryRate, data) returns (</span></a>
-<a name="427"><span class="lineNum">     427 </span>                :            :             bytes4 retval</a>
-<a name="428"><span class="lineNum">     428 </span>                :            :         ) {</a>
-<a name="429"><span class="lineNum">     429 </span>                :            :             return retval == IERC5827Spender.onRenewableApprovalReceived.selector;</a>
-<a name="430"><span class="lineNum">     430 </span>                :            :         } catch (bytes memory reason) {</a>
-<a name="431"><span class="lineNum">     431 </span>                :            :             if (reason.length == 0) {</a>
-<a name="432"><span class="lineNum">     432 </span>                :            :                 // attempting to approve a non IERC5827Spender implementer</a>
-<a name="433"><span class="lineNum">     433 </span>                :            :                 revert NotIERC5827Spender();</a>
-<a name="434"><span class="lineNum">     434 </span>                :            :             } else {</a>
-<a name="435"><span class="lineNum">     435 </span>                :            :                 /// @solidity memory-safe-assembly</a>
-<a name="436"><span class="lineNum">     436 </span>                :            :                 assembly {</a>
-<a name="437"><span class="lineNum">     437 </span>                :            :                     revert(add(32, reason), mload(reason))</a>
-<a name="438"><span class="lineNum">     438 </span>                :            :                 }</a>
-<a name="439"><span class="lineNum">     439 </span>                :            :             }</a>
-<a name="440"><span class="lineNum">     440 </span>                :            :         }</a>
-<a name="441"><span class="lineNum">     441 </span>                :            :     }</a>
-<a name="442"><span class="lineNum">     442 </span>                :            : </a>
-<a name="443"><span class="lineNum">     443 </span>                :            :     /// @notice fetch remaining allowance between _owner and _spender while accounting for base token allowance.</a>
-<a name="444"><span class="lineNum">     444 </span>                :            :     /// @param _owner address of the owner</a>
-<a name="445"><span class="lineNum">     445 </span>                :            :     /// @param _spender address of spender</a>
-<a name="446"><span class="lineNum">     446 </span>                :            :     /// @return remaining allowance left</a>
-<a name="447"><span class="lineNum">     447 </span>                :            :     function _remainingAllowance(address _owner, address _spender) private view returns (uint256) {</a>
-<a name="448"><span class="lineNum">     448 </span>                :<span class="lineCov">       1839 :         RenewableAllowance memory a = rAllowance[_owner][_spender];</span></a>
-<a name="449"><span class="lineNum">     449 </span>                :            : </a>
-<a name="450"><span class="lineNum">     450 </span>                :<span class="lineCov">       1839 :         uint256 recovered = a.recoveryRate * uint64(block.timestamp - a.lastUpdated);</span></a>
-<a name="451"><span class="lineNum">     451 </span>                :<span class="lineCov">       1839 :         uint256 remainingAllowance = MathUtil.saturatingAdd(a.remaining, recovered);</span></a>
-<a name="452"><span class="lineNum">     452 </span>                :            : </a>
-<a name="453"><span class="lineNum">     453 </span>                :<span class="lineCov">       1839 :         return remainingAllowance &gt; a.maxAmount ? a.maxAmount : remainingAllowance;</span></a>
-<a name="454"><span class="lineNum">     454 </span>                :            :     }</a>
-<a name="455"><span class="lineNum">     455 </span>                :            : }</a>
+<a name="309"><span class="lineNum">     309 </span>                :            :     /// @notice Gets the name of the token</a>
+<a name="310"><span class="lineNum">     310 </span>                :            :     /// @dev Fallback to token address if not found</a>
+<a name="311"><span class="lineNum">     311 </span>                :            :     function name() public view returns (string memory) {</a>
+<a name="312"><span class="lineNum">     312 </span>                :<span class="lineCov">         11 :         string memory _name;</span></a>
+<a name="313"><span class="lineNum">     313 </span>                :<span class="lineCov">         11 :         (bool success, bytes memory result) = address(_baseToken).staticcall(abi.encodeWithSignature(&quot;name()&quot;));</span></a>
+<a name="314"><span class="lineNum">     314 </span>                :            : </a>
+<a name="315"><span class="lineNum">     315 </span>        [<span class="branchCov" title="Branch 0 was taken 11 times"> + </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineCov">         11 :         if (success &amp;&amp; result.length &gt; 0) {</span></a>
+<a name="316"><span class="lineNum">     316 </span>                :<span class="lineCov">         11 :             _name = abi.decode(result, (string));</span></a>
+<a name="317"><span class="lineNum">     317 </span>                :            :         } else {</a>
+<a name="318"><span class="lineNum">     318 </span>                :<span class="lineNoCov">          0 :             _name = Strings.toHexString(uint160(address(_baseToken)), 20);</span></a>
+<a name="319"><span class="lineNum">     319 </span>                :            :         }</a>
+<a name="320"><span class="lineNum">     320 </span>                :            : </a>
+<a name="321"><span class="lineNum">     321 </span>                :<span class="lineCov">         11 :         return string.concat(_name, &quot; (funnel)&quot;);</span></a>
+<a name="322"><span class="lineNum">     322 </span>                :            :     }</a>
+<a name="323"><span class="lineNum">     323 </span>                :            : </a>
+<a name="324"><span class="lineNum">     324 </span>                :            :     /// @notice Gets the domain seperator</a>
+<a name="325"><span class="lineNum">     325 </span>                :            :     /// @dev DOMAIN_SEPARATOR should be unique to the contract and chain to prevent replay attacks from</a>
+<a name="326"><span class="lineNum">     326 </span>                :            :     /// other domains, and satisfy the requirements of EIP-712</a>
+<a name="327"><span class="lineNum">     327 </span>                :            :     /// @return bytes32 the domain separator</a>
+<a name="328"><span class="lineNum">     328 </span>                :            :     function DOMAIN_SEPARATOR() public view override returns (bytes32) {</a>
+<a name="329"><span class="lineNum">     329 </span>                :<span class="lineCov">          8 :         return block.chainid == INITIAL_CHAIN_ID ? INITIAL_DOMAIN_SEPARATOR : computeDomainSeparator();</span></a>
+<a name="330"><span class="lineNum">     330 </span>                :            :     }</a>
+<a name="331"><span class="lineNum">     331 </span>                :            : </a>
+<a name="332"><span class="lineNum">     332 </span>                :            :     /// =================================================================</a>
+<a name="333"><span class="lineNum">     333 </span>                :            :     ///                 Internal Functions</a>
+<a name="334"><span class="lineNum">     334 </span>                :            :     /// =================================================================</a>
+<a name="335"><span class="lineNum">     335 </span>                :            : </a>
+<a name="336"><span class="lineNum">     336 </span>                :            :     function _approve(</a>
+<a name="337"><span class="lineNum">     337 </span>                :            :         address _owner,</a>
+<a name="338"><span class="lineNum">     338 </span>                :            :         address _spender,</a>
+<a name="339"><span class="lineNum">     339 </span>                :            :         uint256 _value,</a>
+<a name="340"><span class="lineNum">     340 </span>                :            :         uint256 _recoveryRate</a>
+<a name="341"><span class="lineNum">     341 </span>                :            :     ) internal {</a>
+<a name="342"><span class="lineNum">     342 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 541 times"> + </span>]:<span class="lineCov">        543 :         if (_recoveryRate &gt; _value) {</span></a>
+<a name="343"><span class="lineNum">     343 </span>                :<span class="lineCov">          2 :             revert RecoveryRateExceeded();</span></a>
+<a name="344"><span class="lineNum">     344 </span>                :            :         }</a>
+<a name="345"><span class="lineNum">     345 </span>                :            : </a>
+<a name="346"><span class="lineNum">     346 </span>                :<span class="lineCov">        541 :         rAllowance[_owner][_spender] = RenewableAllowance({</span></a>
+<a name="347"><span class="lineNum">     347 </span>                :            :             maxAmount: _value,</a>
+<a name="348"><span class="lineNum">     348 </span>                :            :             remaining: _value,</a>
+<a name="349"><span class="lineNum">     349 </span>                :            :             recoveryRate: uint192(_recoveryRate),</a>
+<a name="350"><span class="lineNum">     350 </span>                :            :             lastUpdated: uint64(block.timestamp)</a>
+<a name="351"><span class="lineNum">     351 </span>                :            :         });</a>
+<a name="352"><span class="lineNum">     352 </span>                :<span class="lineCov">        541 :         emit Approval(_owner, _spender, _value);</span></a>
+<a name="353"><span class="lineNum">     353 </span>                :<span class="lineCov">        541 :         emit RenewableApproval(_owner, _spender, _value, _recoveryRate);</span></a>
+<a name="354"><span class="lineNum">     354 </span>                :            :     }</a>
+<a name="355"><span class="lineNum">     355 </span>                :            : </a>
+<a name="356"><span class="lineNum">     356 </span>                :            :     /// @dev Internal function to invoke {IERC1363Receiver-onTransferReceived} on a target address</a>
+<a name="357"><span class="lineNum">     357 </span>                :            :     /// The call is not executed if the target address is not a contract</a>
+<a name="358"><span class="lineNum">     358 </span>                :            :     /// @param from address Representing the previous owner of the given token amount</a>
+<a name="359"><span class="lineNum">     359 </span>                :            :     /// @param recipient address Target address that will receive the tokens</a>
+<a name="360"><span class="lineNum">     360 </span>                :            :     /// @param value uint256 The amount tokens to be transferred</a>
+<a name="361"><span class="lineNum">     361 </span>                :            :     /// @param data bytes Optional data to send along with the call</a>
+<a name="362"><span class="lineNum">     362 </span>                :            :     /// @return whether the call correctly returned the expected magic value</a>
+<a name="363"><span class="lineNum">     363 </span>                :            :     function _checkOnTransferReceived(</a>
+<a name="364"><span class="lineNum">     364 </span>                :            :         address from,</a>
+<a name="365"><span class="lineNum">     365 </span>                :            :         address recipient,</a>
+<a name="366"><span class="lineNum">     366 </span>                :            :         uint256 value,</a>
+<a name="367"><span class="lineNum">     367 </span>                :            :         bytes memory data</a>
+<a name="368"><span class="lineNum">     368 </span>                :            :     ) internal returns (bool) {</a>
+<a name="369"><span class="lineNum">     369 </span>        [<span class="branchCov" title="Branch 0 was taken 1 time"> + </span><span class="branchCov" title="Branch 1 was taken 3 times"> + </span>]:<span class="lineCov">          4 :         if (!Address.isContract(recipient)) {</span></a>
+<a name="370"><span class="lineNum">     370 </span>                :<span class="lineCov">          1 :             revert NotContractError();</span></a>
+<a name="371"><span class="lineNum">     371 </span>                :            :         }</a>
+<a name="372"><span class="lineNum">     372 </span>                :            : </a>
+<a name="373"><span class="lineNum">     373 </span>                :            :         try</a>
+<a name="374"><span class="lineNum">     374 </span>                :<span class="lineCov">          3 :             IERC1363Receiver(recipient).onTransferReceived(</span></a>
+<a name="375"><span class="lineNum">     375 </span>                :            :                 _msgSender(), // operator</a>
+<a name="376"><span class="lineNum">     376 </span>                :            :                 from,</a>
+<a name="377"><span class="lineNum">     377 </span>                :            :                 value,</a>
+<a name="378"><span class="lineNum">     378 </span>                :            :                 data</a>
+<a name="379"><span class="lineNum">     379 </span>                :            :             )</a>
+<a name="380"><span class="lineNum">     380 </span>                :            :         returns (bytes4 retval) {</a>
+<a name="381"><span class="lineNum">     381 </span>                :            :             return retval == IERC1363Receiver.onTransferReceived.selector;</a>
+<a name="382"><span class="lineNum">     382 </span>                :            :         } catch (bytes memory reason) {</a>
+<a name="383"><span class="lineNum">     383 </span>                :            :             if (reason.length == 0) {</a>
+<a name="384"><span class="lineNum">     384 </span>                :            :                 // Attempted to transfer to a non-IERC1363Receiver implementer</a>
+<a name="385"><span class="lineNum">     385 </span>                :            :                 revert NotIERC1363Receiver();</a>
+<a name="386"><span class="lineNum">     386 </span>                :            :             } else {</a>
+<a name="387"><span class="lineNum">     387 </span>                :            :                 /// @solidity memory-safe-assembly</a>
+<a name="388"><span class="lineNum">     388 </span>                :            :                 assembly {</a>
+<a name="389"><span class="lineNum">     389 </span>                :            :                     revert(add(32, reason), mload(reason))</a>
+<a name="390"><span class="lineNum">     390 </span>                :            :                 }</a>
+<a name="391"><span class="lineNum">     391 </span>                :            :             }</a>
+<a name="392"><span class="lineNum">     392 </span>                :            :         }</a>
+<a name="393"><span class="lineNum">     393 </span>                :            :     }</a>
+<a name="394"><span class="lineNum">     394 </span>                :            : </a>
+<a name="395"><span class="lineNum">     395 </span>                :            :     /// @notice compute the domain seperator that is required for the approve by signature functionality</a>
+<a name="396"><span class="lineNum">     396 </span>                :            :     /// Stops replay attacks from happening because of approvals on different contracts on different chains</a>
+<a name="397"><span class="lineNum">     397 </span>                :            :     /// @dev Reference https://eips.ethereum.org/EIPS/eip-712</a>
+<a name="398"><span class="lineNum">     398 </span>                :            :     function computeDomainSeparator() internal view virtual returns (bytes32) {</a>
+<a name="399"><span class="lineNum">     399 </span>                :<span class="lineCov">         10 :         return</span></a>
+<a name="400"><span class="lineNum">     400 </span>                :            :             keccak256(</a>
+<a name="401"><span class="lineNum">     401 </span>                :            :                 abi.encode(</a>
+<a name="402"><span class="lineNum">     402 </span>                :            :                     keccak256(&quot;EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)&quot;),</a>
+<a name="403"><span class="lineNum">     403 </span>                :            :                     keccak256(bytes(name())),</a>
+<a name="404"><span class="lineNum">     404 </span>                :            :                     keccak256(&quot;1&quot;),</a>
+<a name="405"><span class="lineNum">     405 </span>                :            :                     block.chainid,</a>
+<a name="406"><span class="lineNum">     406 </span>                :            :                     address(this)</a>
+<a name="407"><span class="lineNum">     407 </span>                :            :                 )</a>
+<a name="408"><span class="lineNum">     408 </span>                :            :             );</a>
+<a name="409"><span class="lineNum">     409 </span>                :            :     }</a>
+<a name="410"><span class="lineNum">     410 </span>                :            : </a>
+<a name="411"><span class="lineNum">     411 </span>                :            :     function _checkOnApprovalReceived(</a>
+<a name="412"><span class="lineNum">     412 </span>                :            :         address _spender,</a>
+<a name="413"><span class="lineNum">     413 </span>                :            :         uint256 _value,</a>
+<a name="414"><span class="lineNum">     414 </span>                :            :         uint256 _recoveryRate,</a>
+<a name="415"><span class="lineNum">     415 </span>                :            :         bytes memory data</a>
+<a name="416"><span class="lineNum">     416 </span>                :            :     ) internal returns (bool) {</a>
+<a name="417"><span class="lineNum">     417 </span>        [<span class="branchCov" title="Branch 0 was taken 1 time"> + </span><span class="branchCov" title="Branch 1 was taken 3 times"> + </span>]:<span class="lineCov">          4 :         if (!Address.isContract(_spender)) {</span></a>
+<a name="418"><span class="lineNum">     418 </span>                :<span class="lineCov">          1 :             revert NotContractError();</span></a>
+<a name="419"><span class="lineNum">     419 </span>                :            :         }</a>
+<a name="420"><span class="lineNum">     420 </span>                :            : </a>
+<a name="421"><span class="lineNum">     421 </span>                :<span class="lineCov">          3 :         try IERC5827Spender(_spender).onRenewableApprovalReceived(_msgSender(), _value, _recoveryRate, data) returns (</span></a>
+<a name="422"><span class="lineNum">     422 </span>                :            :             bytes4 retval</a>
+<a name="423"><span class="lineNum">     423 </span>                :            :         ) {</a>
+<a name="424"><span class="lineNum">     424 </span>                :            :             return retval == IERC5827Spender.onRenewableApprovalReceived.selector;</a>
+<a name="425"><span class="lineNum">     425 </span>                :            :         } catch (bytes memory reason) {</a>
+<a name="426"><span class="lineNum">     426 </span>                :            :             if (reason.length == 0) {</a>
+<a name="427"><span class="lineNum">     427 </span>                :            :                 // attempting to approve a non IERC5827Spender implementer</a>
+<a name="428"><span class="lineNum">     428 </span>                :            :                 revert NotIERC5827Spender();</a>
+<a name="429"><span class="lineNum">     429 </span>                :            :             } else {</a>
+<a name="430"><span class="lineNum">     430 </span>                :            :                 /// @solidity memory-safe-assembly</a>
+<a name="431"><span class="lineNum">     431 </span>                :            :                 assembly {</a>
+<a name="432"><span class="lineNum">     432 </span>                :            :                     revert(add(32, reason), mload(reason))</a>
+<a name="433"><span class="lineNum">     433 </span>                :            :                 }</a>
+<a name="434"><span class="lineNum">     434 </span>                :            :             }</a>
+<a name="435"><span class="lineNum">     435 </span>                :            :         }</a>
+<a name="436"><span class="lineNum">     436 </span>                :            :     }</a>
+<a name="437"><span class="lineNum">     437 </span>                :            : </a>
+<a name="438"><span class="lineNum">     438 </span>                :            :     /// @notice fetch remaining allowance between _owner and _spender while accounting for base token allowance.</a>
+<a name="439"><span class="lineNum">     439 </span>                :            :     /// @param _owner address of the owner</a>
+<a name="440"><span class="lineNum">     440 </span>                :            :     /// @param _spender address of spender</a>
+<a name="441"><span class="lineNum">     441 </span>                :            :     /// @return remaining allowance left</a>
+<a name="442"><span class="lineNum">     442 </span>                :            :     function _remainingAllowance(address _owner, address _spender) private view returns (uint256) {</a>
+<a name="443"><span class="lineNum">     443 </span>                :<span class="lineCov">       1839 :         RenewableAllowance memory a = rAllowance[_owner][_spender];</span></a>
+<a name="444"><span class="lineNum">     444 </span>                :            : </a>
+<a name="445"><span class="lineNum">     445 </span>                :<span class="lineCov">       1839 :         uint256 recovered = a.recoveryRate * uint64(block.timestamp - a.lastUpdated);</span></a>
+<a name="446"><span class="lineNum">     446 </span>                :<span class="lineCov">       1839 :         uint256 remainingAllowance = MathUtil.saturatingAdd(a.remaining, recovered);</span></a>
+<a name="447"><span class="lineNum">     447 </span>                :            : </a>
+<a name="448"><span class="lineNum">     448 </span>                :<span class="lineCov">       1839 :         return remainingAllowance &gt; a.maxAmount ? a.maxAmount : remainingAllowance;</span></a>
+<a name="449"><span class="lineNum">     449 </span>                :            :     }</a>
+<a name="450"><span class="lineNum">     450 </span>                :            : }</a>
 </pre>
       </td>
     </tr>
