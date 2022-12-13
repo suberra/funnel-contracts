@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-/// @notice Handles nonces mapping. Required for permits
+/// @notice Handles nonces mapping. Required for EIP712-based signatures
 abstract contract Nonces {
     /// mapping between the user and the nonce of the account
     mapping(address => uint256) internal _nonces;
