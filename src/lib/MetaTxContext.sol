@@ -25,6 +25,5 @@ abstract contract MetaTxContext is Context {
         } else {
             sender = msg.sender;
         }
-        return sender;
     }
 }
