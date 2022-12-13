@@ -18,3 +18,4 @@ cache_hardhat/
 typechain-types/
 .gas-snapshot
 gas-snapshots/
+report/
