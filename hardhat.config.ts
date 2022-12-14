@@ -9,7 +9,7 @@ import "@nomicfoundation/hardhat-toolbox";
 import "@nomiclabs/hardhat-ethers";
 
 import * as tdly from "@tenderly/hardhat-tenderly";
-tdly.setup({ automaticVerifications: true });
+tdly.setup({ automaticVerifications: false });
 
 function getRemappings() {
   return fs
