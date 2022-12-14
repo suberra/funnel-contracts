@@ -98,12 +98,16 @@ genhtml lcov.info -o report --branch-coverage
 Script for batch deployment across testnet or mainnet
 `./script/deployAll.sh`
 
-
-| Network | Contract      | Address                                    | Version     |
-| ------- | ------------- | ------------------------------------------ | ----------- |
-| Goerli  | Funnel (impl) | 0xb2acc9a328039e2918b2d85420251fb831ce47e0 | 0.2.0-alpha |
-| Goerli  | FunnelFactory | 0x92324acad3946f0600d7e0e2641ef10d1655d89d | 0.2.0-alpha |
-
+| Network   | Contract      | Address                                    | Version     |
+| --------- | ------------- | ------------------------------------------ | ----------- |
+| Goerli    | Funnel (impl) | 0xb2acc9a328039e2918b2d85420251fb831ce47e0 | 0.2.0-alpha |
+| Goerli    | FunnelFactory | 0x92324acad3946f0600d7e0e2641ef10d1655d89d | 0.2.0-alpha |
+| Polygon   | Funnel (impl) | 0xb2acc9a328039e2918b2d85420251fb831ce47e0 | 0.2.0-alpha |
+| Polygon   | FunnelFactory | 0x92324acad3946f0600d7e0e2641ef10d1655d89d | 0.2.0-alpha |
+| Avalanche | Funnel (impl) | 0xb2acc9a328039e2918b2d85420251fb831ce47e0 | 0.2.0-alpha |
+| Avalanche | FunnelFactory | 0x92324acad3946f0600d7e0e2641ef10d1655d89d | 0.2.0-alpha |
+| Arbitrum  | Funnel (impl) | 0xb2acc9a328039e2918b2d85420251fb831ce47e0 | 0.2.0-alpha |
+| Arbitrum  | FunnelFactory | 0x92324acad3946f0600d7e0e2641ef10d1655d89d | 0.2.0-alpha |
 
 # License
 
