@@ -2,10 +2,14 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 import fs from "fs";
-import { extendConfig, HardhatUserConfig } from "hardhat/config";
+import { HardhatUserConfig } from "hardhat/config";
 import "solidity-docgen";
 import "hardhat-preprocessor";
 import "@nomicfoundation/hardhat-toolbox";
+import "@nomiclabs/hardhat-ethers";
+
+import * as tdly from "@tenderly/hardhat-tenderly";
+tdly.setup({ automaticVerifications: true });
 
 function getRemappings() {
   return fs
@@ -41,6 +45,21 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    polygon: {
+      url: process.env.POLYGON_RPC_URL || "",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    avalanche: {
+      url: process.env.AVAX_RPC_URL || "",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    arbitrum: {
+      url: process.env.ARBITRUM_RPC_URL || "",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
   },
   preprocess: {
     eachLine: (hre) => ({
@@ -63,6 +82,11 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
-  }
+  },
+  tenderly: {
+    project: process.env.TENDERLY_PROJECT || "",
+    username: process.env.TENDERLY_USERNAME || "",
+    privateVerification: true,
+  },
 };
 export default config;

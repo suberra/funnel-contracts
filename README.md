@@ -63,7 +63,12 @@ Deploy factory to goerli
 
 `forge script script/FunnelFactoryDeployer.sol:FunnelFactoryDeployer --rpc-url $GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY`
 
-Note: Deployment addresses are dependent on deployer's private key, FunnelFactory bytecode and salt used. Multiple deployments will fail.
+Note: Deployment addresses are dependent on FunnelFactory bytecode and salt used. Multiple deployments will fail.
+
+## Verification
+
+Private verification
+`npx hardhat run script/verifyContracts.ts --network goerli`
 
 ## Misc
 
