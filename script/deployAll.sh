@@ -9,7 +9,7 @@ else
     broadcast=""
 fi
 
-echo "Deploy testnet? (Y/n)"
+echo "Deploy testnet (else mainnet)? (Y/n)"
 read isTestnet
 
 if [[ "$isTestnet" = "Y" || "$isTestnet" = "y" || "$isTestnet" = "" ]] 

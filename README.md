@@ -68,7 +68,7 @@ Note: Deployment addresses are dependent on FunnelFactory bytecode and salt used
 ## Verification
 
 Private verification
-`npx hardhat run script/verifyContracts.ts --network goerli`
+`npx hardhat run script/verifyTenderly.ts --network goerli`
 
 ## Misc
 
@@ -95,11 +95,15 @@ genhtml lcov.info -o report --branch-coverage
 
 # Deployments
 
-| Network | Contract      | Address                                    |
-| ------- | ------------- | ------------------------------------------ |
-| Goerli  | Funnel (impl) | 0x3B1bbB0756250Bd981EEC8C02801d06ad5F86B75 |
-| Goerli  | FunnelFactory | 0xDd3e9D430D0681Eaa833DbD6B186E7f031f71837 |
-| Goerli  | USDC (funnel) | 0x3d5499808F8082d239a62B5c4876B6ffD23526d5 |
+Script for batch deployment across testnet or mainnet
+`./script/deployAll.sh`
+
+
+| Network | Contract      | Address                                    | Version     |
+| ------- | ------------- | ------------------------------------------ | ----------- |
+| Goerli  | Funnel (impl) | 0xb2acc9a328039e2918b2d85420251fb831ce47e0 | 0.2.0-alpha |
+| Goerli  | FunnelFactory | 0x92324acad3946f0600d7e0e2641ef10d1655d89d | 0.2.0-alpha |
+
 
 # License
 
