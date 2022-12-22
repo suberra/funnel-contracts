@@ -5,6 +5,7 @@ import { IFunnelFactory } from "./interfaces/IFunnelFactory.sol";
 import { IERC5827Proxy } from "./interfaces/IERC5827Proxy.sol";
 import { IFunnelErrors } from "./interfaces/IFunnelErrors.sol";
 import { Funnel } from "./Funnel.sol";
+import { IFunnel } from "./interfaces/IFunnel.sol";
 import { Clones } from "openzeppelin-contracts/proxy/Clones.sol";
 
 /// @title Factory for all the funnel contracts
@@ -42,7 +43,7 @@ contract FunnelFactory is IFunnelFactory, IFunnelErrors {
         _funnelAddress = funnelImplementation.cloneDeterministic(bytes32(uint256(uint160(_tokenAddress))));
 
         deployments[_tokenAddress] = _funnelAddress;
-        Funnel(_funnelAddress).initialize(_tokenAddress);
+        IFunnel(_funnelAddress).initialize(_tokenAddress);
         emit DeployedFunnel(_tokenAddress, _funnelAddress);
     }
 
