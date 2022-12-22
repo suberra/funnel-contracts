@@ -307,7 +307,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     /// This is a low level function that doesn't return to its internal call site.
     /// It will return to the external caller whatever the implementation returns.
     /// @param implementation Address to delegate.
-    function _fallback(address implementation) internal {
+    function _fallback(address implementation) internal view {
         assembly {
             // Copy msg.data. We take full control of memory in this inline assembly
             // block because it will not return to Solidity code. We overwrite the
