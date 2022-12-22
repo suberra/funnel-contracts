@@ -43,8 +43,8 @@ contract FunnelFactory is IFunnelFactory, IFunnelErrors {
         _funnelAddress = funnelImplementation.cloneDeterministic(bytes32(uint256(uint160(_tokenAddress))));
 
         deployments[_tokenAddress] = _funnelAddress;
-        IFunnel(_funnelAddress).initialize(_tokenAddress);
         emit DeployedFunnel(_tokenAddress, _funnelAddress);
+        IFunnel(_funnelAddress).initialize(_tokenAddress);
     }
 
     /// @inheritdoc IFunnelFactory

@@ -49,7 +49,7 @@ abstract contract NativeMetaTransaction is EIP712, Nonces {
         bytes32 sigR,
         bytes32 sigS,
         uint8 sigV
-    ) external payable returns (bytes memory data) {
+    ) external returns (bytes memory data) {
         MetaTransaction memory metaTx = MetaTransaction({
             nonce: _nonces[userAddress]++,
             from: userAddress,

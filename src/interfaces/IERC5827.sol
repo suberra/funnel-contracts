@@ -39,8 +39,6 @@ interface IERC5827 is IERC20, IERC165 {
         uint256 _recoveryRate
     ) external returns (bool success);
 
-    /// Overridden EIP-20 functions
-
     /// @notice Returns approved max amount and recovery rate.
     /// @return amount initial and maximum allowance given to spender
     /// @return recoveryRate recovery amount per second
@@ -48,6 +46,8 @@ interface IERC5827 is IERC20, IERC165 {
         external
         view
         returns (uint256 amount, uint256 recoveryRate);
+
+    /// Overridden EIP-20 functions
 
     /// @notice Grants a (non-increasing) allowance of _value to _spender.
     /// MUST clear set _recoveryRate to 0 on the corresponding renewable allowance, if any.
