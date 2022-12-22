@@ -4,7 +4,6 @@ pragma solidity 0.8.17;
 import { IFunnelFactory } from "./interfaces/IFunnelFactory.sol";
 import { IERC5827Proxy } from "./interfaces/IERC5827Proxy.sol";
 import { IFunnelErrors } from "./interfaces/IFunnelErrors.sol";
-import { Funnel } from "./Funnel.sol";
 import { IFunnel } from "./interfaces/IFunnel.sol";
 import { Clones } from "openzeppelin-contracts/proxy/Clones.sol";
 
