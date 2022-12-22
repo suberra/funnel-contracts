@@ -14,7 +14,7 @@ contract FunnelFactory is IFunnelFactory, IFunnelErrors {
     using Clones for address;
 
     /// Stores the mapping between tokenAddress => funnelAddress
-    mapping(address => address) deployments;
+    mapping(address => address) private deployments;
 
     /// address of the implementation. This is immutable due to security as implementation is not
     /// supposed to change after deployment

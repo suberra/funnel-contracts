@@ -18,7 +18,11 @@ abstract contract NativeMetaTransaction is EIP712, Nonces {
     /// @param userAddress Address of the user that sent the meta-transaction
     /// @param relayerAddress Address of the relayer that executed the meta-transaction
     /// @param functionSignature Signature of the function
-    event MetaTransactionExecuted(address indexed userAddress, address payable relayerAddress, bytes functionSignature);
+    event MetaTransactionExecuted(
+        address indexed userAddress,
+        address payable indexed relayerAddress,
+        bytes functionSignature
+    );
 
     /// @dev Function call is not successful
     error FunctionCallError();

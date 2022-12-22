@@ -46,7 +46,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     }
 
     // owner => spender => renewableAllowance
-    mapping(address => mapping(address => RenewableAllowance)) rAllowance;
+    mapping(address => mapping(address => RenewableAllowance)) private rAllowance;
 
     //////////////////////////////////////////////////////////////
     ///                        EIP-2612 STORAGE
@@ -291,7 +291,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     /// @param interfaceId The interface identifier, as specified in ERC-165
     /// @dev Interface identification is specified in ERC-165. See https://eips.ethereum.org/EIPS/eip-165
     /// @return `true` if the contract implements `interfaceID`
-    function supportsInterface(bytes4 interfaceId) external pure virtual returns (bool) {
+    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
         return
             interfaceId == type(IERC5827).interfaceId ||
             interfaceId == type(IERC5827Payable).interfaceId ||
@@ -307,7 +307,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     /// This is a low level function that doesn't return to its internal call site.
     /// It will return to the external caller whatever the implementation returns.
     /// @param implementation Address to delegate.
-    function _fallback(address implementation) internal virtual {
+    function _fallback(address implementation) internal {
         assembly {
             // Copy msg.data. We take full control of memory in this inline assembly
             // block because it will not return to Solidity code. We overwrite the
@@ -450,7 +450,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     /// @notice compute the domain seperator that is required for the approve by signature functionality
     /// Stops replay attacks from happening because of approvals on different contracts on different chains
     /// @dev Reference https://eips.ethereum.org/EIPS/eip-712
-    function _computeDomainSeparator() internal view virtual returns (bytes32) {
+    function _computeDomainSeparator() internal view returns (bytes32) {
         return
             keccak256(
                 abi.encode(
