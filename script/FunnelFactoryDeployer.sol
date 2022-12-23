@@ -2,7 +2,8 @@
 pragma solidity 0.8.17;
 
 import "forge-std/Script.sol";
-import "../src/FunnelFactory.sol";
+import { FunnelFactory } from "../src/FunnelFactory.sol";
+import { Funnel } from "../src/Funnel.sol";
 
 contract FunnelFactoryDeployer is Script {
     function run() external {

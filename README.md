@@ -79,6 +79,7 @@ Forge snapshot automatically captures selected function calls on `.forge-snapsho
 
 ```sh
 forge test --gas-report >> .forge-snapshots/report.txt   
+forge snapshot # needed for gas checks
 ```
 
 ### Test Coverage

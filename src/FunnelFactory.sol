@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 import { IFunnelFactory } from "./interfaces/IFunnelFactory.sol";
 import { IERC5827Proxy } from "./interfaces/IERC5827Proxy.sol";
 import { IFunnelErrors } from "./interfaces/IFunnelErrors.sol";
-import { Funnel } from "./Funnel.sol";
+import { IFunnel } from "./interfaces/IFunnel.sol";
 import { Clones } from "openzeppelin-contracts/proxy/Clones.sol";
 
 /// @title Factory for all the funnel contracts
@@ -13,7 +13,7 @@ contract FunnelFactory is IFunnelFactory, IFunnelErrors {
     using Clones for address;
 
     /// Stores the mapping between tokenAddress => funnelAddress
-    mapping(address => address) deployments;
+    mapping(address => address) private deployments;
 
     /// address of the implementation. This is immutable due to security as implementation is not
     /// supposed to change after deployment
@@ -42,8 +42,8 @@ contract FunnelFactory is IFunnelFactory, IFunnelErrors {
         _funnelAddress = funnelImplementation.cloneDeterministic(bytes32(uint256(uint160(_tokenAddress))));
 
         deployments[_tokenAddress] = _funnelAddress;
-        Funnel(_funnelAddress).initialize(_tokenAddress);
         emit DeployedFunnel(_tokenAddress, _funnelAddress);
+        IFunnel(_funnelAddress).initialize(_tokenAddress);
     }
 
     /// @inheritdoc IFunnelFactory

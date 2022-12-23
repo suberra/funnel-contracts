@@ -19,4 +19,9 @@ interface IFunnel is IERC5827, IERC5827Proxy, IERC5827Payable {
 
     /// @dev Error thrown if the Recovery Rate exceeds the max allowance
     error RecoveryRateExceeded();
+
+    /// @notice Called when the contract is being initialised.
+    /// @param _token contract address of the underlying ERC20 token
+    /// @dev Sets the INITIAL_CHAIN_ID and INITIAL_DOMAIN_SEPARATOR that might be used in future permit calls
+    function initialize(address _token) external;
 }

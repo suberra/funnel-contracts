@@ -46,7 +46,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     }
 
     // owner => spender => renewableAllowance
-    mapping(address => mapping(address => RenewableAllowance)) rAllowance;
+    mapping(address => mapping(address => RenewableAllowance)) public rAllowance;
 
     //////////////////////////////////////////////////////////////
     ///                        EIP-2612 STORAGE
@@ -70,8 +70,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     bytes32 internal constant PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
-    /// @notice Called when the contract is being initialised.
-    /// @dev Sets the INITIAL_CHAIN_ID and INITIAL_DOMAIN_SEPARATOR that might be used in future permit calls
+    /// @inheritdoc IFunnel
     function initialize(address _token) external initializer {
         if (_token == address(0)) {
             revert InvalidAddress({ _input: _token });
@@ -292,7 +291,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     /// @param interfaceId The interface identifier, as specified in ERC-165
     /// @dev Interface identification is specified in ERC-165. See https://eips.ethereum.org/EIPS/eip-165
     /// @return `true` if the contract implements `interfaceID`
-    function supportsInterface(bytes4 interfaceId) external pure virtual returns (bool) {
+    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
         return
             interfaceId == type(IERC5827).interfaceId ||
             interfaceId == type(IERC5827Payable).interfaceId ||
@@ -308,7 +307,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     /// This is a low level function that doesn't return to its internal call site.
     /// It will return to the external caller whatever the implementation returns.
     /// @param implementation Address to delegate.
-    function _fallback(address implementation) internal virtual {
+    function _fallback(address implementation) internal view {
         assembly {
             // Copy msg.data. We take full control of memory in this inline assembly
             // block because it will not return to Solidity code. We overwrite the
@@ -323,7 +322,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
             returndatacopy(0, 0, returndatasize())
 
             switch result
-            // delegatecall returns 0 on error.
+            // staticcall returns 0 on error.
             case 0 {
                 revert(0, returndatasize())
             }
@@ -451,7 +450,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     /// @notice compute the domain seperator that is required for the approve by signature functionality
     /// Stops replay attacks from happening because of approvals on different contracts on different chains
     /// @dev Reference https://eips.ethereum.org/EIPS/eip-712
-    function _computeDomainSeparator() internal view virtual returns (bytes32) {
+    function _computeDomainSeparator() internal view returns (bytes32) {
         return
             keccak256(
                 abi.encode(
