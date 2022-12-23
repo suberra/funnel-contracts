@@ -46,7 +46,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
     }
 
     // owner => spender => renewableAllowance
-    mapping(address => mapping(address => RenewableAllowance)) private rAllowance;
+    mapping(address => mapping(address => RenewableAllowance)) public rAllowance;
 
     //////////////////////////////////////////////////////////////
     ///                        EIP-2612 STORAGE
