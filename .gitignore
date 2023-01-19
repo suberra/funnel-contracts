@@ -18,6 +18,5 @@ cache_hardhat/
 typechain-types/
 
 # PNM files
-out
 reports
 pnm-cov.json
