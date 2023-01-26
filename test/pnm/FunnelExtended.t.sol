@@ -19,8 +19,6 @@ contract FunnelExtendedTest is TestSetup {
     ERC20 token;
     Funnel funnel;
 
-    IERC5827 public renewableToken;
-
     function setUp() public override {
         uint256 privateKey = 0xBEEF;
         user1 = vm.addr(privateKey);
@@ -31,12 +29,6 @@ contract FunnelExtendedTest is TestSetup {
 
         funnel = new Funnel();
         funnel.initialize(address(token));
-        renewableToken = funnel;
-
-        // spender = new MockSpenderReceiver();
-
-        // vm.prank(user1);
-        // contractWallet = new MockERC1271(); // contract wallet owned by user1
 
         vm.prank(user1);
         // approves proxy contract to handle allowance
