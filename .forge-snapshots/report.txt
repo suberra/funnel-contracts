@@ -1,0 +1,432 @@
+No files changed, compilation skipped
+
+Running 2 tests for test/MockSpenderReceiver.t.sol:MockSpenderReceiverTest
+[32m[PASS][0m testSupportInterfaceReceiver() (gas: 5598)
+[32m[PASS][0m testSupportInterfaceSpender() (gas: 6567)
+
+Test result: [32mok[0m. 2 passed; 0 failed; finished in 2.29ms
+
+
+Running 11 tests for test/FunnelFactory.t.sol:FunnelFactoryTest
+[32m[PASS][0m testDeployFunnelForDifferentTokens() (gas: 298301)
+[32m[PASS][0m testDeployFunnelForToken() (gas: 190140)
+[32m[PASS][0m testDeployFunnelForTokenRevertsIfAlreadyDeployed() (gas: 156740)
+[32m[PASS][0m testDeployFunnelFromDifferentFactory() (gas: 558192)
+[32m[PASS][0m testGetFunnelForTokenRevertsIfNotDeployed() (gas: 12826)
+[32m[PASS][0m testIsFunnelFalseForDeployedFunnelFromDifferentFactory() (gas: 563344)
+[32m[PASS][0m testIsFunnelFalseForNonFunnel() (gas: 10897)
+[32m[PASS][0m testIsFunnelFalseForUndeployedFunnel() (gas: 8329)
+[32m[PASS][0m testIsFunnelTrueForDeployedFunnel() (gas: 155345)
+[32m[PASS][0m testNoCodeTokenReverts() (gas: 15454)
+[32m[PASS][0m testTransferFromFunnel() (gas: 294476)
+
+Test result: [32mok[0m. 11 passed; 0 failed; finished in 9.01ms
+
+Running 44 tests for test/Funnel.t.sol:FunnelTest
+[32m[PASS][0m testApprove() (gas: 144763)
+[32m[PASS][0m testApproveRenewable() (gas: 96888)
+[32m[PASS][0m testApproveRenewableAndCall() (gas: 92507)
+[32m[PASS][0m testApproveRenewableAndCallRevertNonContract() (gas: 84743)
+[32m[PASS][0m testApproveRenewableAndCallRevertNonReceiver() (gas: 85695)
+[32m[PASS][0m testApproveRenewableAndCallWithGasSnapshot() (gas: 120930)
+[32m[PASS][0m testBaseToken() (gas: 9949)
+[32m[PASS][0m testBaseTokenAllowance() (gas: 103957)
+[32m[PASS][0m testClearRenewableAllowanceOnNormalApprove() (gas: 146049)
+[32m[PASS][0m testExecuteMetaTransactionApproveRenewable() (gas: 211566)
+[32m[PASS][0m testExecuteMetaTransactionTransfer() (gas: 127678)
+
+[32m[PASS][0m testFailExecuteMetaTransactionBadNonce() (gas: 47539)
+[32m[PASS][0m testFailExecuteMetaTransactionReplayProtection() (gas: 143216)
+[32m[PASS][0m testFailPermitBadDeadline() (gas: 46617)
+[32m[PASS][0m testFailPermitBadNonce() (gas: 46607)
+[32m[PASS][0m testFailPermitPastDeadline() (gas: 15794)
+[32m[PASS][0m testFailPermitRenewableBadDeadline() (gas: 48718)
+[32m[PASS][0m testFailPermitRenewableBadNonce() (gas: 48688)
+[32m[PASS][0m testFailPermitRenewablePastDeadline() (gas: 20042)
+[32m[PASS][0m testFailPermitRenewableReplay() (gas: 125597)
+[32m[PASS][0m testFailPermitReplay() (gas: 123472)
+[32m[PASS][0m testFallbackToBaseToken() (gas: 25635)
+[32m[PASS][0m testInfiniteApproveTransferFrom() (gas: 134109)
+[32m[PASS][0m testInsufficientAllowance() (gas: 29359)
+
+[32m[PASS][0m testOverflow() (gas: 116604)
+[32m[PASS][0m testOverflow2() (gas: 116501)
+[32m[PASS][0m testOverflow3() (gas: 129967)
+[32m[PASS][0m testOverriddenName() (gas: 20770)
+[32m[PASS][0m testPermit() (gas: 159359)
+[32m[PASS][0m testPermitRenewable() (gas: 130901)
+[32m[PASS][0m testRecoveryRateCasting() (gas: 85917)
+[32m[PASS][0m testRecoveryRateExceeded() (gas: 13408)
+[32m[PASS][0m testRecoveryRateExceeded2() (gas: 13447)
+
+[32m[PASS][0m testRenewableAllowanceTransferFrom() (gas: 155288)
+
+[32m[PASS][0m testRenewableMaxAllowance() (gas: 98381)
+[32m[PASS][0m testSupportInterface() (gas: 5766)
+[32m[PASS][0m testSupportsInterfacePayable() (gas: 5814)
+[32m[PASS][0m testSupportsInterfaceProxy() (gas: 5874)
+[32m[PASS][0m testTransfer() (gas: 62078)
+[32m[PASS][0m testTransferFromAndCall() (gas: 138765)
+[32m[PASS][0m testTransferFromAndCallRevertNonContract() (gas: 113466)
+[32m[PASS][0m testTransferFromAndCallRevertNonReceiver() (gas: 111819)
+[32m[PASS][0m testTransferFromAndCallWithGasSnapshot() (gas: 174098)
+[32m[PASS][0m testTransferFromWithSnapshot() (gas: 156685)
+
+Test result: [32mok[0m. 44 passed; 0 failed; finished in 14.08ms
+
+Running 18 tests for test/FunnelERC20.t.sol:FunnelERC20Test
+[32m[PASS][0m testApproveFuzzing(uint256) (runs: 256, μ: 118491, ~: 119891)
+[32m[PASS][0m testApproveMaxWithTransfer() (gas: 138686)
+[32m[PASS][0m testApproveWithTransferFuzzing(uint256,uint256) (runs: 256, μ: 148358, ~: 150398)
+[32m[PASS][0m testBalanceOfOnMint(uint256) (runs: 256, μ: 66051, ~: 67015)
+[32m[PASS][0m testBalanceOfOnMintLargeAmount() (gas: 66981)
+[32m[PASS][0m testBalanceOfOnTransfer(uint256,uint256) (runs: 256, μ: 103797, ~: 107372)
+[32m[PASS][0m testBalanceOfOnTransferLargeAmount() (gas: 87476)
+[32m[PASS][0m testBalanceOfReflectsSlot(uint256) (runs: 256, μ: 322, ~: 322)
+[32m[PASS][0m testFailApproveWithTransferInsufficientApproval() (gas: 100464)
+[32m[PASS][0m testFailApprovewithTransferInsufficientBalance() (gas: 108378)
+[32m[PASS][0m testFailTransferExceedsBalance(uint256) (runs: 256, μ: 40598, ~: 40682)
+[32m[PASS][0m testInitialAllowance() (gas: 25026)
+[32m[PASS][0m testTotalSupply(uint256) (runs: 256, μ: 42740, ~: 42933)
+[32m[PASS][0m testTransferFullBalance() (gas: 61369)
+[32m[PASS][0m testTransferFuzzing(uint256) (runs: 256, μ: 68628, ~: 69678)
+[32m[PASS][0m testTransferHalfBalance() (gas: 66255)
+[32m[PASS][0m testTransferOneToken() (gas: 64089)
+[32m[PASS][0m testTransferZeroTokens() (gas: 41433)
+Test result: [32mok[0m. 18 passed; 0 failed; finished in 48.81ms
+
+╭────────────────────────────────┬─────────────────┬───────┬────────┬────────┬─────────╮
+│ src/Funnel.sol:Funnel contract ┆                 ┆       ┆        ┆        ┆         │
+╞════════════════════════════════╪═════════════════╪═══════╪════════╪════════╪═════════╡
+│ Deployment Cost                ┆ Deployment Size ┆       ┆        ┆        ┆         │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ 1725613                        ┆ 8651            ┆       ┆        ┆        ┆         │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ Function Name                  ┆ min             ┆ avg   ┆ median ┆ max    ┆ # calls │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ DOMAIN_SEPARATOR               ┆ 4479            ┆ 4479  ┆ 4479   ┆ 4479   ┆ 14      │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ allowance                      ┆ 3026            ┆ 6547  ┆ 7028   ┆ 15533  ┆ 34      │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ approve                        ┆ 4212            ┆ 57959 ┆ 71265  ┆ 71265  ┆ 10      │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ approveRenewable               ┆ 559             ┆ 60388 ┆ 71285  ┆ 71497  ┆ 19      │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ approveRenewableAndCall        ┆ 74292           ┆ 76241 ┆ 76468  ┆ 77738  ┆ 4       │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ balanceOf                      ┆ 1504            ┆ 3364  ┆ 1506   ┆ 8004   ┆ 43      │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ baseToken                      ┆ 419             ┆ 919   ┆ 419    ┆ 2419   ┆ 4       │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ decimals                       ┆ 829             ┆ 829   ┆ 829    ┆ 829    ┆ 1       │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ executeMetaTransaction         ┆ 5972            ┆ 64915 ┆ 74151  ┆ 107040 ┆ 5       │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ initialize                     ┆ 72081           ┆ 72324 ┆ 72081  ┆ 74081  ┆ 72      │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ name                           ┆ 9939            ┆ 9939  ┆ 9939   ┆ 9939   ┆ 1       │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ nonces                         ┆ 629             ┆ 629   ┆ 629    ┆ 629    ┆ 5       │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ permit                         ┆ 760             ┆ 44478 ┆ 29796  ┆ 100560 ┆ 6       │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ permitRenewable                ┆ 694             ┆ 44435 ┆ 29757  ┆ 100524 ┆ 6       │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ renewableAllowance             ┆ 1237            ┆ 1237  ┆ 1237   ┆ 1237   ┆ 1       │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ supportsInterface              ┆ 458             ┆ 496   ┆ 496    ┆ 534    ┆ 3       │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ symbol                         ┆ 8268            ┆ 8268  ┆ 8268   ┆ 8268   ┆ 1       │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ totalSupply                    ┆ 1196            ┆ 4029  ┆ 3195   ┆ 7696   ┆ 3       │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ transfer                       ┆ 4728            ┆ 25032 ┆ 27780  ┆ 39083  ┆ 11      │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ transferFrom                   ┆ 3110            ┆ 24789 ┆ 34082  ┆ 41552  ┆ 19      │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ transferFromAndCall            ┆ 35334           ┆ 42629 ┆ 42949  ┆ 49283  ┆ 4       │
+╰────────────────────────────────┴─────────────────┴───────┴────────┴────────┴─────────╯
+╭──────────────────────────────────────────────┬─────────────────┬────────┬────────┬────────┬─────────╮
+│ src/FunnelFactory.sol:FunnelFactory contract ┆                 ┆        ┆        ┆        ┆         │
+╞══════════════════════════════════════════════╪═════════════════╪════════╪════════╪════════╪═════════╡
+│ Deployment Cost                              ┆ Deployment Size ┆        ┆        ┆        ┆         │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ 231947                                       ┆ 1388            ┆        ┆        ┆        ┆         │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ Function Name                                ┆ min             ┆ avg    ┆ median ┆ max    ┆ # calls │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ deployFunnelForToken                         ┆ 537             ┆ 120208 ┆ 145329 ┆ 145329 ┆ 12      │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ getFunnelForToken                            ┆ 830             ┆ 1420   ┆ 830    ┆ 2600   ┆ 3       │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ isFunnel                                     ┆ 2070            ┆ 2535   ┆ 2070   ┆ 3454   ┆ 5       │
+╰──────────────────────────────────────────────┴─────────────────┴────────┴────────┴────────┴─────────╯
+
+No files changed, compilation skipped
+
+Running 2 tests for test/MockSpenderReceiver.t.sol:MockSpenderReceiverTest
+[32m[PASS][0m testSupportInterfaceReceiver() (gas: 5598)
+[32m[PASS][0m testSupportInterfaceSpender() (gas: 6567)
+Test result: [32mok[0m. 2 passed; 0 failed; finished in 2.55ms
+
+Running 11 tests for test/FunnelFactory.t.sol:FunnelFactoryTest
+[32m[PASS][0m testDeployFunnelForDifferentTokens() (gas: 298277)
+[32m[PASS][0m testDeployFunnelForToken() (gas: 190128)
+[32m[PASS][0m testDeployFunnelForTokenRevertsIfAlreadyDeployed() (gas: 156728)
+[32m[PASS][0m testDeployFunnelFromDifferentFactory() (gas: 557162)
+[32m[PASS][0m testGetFunnelForTokenRevertsIfNotDeployed() (gas: 12826)
+[32m[PASS][0m testIsFunnelFalseForDeployedFunnelFromDifferentFactory() (gas: 562314)
+[32m[PASS][0m testIsFunnelFalseForNonFunnel() (gas: 10897)
+[32m[PASS][0m testIsFunnelFalseForUndeployedFunnel() (gas: 8329)
+[32m[PASS][0m testIsFunnelTrueForDeployedFunnel() (gas: 155333)
+[32m[PASS][0m testNoCodeTokenReverts() (gas: 15454)
+[32m[PASS][0m testTransferFromFunnel() (gas: 291694)
+Test result: [32mok[0m. 11 passed; 0 failed; finished in 7.08ms
+
+Running 51 tests for test/Funnel.t.sol:FunnelTest
+[32m[PASS][0m testApprove() (gas: 143366)
+[32m[PASS][0m testApproveRenewable() (gas: 96870)
+[32m[PASS][0m testApproveRenewableAndCall() (gas: 92530)
+[32m[PASS][0m testApproveRenewableAndCallRevertNonContract() (gas: 84740)
+[32m[PASS][0m testApproveRenewableAndCallRevertNonReceiver() (gas: 85670)
+[32m[PASS][0m testApproveRenewableAndCallWithGasSnapshot() (gas: 121012)
+[32m[PASS][0m testBaseToken() (gas: 9905)
+[32m[PASS][0m testBaseTokenAllowance() (gas: 103961)
+[32m[PASS][0m testClearRenewableAllowanceOnNormalApprove() (gas: 143323)
+[32m[PASS][0m testExecuteMetaTransactionApproveRenewable() (gas: 211886)
+[32m[PASS][0m testExecuteMetaTransactionTransfer() (gas: 127938)
+[32m[PASS][0m testFallbackToBaseToken() (gas: 25840)
+[32m[PASS][0m testInfiniteApproveTransferFrom() (gas: 132794)
+[32m[PASS][0m testInsufficientAllowance() (gas: 21475)
+[32m[PASS][0m testInsufficientBaseAllowance() (gas: 113379)
+[32m[PASS][0m testOverflow() (gas: 115155)
+[32m[PASS][0m testOverflow2() (gas: 115176)
+[32m[PASS][0m testOverflow3() (gas: 128616)
+[32m[PASS][0m testOverriddenName() (gas: 20952)
+[32m[PASS][0m testOverriddenNameWithNoName() (gas: 1990130)
+[32m[PASS][0m testPermit() (gas: 159444)
+[32m[PASS][0m testPermitRenewable() (gas: 130905)
+[32m[PASS][0m testPermitRenewableContractWallet() (gas: 126685)
+[32m[PASS][0m testRecoveryRateCasting() (gas: 85918)
+[32m[PASS][0m testRecoveryRateExceeded() (gas: 13452)
+[32m[PASS][0m testRecoveryRateExceeded2() (gas: 13492)
+[32m[PASS][0m testRenewableAllowanceTransferFrom() (gas: 149827)
+[32m[PASS][0m testRenewableMaxAllowance() (gas: 98365)
+[32m[PASS][0m testRevertExecuteMetaTransactionBadNonce() (gas: 48729)
+[32m[PASS][0m testRevertExecuteMetaTransactionCallFailed() (gas: 55301)
+[32m[PASS][0m testRevertExecuteMetaTransactionInvalidSigner() (gas: 41435)
+[32m[PASS][0m testRevertExecuteMetaTransactionReplayProtection() (gas: 144575)
+[32m[PASS][0m testRevertPermitBadDeadline() (gas: 47105)
+[32m[PASS][0m testRevertPermitBadNonce() (gas: 47002)
+[32m[PASS][0m testRevertPermitPastDeadline() (gas: 16239)
+[32m[PASS][0m testRevertPermitRenewableBadDeadline() (gas: 49183)
+[32m[PASS][0m testRevertPermitRenewableBadNonce() (gas: 49146)
+[32m[PASS][0m testRevertPermitRenewableContractWalletBadSigner() (gas: 52942)
+[32m[PASS][0m testRevertPermitRenewablePastDeadline() (gas: 20595)
+[32m[PASS][0m testRevertPermitRenewableReplay() (gas: 126066)
+[32m[PASS][0m testRevertPermitReplay() (gas: 123961)
+[32m[PASS][0m testSupportInterface() (gas: 5700)
+[32m[PASS][0m testSupportsInterfacePayable() (gas: 5770)
+[32m[PASS][0m testSupportsInterfaceProxy() (gas: 5852)
+[32m[PASS][0m testTransfer() (gas: 62100)
+[32m[PASS][0m testTransferFromAndCall() (gas: 137404)
+[32m[PASS][0m testTransferFromAndCallRevertNonContract() (gas: 112100)
+[32m[PASS][0m testTransferFromAndCallRevertNonReceiver() (gas: 110453)
+[32m[PASS][0m testTransferFromAndCallWithGasSnapshot() (gas: 172942)
+[32m[PASS][0m testTransferFromWithSnapshot() (gas: 155381)
+[32m[PASS][0m testZeroAddressInitialise() (gas: 1732666)
+Test result: [32mok[0m. 51 passed; 0 failed; finished in 53.11ms
+
+Running 18 tests for test/FunnelERC20.t.sol:FunnelERC20Test
+[32m[PASS][0m testApproveFuzzing(uint256) (runs: 256, μ: 118189, ~: 119900)
+[32m[PASS][0m testApproveMaxWithTransfer() (gas: 137307)
+[32m[PASS][0m testApproveWithTransferFuzzing(uint256,uint256) (runs: 256, μ: 147386, ~: 149303)
+[32m[PASS][0m testBalanceOfOnMint(uint256) (runs: 256, μ: 66486, ~: 67015)
+[32m[PASS][0m testBalanceOfOnMintLargeAmount() (gas: 66981)
+[32m[PASS][0m testBalanceOfOnTransfer(uint256,uint256) (runs: 256, μ: 103857, ~: 107372)
+[32m[PASS][0m testBalanceOfOnTransferLargeAmount() (gas: 87476)
+[32m[PASS][0m testBalanceOfReflectsSlot(uint256) (runs: 256, μ: 322, ~: 322)
+[32m[PASS][0m testFailApproveWithTransferInsufficientApproval() (gas: 99082)
+[32m[PASS][0m testFailApprovewithTransferInsufficientBalance() (gas: 106996)
+[32m[PASS][0m testFailTransferExceedsBalance(uint256) (runs: 256, μ: 40576, ~: 40682)
+[32m[PASS][0m testInitialAllowance() (gas: 25029)
+[32m[PASS][0m testTotalSupply(uint256) (runs: 256, μ: 42814, ~: 42933)
+[32m[PASS][0m testTransferFullBalance() (gas: 61369)
+[32m[PASS][0m testTransferFuzzing(uint256) (runs: 256, μ: 69105, ~: 69678)
+[32m[PASS][0m testTransferHalfBalance() (gas: 66255)
+[32m[PASS][0m testTransferOneToken() (gas: 64089)
+[32m[PASS][0m testTransferZeroTokens() (gas: 41433)
+Test result: [32mok[0m. 18 passed; 0 failed; finished in 58.62ms
+| src/Funnel.sol:Funnel contract |                 |       |        |        |         |
+|--------------------------------|-----------------|-------|--------|--------|---------|
+| Deployment Cost                | Deployment Size |       |        |        |         |
+| 1666550                        | 8356            |       |        |        |         |
+| Function Name                  | min             | avg   | median | max    | # calls |
+| DOMAIN_SEPARATOR               | 4479            | 4479  | 4479   | 4479   | 18      |
+| allowance                      | 3029            | 6678  | 9036   | 15536  | 35      |
+| approve                        | 4212            | 57959 | 71265  | 71265  | 10      |
+| approveRenewable               | 559             | 60933 | 71285  | 71497  | 20      |
+| approveRenewableAndCall        | 74289           | 76229 | 76456  | 77717  | 4       |
+| balanceOf                      | 1504            | 3364  | 1506   | 8004   | 43      |
+| baseToken                      | 419             | 919   | 419    | 2419   | 4       |
+| decimals                       | 829             | 829   | 829    | 829    | 1       |
+| executeMetaTransaction         | 5996            | 55055 | 36922  | 107151 | 7       |
+| initialize                     | 23155           | 71810 | 72081  | 81583  | 81      |
+| name                           | 9939            | 11472 | 11472  | 13005  | 2       |
+| nonces                         | 629             | 629   | 629    | 629    | 6       |
+| permit                         | 760             | 44478 | 29796  | 100560 | 6       |
+| permitRenewable                | 694             | 50121 | 30774  | 102565 | 8       |
+| renewableAllowance             | 1237            | 1237  | 1237   | 1237   | 2       |
+| supportsInterface              | 458             | 496   | 496    | 534    | 3       |
+| symbol                         | 8268            | 8268  | 8268   | 8268   | 1       |
+| totalSupply                    | 1196            | 4029  | 3195   | 7696   | 3       |
+| transfer                       | 4728            | 25032 | 27780  | 39083  | 11      |
+| transferFrom                   | 1725            | 23135 | 32974  | 40167  | 19      |
+| transferFromAndCall            | 5566            | 34209 | 35505  | 47877  | 5       |
+
+
+| src/FunnelFactory.sol:FunnelFactory contract |                 |        |        |        |         |
+|----------------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                              | Deployment Size |        |        |        |         |
+| 230941                                       | 1383            |        |        |        |         |
+| Function Name                                | min             | avg    | median | max    | # calls |
+| deployFunnelForToken                         | 537             | 120198 | 145317 | 145317 | 12      |
+| getFunnelForToken                            | 830             | 1420   | 830    | 2600   | 3       |
+| isFunnel                                     | 2070            | 2535   | 2070   | 3454   | 5       |
+
+
+
+No files changed, compilation skipped
+
+Running 2 tests for test/MockSpenderReceiver.t.sol:MockSpenderReceiverTest
+[32m[PASS][0m testSupportInterfaceReceiver() (gas: 5598)
+[32m[PASS][0m testSupportInterfaceSpender() (gas: 6567)
+Test result: [32mok[0m. 2 passed; 0 failed; finished in 2.47ms
+
+Running 11 tests for test/FunnelFactory.t.sol:FunnelFactoryTest
+[32m[PASS][0m testDeployFunnelForDifferentTokens() (gas: 298321)
+[32m[PASS][0m testDeployFunnelForToken() (gas: 190150)
+[32m[PASS][0m testDeployFunnelForTokenRevertsIfAlreadyDeployed() (gas: 156750)
+[32m[PASS][0m testDeployFunnelFromDifferentFactory() (gas: 557206)
+[32m[PASS][0m testGetFunnelForTokenRevertsIfNotDeployed() (gas: 12826)
+[32m[PASS][0m testIsFunnelFalseForDeployedFunnelFromDifferentFactory() (gas: 562402)
+[32m[PASS][0m testIsFunnelFalseForNonFunnel() (gas: 10897)
+[32m[PASS][0m testIsFunnelFalseForUndeployedFunnel() (gas: 8329)
+[32m[PASS][0m testIsFunnelTrueForDeployedFunnel() (gas: 155377)
+[32m[PASS][0m testNoCodeTokenReverts() (gas: 15454)
+[32m[PASS][0m testTransferFromFunnel() (gas: 291782)
+Test result: [32mok[0m. 11 passed; 0 failed; finished in 8.79ms
+
+Running 18 tests for test/FunnelERC20.t.sol:FunnelERC20Test
+[32m[PASS][0m testApproveFuzzing(uint256) (runs: 256, μ: 119344, ~: 119966)
+[32m[PASS][0m testApproveMaxWithTransfer() (gas: 137373)
+[32m[PASS][0m testApproveWithTransferFuzzing(uint256,uint256) (runs: 256, μ: 147332, ~: 149110)
+[32m[PASS][0m testBalanceOfOnMint(uint256) (runs: 256, μ: 66379, ~: 67081)
+[32m[PASS][0m testBalanceOfOnMintLargeAmount() (gas: 67047)
+[32m[PASS][0m testBalanceOfOnTransfer(uint256,uint256) (runs: 256, μ: 104973, ~: 107807)
+[32m[PASS][0m testBalanceOfOnTransferLargeAmount() (gas: 87630)
+[32m[PASS][0m testBalanceOfReflectsSlot(uint256) (runs: 256, μ: 322, ~: 322)
+[32m[PASS][0m testFailApproveWithTransferInsufficientApproval() (gas: 99126)
+[32m[PASS][0m testFailApprovewithTransferInsufficientBalance() (gas: 107040)
+[32m[PASS][0m testFailTransferExceedsBalance(uint256) (runs: 256, μ: 40651, ~: 40748)
+[32m[PASS][0m testInitialAllowance() (gas: 25051)
+[32m[PASS][0m testTotalSupply(uint256) (runs: 256, μ: 42488, ~: 42755)
+[32m[PASS][0m testTransferFullBalance() (gas: 61479)
+[32m[PASS][0m testTransferFuzzing(uint256) (runs: 256, μ: 69138, ~: 69788)
+[32m[PASS][0m testTransferHalfBalance() (gas: 66365)
+[32m[PASS][0m testTransferOneToken() (gas: 64199)
+[32m[PASS][0m testTransferZeroTokens() (gas: 41543)
+Test result: [32mok[0m. 18 passed; 0 failed; finished in 51.72ms
+
+Running 51 tests for test/Funnel.t.sol:FunnelTest
+[32m[PASS][0m testApprove() (gas: 143454)
+[32m[PASS][0m testApproveRenewable() (gas: 96914)
+[32m[PASS][0m testApproveRenewableAndCall() (gas: 92552)
+[32m[PASS][0m testApproveRenewableAndCallRevertNonContract() (gas: 84762)
+[32m[PASS][0m testApproveRenewableAndCallRevertNonReceiver() (gas: 85692)
+[32m[PASS][0m testApproveRenewableAndCallWithGasSnapshot() (gas: 121034)
+[32m[PASS][0m testBaseToken() (gas: 9927)
+[32m[PASS][0m testBaseTokenAllowance() (gas: 104005)
+[32m[PASS][0m testClearRenewableAllowanceOnNormalApprove() (gas: 143565)
+[32m[PASS][0m testExecuteMetaTransactionApproveRenewable() (gas: 211974)
+[32m[PASS][0m testExecuteMetaTransactionTransfer() (gas: 128026)
+[32m[PASS][0m testFallbackToBaseToken() (gas: 25751)
+[32m[PASS][0m testInfiniteApproveTransferFrom() (gas: 132882)
+[32m[PASS][0m testInsufficientAllowance() (gas: 21497)
+[32m[PASS][0m testInsufficientBaseAllowance() (gas: 113445)
+[32m[PASS][0m testOverflow() (gas: 115199)
+[32m[PASS][0m testOverflow2() (gas: 115220)
+[32m[PASS][0m testOverflow3() (gas: 128660)
+[32m[PASS][0m testOverriddenName() (gas: 20952)
+[32m[PASS][0m testOverriddenNameWithNoName() (gas: 2019808)
+[32m[PASS][0m testPermit() (gas: 159421)
+[32m[PASS][0m testPermitRenewable() (gas: 130993)
+[32m[PASS][0m testPermitRenewableContractWallet() (gas: 126663)
+[32m[PASS][0m testRecoveryRateCasting() (gas: 85852)
+[32m[PASS][0m testRecoveryRateExceeded() (gas: 13474)
+[32m[PASS][0m testRecoveryRateExceeded2() (gas: 13514)
+[32m[PASS][0m testRenewableAllowanceTransferFrom() (gas: 150025)
+[32m[PASS][0m testRenewableMaxAllowance() (gas: 98431)
+[32m[PASS][0m testRevertExecuteMetaTransactionBadNonce() (gas: 48751)
+[32m[PASS][0m testRevertExecuteMetaTransactionCallFailed() (gas: 55345)
+[32m[PASS][0m testRevertExecuteMetaTransactionInvalidSigner() (gas: 41457)
+[32m[PASS][0m testRevertExecuteMetaTransactionReplayProtection() (gas: 144663)
+[32m[PASS][0m testRevertPermitBadDeadline() (gas: 47038)
+[32m[PASS][0m testRevertPermitBadNonce() (gas: 46935)
+[32m[PASS][0m testRevertPermitPastDeadline() (gas: 16172)
+[32m[PASS][0m testRevertPermitRenewableBadDeadline() (gas: 49227)
+[32m[PASS][0m testRevertPermitRenewableBadNonce() (gas: 49190)
+[32m[PASS][0m testRevertPermitRenewableContractWalletBadSigner() (gas: 52986)
+[32m[PASS][0m testRevertPermitRenewablePastDeadline() (gas: 20639)
+[32m[PASS][0m testRevertPermitRenewableReplay() (gas: 126132)
+[32m[PASS][0m testRevertPermitReplay() (gas: 123805)
+[32m[PASS][0m testSupportInterface() (gas: 5700)
+[32m[PASS][0m testSupportsInterfacePayable() (gas: 5770)
+[32m[PASS][0m testSupportsInterfaceProxy() (gas: 5852)
+[32m[PASS][0m testTransfer() (gas: 62144)
+[32m[PASS][0m testTransferFromAndCall() (gas: 137448)
+[32m[PASS][0m testTransferFromAndCallRevertNonContract() (gas: 112144)
+[32m[PASS][0m testTransferFromAndCallRevertNonReceiver() (gas: 110497)
+[32m[PASS][0m testTransferFromAndCallWithGasSnapshot() (gas: 172986)
+[32m[PASS][0m testTransferFromWithSnapshot() (gas: 155403)
+[32m[PASS][0m testZeroAddressInitialise() (gas: 1762344)
+Test result: [32mok[0m. 51 passed; 0 failed; finished in 51.45ms
+| src/Funnel.sol:Funnel contract |                 |       |        |        |         |
+|--------------------------------|-----------------|-------|--------|--------|---------|
+| Deployment Cost                | Deployment Size |       |        |        |         |
+| 1696178                        | 8504            |       |        |        |         |
+| Function Name                  | min             | avg   | median | max    | # calls |
+| DOMAIN_SEPARATOR               | 4501            | 4501  | 4501   | 4501   | 18      |
+| allowance                      | 3051            | 6700  | 9058   | 15558  | 35      |
+| approve                        | 4212            | 57959 | 71265  | 71265  | 10      |
+| approveRenewable               | 581             | 60955 | 71307  | 71519  | 20      |
+| approveRenewableAndCall        | 74311           | 76251 | 76478  | 77739  | 4       |
+| balanceOf                      | 1526            | 3386  | 1528   | 8026   | 43      |
+| baseToken                      | 441             | 941   | 441    | 2441   | 4       |
+| decimals                       | 829             | 829   | 829    | 829    | 1       |
+| executeMetaTransaction         | 5996            | 55067 | 36944  | 107173 | 7       |
+| initialize                     | 23177           | 71832 | 72103  | 81605  | 81      |
+| name                           | 9939            | 11472 | 11472  | 13005  | 2       |
+| nonces                         | 651             | 651   | 651    | 651    | 6       |
+| permit                         | 671             | 44389 | 29707  | 100471 | 6       |
+| permitRenewable                | 716             | 50143 | 30796  | 102587 | 8       |
+| renewableAllowance             | 1149            | 1149  | 1149   | 1149   | 2       |
+| supportsInterface              | 458             | 496   | 496    | 534    | 3       |
+| symbol                         | 8268            | 8268  | 8268   | 8268   | 1       |
+| totalSupply                    | 1107            | 3940  | 3106   | 7607   | 3       |
+| transfer                       | 4750            | 25054 | 27802  | 39105  | 11      |
+| transferFrom                   | 1747            | 23156 | 32992  | 40189  | 19      |
+| transferFromAndCall            | 5588            | 34230 | 35523  | 47899  | 5       |
+
+
+| src/FunnelFactory.sol:FunnelFactory contract |                 |        |        |        |         |
+|----------------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                              | Deployment Size |        |        |        |         |
+| 230941                                       | 1383            |        |        |        |         |
+| Function Name                                | min             | avg    | median | max    | # calls |
+| deployFunnelForToken                         | 537             | 120217 | 145339 | 145339 | 12      |
+| getFunnelForToken                            | 830             | 1420   | 830    | 2600   | 3       |
+| isFunnel                                     | 2092            | 2549   | 2092   | 3454   | 5       |
+
+
+

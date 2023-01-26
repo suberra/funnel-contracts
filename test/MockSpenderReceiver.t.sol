@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.15;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
 import { IERC1363Receiver } from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
@@ -16,17 +16,11 @@ contract MockSpenderReceiverTest is Test {
     }
 
     function testSupportInterfaceReceiver() public {
-        assertTrue(
-            receiver.supportsInterface(IERC1363Receiver.onTransferReceived.selector)
-        );
+        assertTrue(receiver.supportsInterface(IERC1363Receiver.onTransferReceived.selector));
     }
 
     function testSupportInterfaceSpender() public {
         assertTrue(receiver.supportsInterface(0xb868618d));
-        assertTrue(
-            receiver.supportsInterface(
-                IERC5827Spender.onRenewableApprovalReceived.selector
-            )
-        );
+        assertTrue(receiver.supportsInterface(IERC5827Spender.onRenewableApprovalReceived.selector));
     }
 }

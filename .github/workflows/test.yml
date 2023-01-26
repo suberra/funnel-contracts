@@ -1,6 +1,6 @@
 name: test
 
-on: workflow_dispatch
+on: [push, pull_request]
 
 env:
   FOUNDRY_PROFILE: ci
@@ -13,22 +13,19 @@ jobs:
     name: Foundry project
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
+          - uses: actions/checkout@v2
+          - uses: actions/setup-node@v2
 
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly
+          - name: Install Foundry
+            uses: foundry-rs/foundry-toolchain@v1
+            with:
+              version: nightly
 
-      - name: Run Forge build
-        run: |
-          forge --version
-          forge build --sizes
-        id: build
+          - name: Install dependencies
+            run: forge install
 
-      - name: Run Forge tests
-        run: |
-          forge test -vvv
-        id: test
+          - name: Check contract sizes
+            run: forge build --sizes
+
+          - name: Run tests
+            run: forge test

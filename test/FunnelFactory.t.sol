@@ -1,15 +1,16 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.15;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
 
 import { console } from "forge-std/console.sol";
 import "forge-std/Test.sol";
 import { ERC20PresetFixedSupply, ERC20 } from "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
-import { FunnelFactory } from "../src/FunnelFactory.sol";
+import { FunnelFactory, IFunnelErrors } from "../src/FunnelFactory.sol";
 import { Funnel } from "../src/Funnel.sol";
 import { IFunnelFactory } from "../src/interfaces/IFunnelFactory.sol";
 import { Clones } from "openzeppelin-contracts/proxy/Clones.sol";
+import { GasSnapshot } from "forge-gas-snapshot/GasSnapshot.sol";
 
-contract FunnelFactoryTest is Test {
+contract FunnelFactoryTest is Test, GasSnapshot {
     FunnelFactory funnelFactory;
     address tokenAddress1;
     address tokenAddress2;
@@ -51,7 +52,9 @@ contract FunnelFactoryTest is Test {
     }
 
     function testDeployFunnelForToken() public {
+        snapStart("deployFunnelForToken");
         address funnelAddress = funnelFactory.deployFunnelForToken(address(token));
+        snapEnd();
 
         assertEq(funnelFactory.getFunnelForToken(address(token)), funnelAddress);
 
@@ -87,7 +90,7 @@ contract FunnelFactoryTest is Test {
     }
 
     function testNoCodeTokenReverts() public {
-        vm.expectRevert(IFunnelFactory.InvalidToken.selector);
+        vm.expectRevert(IFunnelErrors.InvalidToken.selector);
         funnelFactory.deployFunnelForToken(tokenAddress3);
     }
 

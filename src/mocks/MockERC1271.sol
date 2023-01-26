@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.15;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
 
 import { IERC1271 } from "openzeppelin-contracts/interfaces/IERC1271.sol";
 import { IERC20 } from "openzeppelin-contracts/interfaces/IERC20.sol";
@@ -14,12 +14,7 @@ contract MockERC1271 is IERC1271 {
     /**
      * @notice Verifies that the signer is the owner of the signing contract.
      */
-    function isValidSignature(bytes32 _hash, bytes calldata _signature)
-        external
-        view
-        override
-        returns (bytes4)
-    {
+    function isValidSignature(bytes32 _hash, bytes calldata _signature) external view override returns (bytes4) {
         // Validate signatures
         if (recoverSigner(_hash, _signature) == owner) {
             return 0x1626ba7e;
@@ -61,11 +56,7 @@ contract MockERC1271 is IERC1271 {
      * @param _hash       Hash of message that was signed
      * @param _signature  Signature encoded as (bytes32 r, bytes32 s, uint8 v)
      */
-    function recoverSigner(bytes32 _hash, bytes memory _signature)
-        internal
-        pure
-        returns (address signer)
-    {
+    function recoverSigner(bytes32 _hash, bytes memory _signature) internal pure returns (address signer) {
         uint8 v;
         bytes32 r;
         bytes32 s;
@@ -85,10 +76,7 @@ contract MockERC1271 is IERC1271 {
         // Source OpenZeppelin
         // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/cryptography/ECDSA.sol
 
-        if (
-            uint256(s) >
-            0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0
-        ) {
+        if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0) {
             revert("SignatureValidator#recoverSigner: invalid signature 's' value");
         }
 
@@ -100,10 +88,7 @@ contract MockERC1271 is IERC1271 {
         signer = ecrecover(_hash, v, r, s);
 
         // Prevent signer from being 0x0
-        require(
-            signer != address(0x0),
-            "SignatureValidator#recoverSigner: INVALID_SIGNER"
-        );
+        require(signer != address(0x0), "SignatureValidator#recoverSigner: INVALID_SIGNER");
 
         return signer;
     }

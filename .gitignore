@@ -16,8 +16,13 @@ node_modules/
 artifacts/
 cache_hardhat/
 typechain-types/
+<<<<<<< HEAD
 
 # PNM files
 out
 reports
 pnm-cov.json
+=======
+gas-snapshots/
+report/
+>>>>>>> main

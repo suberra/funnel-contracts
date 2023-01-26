@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.15;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
 
 import { IERC1363Receiver } from "openzeppelin-contracts/interfaces/IERC1363Receiver.sol";
 import { IERC5827Spender } from "../interfaces/IERC5827Spender.sol";
@@ -29,8 +29,6 @@ contract MockSpenderReceiver is IERC1363Receiver, IERC5827Spender {
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
-        return
-            interfaceId == type(IERC1363Receiver).interfaceId ||
-            interfaceId == type(IERC5827Spender).interfaceId;
+        return interfaceId == type(IERC1363Receiver).interfaceId || interfaceId == type(IERC5827Spender).interfaceId;
     }
 }

@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.15;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
 
 import { TestSetup } from "./TestSetup.sol";
 import { IERC20 } from "openzeppelin-contracts/interfaces/IERC20.sol";
@@ -64,11 +64,7 @@ abstract contract ERC20TestBalanceOf is ERC20TestBase {
 
     // does not necessarily have to pass to be compliant
     function testBalanceOfReflectsSlot(uint256 amount) public virtual {
-        uint256 slot = stdstore
-            .target(address(token))
-            .sig(token.balanceOf.selector)
-            .with_key(user2)
-            .find();
+        uint256 slot = stdstore.target(address(token)).sig(token.balanceOf.selector).with_key(user2).find();
 
         vm.store(address(token), bytes32(slot), bytes32(amount));
 
@@ -183,9 +179,7 @@ abstract contract ERC20TestApprove is ERC20TestBase {
         assertEq(token.allowance(user1, user3), 0);
     }
 
-    function testApproveWithTransferFuzzing(uint256 approveAmount, uint256 transferAmount)
-        public
-    {
+    function testApproveWithTransferFuzzing(uint256 approveAmount, uint256 transferAmount) public {
         vm.assume(approveAmount != type(uint256).max);
         transferAmount = bound(transferAmount, 0, mintAmount);
         approveAmount = bound(approveAmount, transferAmount, type(uint256).max - 1);
@@ -209,10 +203,7 @@ abstract contract ERC20TestApprove is ERC20TestBase {
         uint256 allowanceAfter = token.allowance(user1, user2);
 
         assertTrue(success);
-        assertTrue(
-            allowanceAfter == type(uint256).max ||
-                allowanceAfter == type(uint256).max - 31337
-        );
+        assertTrue(allowanceAfter == type(uint256).max || allowanceAfter == type(uint256).max - 31337);
     }
 
     function testFailApproveWithTransferInsufficientApproval() public {
@@ -234,9 +225,4 @@ abstract contract ERC20TestApprove is ERC20TestBase {
     }
 }
 
-abstract contract ERC20TestSuite is
-    ERC20TestTotalSupply,
-    ERC20TestBalanceOf,
-    ERC20TestTransfer,
-    ERC20TestApprove
-{}
+abstract contract ERC20TestSuite is ERC20TestTotalSupply, ERC20TestBalanceOf, ERC20TestTransfer, ERC20TestApprove {}
