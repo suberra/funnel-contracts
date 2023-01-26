@@ -20,6 +20,7 @@ typechain-types/
 # PNM files
 out
 reports
+crashes
 pnm-cov.json
 
 gas-snapshots/
