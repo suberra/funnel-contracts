@@ -3,7 +3,7 @@ pragma solidity 0.8.17;
 
 import { PTest } from "@pwnednomore/contracts/PTest.sol";
 import { ERC20PresetFixedSupply, ERC20 } from "openzeppelin-contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
-import { Funnel, IFunnel, IFunnelErrors } from "../../src/Funnel.sol";
+import { Funnel } from "../../src/Funnel.sol";
 
 contract TransferAllowedAmountTest is PTest {
     ERC20 internal token;
