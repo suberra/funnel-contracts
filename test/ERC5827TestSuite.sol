@@ -47,12 +47,12 @@ abstract contract ERC5827TestSuite is TestSetup {
         assertEq(renewableToken.allowance(user1, user2), 337);
 
         skip(51);
-        assertEq(renewableToken.allowance(user1, user2), 387);
+        assertEq(renewableToken.allowance(user1, user2), 337 + 51);
 
         vm.prank(user1);
         renewableToken.approve(user2, 50);
 
-        skip(1237); // 1337 - 50
+        skip(2635); // move forward any amount of time
         assertEq(renewableToken.allowance(user1, user2), 50);
 
         // test zero re-approve (i.e. revoke)
@@ -99,7 +99,7 @@ abstract contract ERC5827TestSuite is TestSetup {
         assertEq(renewableToken.allowance(user1, user2), 0);
 
         // time travel forward by 1000s
-        skip(1001);
+        skip(1000);
         // recovered by 1000
         assertEq(renewableToken.allowance(user1, user2), 1000);
         renewableToken.transferFrom(user1, user3, 1000);

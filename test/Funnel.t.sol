@@ -178,6 +178,20 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
         assertEq(token.balanceOf(user3), type(uint256).max);
     }
 
+    function testOverflow4() public {
+        vm.prank(user1);
+        funnel.approveRenewable(
+            user2,
+            0xef0000000000000000000000000000000000000000000000000000000000a5cf,
+            0xebffffff000000000000000000000000000000000000000001
+        );
+
+        skip(5415);
+
+        uint256 rAllowance = funnel.allowance(user1, user2);
+        assertEq(rAllowance, 0xef0000000000000000000000000000000000000000000000000000000000a5cf);
+    }
+
     function testRecoveryRateCasting() public {
         vm.prank(user1);
         funnel.approveRenewable(user2, type(uint256).max, type(uint256).max);
