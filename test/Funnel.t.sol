@@ -148,7 +148,7 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
     function testOverflow() public {
         vm.prank(user1);
         funnel.approveRenewable(address(user2), type(uint256).max - type(uint192).max + 1, type(uint192).max);
-        vm.warp(2);
+        skip(1);
         vm.prank(user2);
         vm.expectEmit(true, false, false, true);
         emit Transfer(user1, user2, type(uint256).max - type(uint192).max + 1);
@@ -159,7 +159,7 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
     function testOverflow2() public {
         vm.prank(user1);
         funnel.approveRenewable(user2, type(uint256).max - type(uint64).max + 1, type(uint64).max);
-        vm.warp(2);
+        skip(1);
         vm.prank(user2);
         vm.expectEmit(true, false, false, true);
         emit Transfer(user1, user2, type(uint256).max - type(uint64).max + 1);
@@ -170,12 +170,26 @@ contract FunnelTest is ERC5827TestSuite, GasSnapshot {
     function testOverflow3() public {
         vm.prank(user1);
         funnel.approveRenewable(user2, type(uint256).max, type(uint64).max);
-        vm.warp(2);
+        skip(1);
         vm.prank(user2);
         vm.expectEmit(true, false, false, true);
         emit Transfer(user1, user2, type(uint256).max);
         assertTrue(funnel.transferFrom(user1, user3, type(uint256).max));
         assertEq(token.balanceOf(user3), type(uint256).max);
+    }
+
+    function testOverflow4() public {
+        vm.prank(user1);
+        funnel.approveRenewable(
+            user2,
+            0xef0000000000000000000000000000000000000000000000000000000000a5cf,
+            0xebffffff000000000000000000000000000000000000000001
+        );
+
+        skip(5415);
+
+        uint256 rAllowance = funnel.allowance(user1, user2);
+        assertEq(rAllowance, 0xef0000000000000000000000000000000000000000000000000000000000a5cf);
     }
 
     function testRecoveryRateCasting() public {

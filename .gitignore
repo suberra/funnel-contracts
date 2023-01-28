@@ -16,5 +16,12 @@ node_modules/
 artifacts/
 cache_hardhat/
 typechain-types/
+
+# PNM files
+out
+reports
+crashes
+pnm-cov.json
+
 gas-snapshots/
 report/

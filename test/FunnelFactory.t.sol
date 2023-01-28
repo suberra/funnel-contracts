@@ -132,7 +132,7 @@ contract FunnelFactoryTest is Test, GasSnapshot {
         vm.startPrank(user2);
         funnel.transferFrom(user1, user3, 10);
 
-        vm.warp(11); // forward 10s
+        skip(11); // forward 10s
         funnel.transferFrom(user1, user3, 10);
 
         assertEq(token.balanceOf(user3), 20);
