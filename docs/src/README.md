@@ -94,6 +94,14 @@ forge coverage --report lcov
 genhtml lcov.info -o report --branch-coverage 
 ```
 
+### Documentation
+
+Documentation is generated automatically from the source files and will be available at `docs/`. To regenerate the documentation, run:
+
+```sh
+forge doc --serve --port 4000   
+```
+
 # Deployments
 
 Script for batch deployment across testnet or mainnet

@@ -1,5 +1,5 @@
 # MockSpenderReceiver
-[Git Source](https://github.com/suberra/funnel-contracts/blob/f73a2b65eed37c0e1e9b0da6edd43d6dee610cb5/src/mocks/MockSpenderReceiver.sol)
+[Git Source](https://github.com/suberra/funnel-contracts/blob/59c542a5eca5681850b213a7c7430da0cfa78c32/src/mocks/MockSpenderReceiver.sol)
 
 **Inherits:**
 IERC1363Receiver, [IERC5827Spender](/src/interfaces/IERC5827Spender.sol/contract.IERC5827Spender.md)

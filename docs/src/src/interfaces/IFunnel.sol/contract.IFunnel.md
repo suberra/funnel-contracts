@@ -1,5 +1,5 @@
 # IFunnel
-[Git Source](https://github.com/suberra/funnel-contracts/blob/f73a2b65eed37c0e1e9b0da6edd43d6dee610cb5/src/interfaces/IFunnel.sol)
+[Git Source](https://github.com/suberra/funnel-contracts/blob/59c542a5eca5681850b213a7c7430da0cfa78c32/src/interfaces/IFunnel.sol)
 
 **Inherits:**
 [IERC5827](/src/interfaces/IERC5827.sol/contract.IERC5827.md), [IERC5827Proxy](/src/interfaces/IERC5827Proxy.sol/contract.IERC5827Proxy.md), [IERC5827Payable](/src/interfaces/IERC5827Payable.sol/contract.IERC5827Payable.md)

@@ -6,6 +6,12 @@ Each funnel contract is a proxy/wrapper for an underlying ERC20 token, funneling
 
 ![Funnels overview](overview.png)
 
+## Factory
+
+The funnel factory is a contract that deploys new funnel contracts, it is the only contract that can create new funnels.
+
+Goal is to deploy a factory onto all supported chains at the same address, and **every chain will produce the same funnel address for the same token address**.
+
 ## How does it work?
 
 By using this funnel contract, a sender can approve a spender a spending limit every periodic interval. For example, a subscriber can approve a merchant to deduct up to 100 USDC from his account every month.
@@ -14,39 +20,8 @@ By using this funnel contract, a sender can approve a spender a spending limit e
 2. User can set renewable allowance on the funnel contract for a given period for an address (spender), approving up to a max limit with a recovery rate.
 3. The spender can then withdraw money out of the user's account up to the available allowance on the account.
 
-What is recovery rate? Recovery rate (amount per second) specifies the rate at which the allowance recovers over time. Once a spender spends the money, the available balance first decreases and slowly restores back to the max limit. Unlike conventional finance apps which performs discrete "resets" of spending limit, we implement renewable allowance using a continuous `recoveryRate` as it allows for more flexible usecases no bound by reset cycles and can be implemented more simply.
+What is recovery rate? Recovery rate (amount per second) specifies the rate at which the allowance recovers over time. Once a spender spends the money, the available balance first decreases and slowly restores back to the max limit. Unlike conventional finance apps which performs discrete "resets" of spending limit, we implement renewable allowance using a continuous `recoveryRate` as it allows for more flexible use-cases no bound by reset cycles and can be implemented more simply.
 
-## Factory
-
-The funnel factory is a contract that deploys new funnel contracts, it is the only contract that can create new funnels.
-
-Goal is to deploy a factory onto all supported chains at the same address, and **every chain will produce the same funnel address for the same token address**.
-
-## Contracts
-
-### FunnelFactory.sol - Factory contract for creating funnels
-
-`deployFunnelForToken(address _tokenAddress)` - Deploys the funnel contract for a given token address
-
-`getFunnelForToken(address _tokenAddress)` - Returns the funnel contract address for a given token address
-
-`isFunnel(address _funnelAddress)` - Returns true if the funnel contract is a funnel deployed by the factory.
-
-### Funnel.sol - Funnel contract for ERC20 tokens
-
-`baseToken()` - Returns the address of the underlying token
-
-# Usage
-
-## Testing
-
-Our tests consist of both Foundry tests and hardhat tests. 
-
-`forge test` - Runs the Foundry tests. Forge gas snapshots will be captured under `.forge-snapshots`
-
-`npx hardhat test` - Runs hardhat tests
-
-`npm test` - Runs all tests
 
 ## Deployment
 
@@ -94,13 +69,18 @@ forge coverage --report lcov
 genhtml lcov.info -o report --branch-coverage 
 ```
 
-### Documentation
+## Documentation
 
-Documentation is generated automatically from the source files and will be available at `docs/`. To regenerate the documentation, run:
+Documentation is generated automatically from the source files through `forge` and will be available at `docs/`. 
+
+To generate the doc and serve automaticaly, run:
 
 ```sh
 forge doc --serve --port 4000   
 ```
+
+For more info, refer to [forge-docs](https://book.getfoundry.sh/reference/forge/forge-doc?highlight=doc#forge-doc).
+
 
 # Deployments
 
