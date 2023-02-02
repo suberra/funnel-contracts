@@ -195,9 +195,10 @@ describe("ERC20Funnel", function () {
     });
 
     it("Should revert transferFrom after permits with invalid nonce", async function () {
-      const { token, minter, user2, user3 } = await loadFixture(
+      const { token, minter, user2, user3, funnel } = await loadFixture(
         deployTokenFixture
       );
+
 
       const deadline =
         (await ethers.provider.getBlock("latest")).timestamp + 60;
@@ -226,7 +227,7 @@ describe("ERC20Funnel", function () {
           r,
           s
         )
-      ).to.revertedWith("EIP712: invalid signature");
+      ).to.revertedWithCustomError(funnel, "InvalidSignature");
 
       await expect(
         token
@@ -341,7 +342,8 @@ describe("ERC20Funnel", function () {
     });
 
     it("does not approve contract wallet with invalid ERC1271 permit", async () => {
-      const { token, minter, user2, contractWallet } = await loadFixture(
+
+      const { token, funnel, user2, contractWallet } = await loadFixture(
         deployTokenFixture
       );
 
@@ -373,7 +375,7 @@ describe("ERC20Funnel", function () {
           r,
           s
         )
-      ).to.revertedWith("IERC1271: invalid signature");
+      ).to.revertedWithCustomError(funnel, "IERC1271InvalidSignature");
     });
   });
 
@@ -537,7 +539,7 @@ describe("ERC20Funnel", function () {
           r,
           s
         )
-      ).to.revertedWith("IERC1271: invalid signature");
+      ).to.revertedWithCustomError(funnel, "IERC1271InvalidSignature");
     });
   });
 
@@ -811,6 +813,7 @@ describe("ERC20Funnel", function () {
         deployTokenFixture
       );
 
+
       const nonce = await token.nonces(contractWallet.address);
       const name = await token.name();
 
@@ -843,7 +846,7 @@ describe("ERC20Funnel", function () {
             metaTxSig.s,
             metaTxSig.v
           )
-      ).to.be.revertedWith("IERC1271: invalid signature");
+      ).to.be.revertedWithCustomError(funnel, "IERC1271InvalidSignature");
     });
 
     it("executeMetaTransaction() reverts on invalid signer", async function () {
@@ -883,7 +886,7 @@ describe("ERC20Funnel", function () {
             metaTxSig.s,
             metaTxSig.v
           )
-      ).to.be.revertedWith("EIP712: invalid signature");
+      ).to.be.revertedWithCustomError(funnel, "InvalidSignature");
     });
 
     it("executeMetaTransaction() reverts on invalid nonce", async function () {
@@ -923,7 +926,7 @@ describe("ERC20Funnel", function () {
             metaTxSig.s,
             metaTxSig.v
           )
-      ).to.be.revertedWith("EIP712: invalid signature");
+      ).to.be.revertedWithCustomError(funnel, "InvalidSignature");
     });
   });
 });
