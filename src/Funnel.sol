@@ -170,13 +170,6 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
         return true;
     }
 
-    /// @inheritdoc IERC5827
-    function allowance(address _owner, address _spender) external view returns (uint256 remaining) {
-        uint256 _baseAllowance = _baseToken.allowance(_owner, address(this));
-        uint256 _renewableAllowance = _remainingAllowance(_owner, _spender);
-        return _baseAllowance < _renewableAllowance ? _baseAllowance : _renewableAllowance;
-    }
-
     /// @inheritdoc IERC5827Payable
     function approveRenewableAndCall(
         address _spender,
@@ -249,6 +242,13 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
         return (a.maxAmount, a.recoveryRate);
     }
 
+    /// @inheritdoc IERC5827
+    function allowance(address _owner, address _spender) external view returns (uint256 remaining) {
+        uint256 _baseAllowance = _baseToken.allowance(_owner, address(this));
+        uint256 _renewableAllowance = _remainingAllowance(_owner, _spender);
+        return _baseAllowance < _renewableAllowance ? _baseAllowance : _renewableAllowance;
+    }
+
     /// @inheritdoc IERC5827Proxy
     function baseToken() external view returns (address) {
         return address(_baseToken);
@@ -279,7 +279,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
         return string.concat(_name, " (funnel)");
     }
 
-    /// @notice Gets the domain seperator
+    /// @notice Gets the domain separator
     /// @dev DOMAIN_SEPARATOR should be unique to the contract and chain to prevent replay attacks from
     /// other domains, and satisfy the requirements of EIP-712
     /// @return bytes32 the domain separator
@@ -399,7 +399,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
         }
     }
 
-    /// @notice Internal functionn that is called after `approve` function.
+    /// @notice Internal function that is called after `approve` function.
     /// `onRenewableApprovalReceived` may revert. Function also checks if the address called is a IERC5827Spender
     /// @param _spender The address which will spend the funds
     /// @param _value The amount of tokens to be spent
@@ -447,7 +447,7 @@ contract Funnel is IFunnel, NativeMetaTransaction, MetaTxContext, Initializable,
         return remainingAllowance > a.maxAmount ? a.maxAmount : remainingAllowance;
     }
 
-    /// @notice compute the domain seperator that is required for the approve by signature functionality
+    /// @notice compute the domain separator that is required for the approve by signature functionality
     /// Stops replay attacks from happening because of approvals on different contracts on different chains
     /// @dev Reference https://eips.ethereum.org/EIPS/eip-712
     function _computeDomainSeparator() internal view returns (bytes32) {

@@ -13,7 +13,7 @@ abstract contract EIP712 {
     /// @dev Signature is invalid (IERC1271)
     error IERC1271InvalidSignature();
 
-    /// @notice Gets the domain seperator
+    /// @notice Gets the domain separator
     /// @dev DOMAIN_SEPARATOR should be unique to the contract and chain to prevent replay attacks from
     /// other domains, and satisfy the requirements of EIP-712
     /// @return bytes32 the domain separator

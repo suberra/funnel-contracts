@@ -13,7 +13,7 @@ abstract contract NativeMetaTransaction is EIP712, Nonces {
     bytes32 public constant META_TRANSACTION_TYPEHASH =
         0x23d10def3caacba2e4042e0c75d44a42d2558aabcf5ce951d0642a8032e1e653;
 
-    /// Event that is emited if a meta-transaction is emitted
+    /// Event that is emitted when a meta-transaction is executed
     /// @dev Useful for off-chain services to pick up these events
     /// @param userAddress Address of the user that sent the meta-transaction
     /// @param relayerAddress Address of the relayer that executed the meta-transaction
