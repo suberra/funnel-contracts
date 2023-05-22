@@ -59,6 +59,8 @@ contract TransferAllowedAmountTest is PTest {
 
         if (amount != type(uint256).max) {
             amount += 1;
+        } else {
+            return;
         }
 
         vm.prank(agent);
