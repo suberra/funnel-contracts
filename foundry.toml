@@ -13,6 +13,7 @@ arbitrum = "${ARBITRUM_RPC_URL}"
 avalanche = "${AVAX_RPC_URL}"
 goerli = "${GOERLI_RPC_URL}"
 polygon = "${POLYGON_RPC_URL}"
+ethereum = "${ETHEREUM_RPC_URL}"
 
 [etherscan]
 goerli = {key = "${ETHERSCAN_API_KEY}"}

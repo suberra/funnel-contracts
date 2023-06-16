@@ -52,6 +52,23 @@ async function main() {
     address: funnelFactoryAddr,
   });
 
+  console.log("To verify to etherscan publicly run this:");
+  console.log(`
+    forge verify-contract --chain ${chainId} --num-of-optimizations 200 --watch --constructor-args $(cast abi-encode "constructor(address)" "${funnelImplAddr}") \
+    --compiler-version v0.8.17 \
+    ${funnelFactoryAddr} \
+    src/FunnelFactory.sol:FunnelFactory \
+    $ETHERSCAN_API_KEY
+  `);
+
+  console.log(`
+    forge verify-contract --chain ${chainId} --num-of-optimizations 200 --watch --constructor-args $(cast abi-encode "constructor()") \
+    --compiler-version v0.8.17 \
+    ${funnelImplAddr} \
+    src/Funnel.sol:Funnel \
+    $ETHERSCAN_API_KEY
+  `);
+
   console.log(`Done`);
 }
 
