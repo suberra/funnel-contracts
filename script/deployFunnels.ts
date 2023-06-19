@@ -1,4 +1,4 @@
-import { ethers, tenderly } from "hardhat";
+import { ethers } from "hardhat";
 import { FunnelFactory } from "../typechain-types";
 import networkConfig from "./networkconfig.json";
 

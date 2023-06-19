@@ -40,10 +40,16 @@ Deploy factory to goerli
 
 Note: Deployment addresses are dependent on FunnelFactory bytecode and salt used. Multiple deployments will fail.
 
+Deploying individual funnels for ERC20 tokens
+
+Edit `script/networkconfig.json` with correct FunnelFactory, supported ERC20 addresses.
+
+`npx hardhat run script/deployFunnels.ts --network goerli`
+
 ## Verification
 
 Private verification
-`npx hardhat run script/verifyTenderly.ts --network goerli`
+`npx hardhat run script/verifyContracts.ts --network goerli`
 
 ## Misc
 
@@ -91,12 +97,15 @@ Script for batch deployment across testnet or mainnet
 | --------- | ------------- | ------------------------------------------ | ----------- |
 | Goerli    | Funnel (impl) | 0xb2acc9a328039e2918b2d85420251fb831ce47e0 | 0.2.0-alpha |
 | Goerli    | FunnelFactory | 0x92324acad3946f0600d7e0e2641ef10d1655d89d | 0.2.0-alpha |
+| Goerli    | FunnelFactory | 0x81603CEC57FC0365019E3B06cE3b65F3ff6bcEB7 | 0.4.0-alpha |
 | Polygon   | Funnel (impl) | 0xb2acc9a328039e2918b2d85420251fb831ce47e0 | 0.2.0-alpha |
 | Polygon   | FunnelFactory | 0x92324acad3946f0600d7e0e2641ef10d1655d89d | 0.2.0-alpha |
 | Avalanche | Funnel (impl) | 0xb2acc9a328039e2918b2d85420251fb831ce47e0 | 0.2.0-alpha |
 | Avalanche | FunnelFactory | 0x92324acad3946f0600d7e0e2641ef10d1655d89d | 0.2.0-alpha |
 | Arbitrum  | Funnel (impl) | 0xb2acc9a328039e2918b2d85420251fb831ce47e0 | 0.2.0-alpha |
 | Arbitrum  | FunnelFactory | 0x92324acad3946f0600d7e0e2641ef10d1655d89d | 0.2.0-alpha |
+| Mainnet   | FunnelFactory | 0x81603CEC57FC0365019E3B06cE3b65F3ff6bcEB7 | 0.4.0-alpha |
+| Mainnet   | Funnel (impl) | 0xB82D6f4b82eA7cF69d6f930DcE8b00B59d5fb036 | 0.4.0-alpha |
 
 # License
 

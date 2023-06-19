@@ -45,28 +45,30 @@ async function main() {
   await tenderly.verify({
     name: "Funnel",
     address: funnelImplAddr,
+    network: chainId,
   });
 
   await tenderly.verify({
     name: "FunnelFactory",
     address: funnelFactoryAddr,
+    network: chainId,
   });
 
   console.log("To verify to etherscan publicly run this:");
   console.log(`
     forge verify-contract --chain ${chainId} --num-of-optimizations 200 --watch --constructor-args $(cast abi-encode "constructor(address)" "${funnelImplAddr}") \
     --compiler-version v0.8.17 \
+    -e $ETHERSCAN_API_KEY \
     ${funnelFactoryAddr} \
-    src/FunnelFactory.sol:FunnelFactory \
-    $ETHERSCAN_API_KEY
+    src/FunnelFactory.sol:FunnelFactory
   `);
 
   console.log(`
     forge verify-contract --chain ${chainId} --num-of-optimizations 200 --watch --constructor-args $(cast abi-encode "constructor()") \
     --compiler-version v0.8.17 \
+    -e $ETHERSCAN_API_KEY \
     ${funnelImplAddr} \
-    src/Funnel.sol:Funnel \
-    $ETHERSCAN_API_KEY
+    src/Funnel.sol:Funnel
   `);
 
   console.log(`Done`);
